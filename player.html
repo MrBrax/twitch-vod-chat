@@ -1,0 +1,572 @@
+<html>
+
+	<head>
+		<title>braxen's vod replay</title>
+	</head>
+	
+	<body>
+
+		<div id="player">
+
+			<video id="video" src=""></video>
+
+			<div id="comments" class="left">
+
+			</div>
+
+		</div>
+
+		<div id="timeline">
+
+		</div>
+
+		<div id="controls">
+
+			<!--
+			
+				<div class="dropzone video" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">Video</div>
+				<div class="dropzone chat" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">Chat</div>
+			</div>
+		-->
+
+			<div class="fileselect-group">
+				
+				<div class="option-group" id="option-group-video">
+					<strong>Video</strong><br>
+					<input type="file" id="inputVideo" accept="video/*" onchange="loadFile(event, 'video'); return false;" />
+				</div>
+
+				<div class="option-group" id="option-group-chat">
+					<strong>Chat</strong><br>
+					<input type="file" id="inputChat" accept="application/json" onchange="loadFile(event, 'chat'); return false;" />
+				</div>
+
+				<div class="option-group">
+					<strong>Comments:</strong> <span id="status-text-comments">Waiting</span><br>
+					<strong>FFZ:</strong> <span id="status-text-ffz">Waiting</span><br>
+					<strong>BTTV Channel:</strong> <span id="status-text-bttv_channel">Waiting</span><br>
+					<strong>BTTV Global:</strong> <span id="status-text-bttv_global">Waiting</span>
+				</div>
+
+			</div>
+
+			<div class="option-group">
+				<strong>Chat location</strong><br>
+				<button onclick="setChat('left')">Left</button>
+				<button onclick="setChat('right')">Right</button>
+			</div>
+
+			<div class="option-group">
+				<strong>Chat offset in seconds</strong><br>
+				<input id="optionOffset" value="0">
+			</div>
+
+			<div class="option-group">
+				<strong>Chat timescale</strong><br>
+				<input id="optionTimescale" value="1">
+			</div>
+
+			<div class="option-group">
+				<strong>Update frequency in ms</strong><br>
+				<input id="optionTickDelay" value="300">
+			</div>
+
+			<div class="option-group">
+				<button onclick="startPlayback()">Start</button>
+				<button onclick="applyOptions()">Apply</button>
+			</div>
+
+		</div>
+
+		<script>
+
+			let channelName;
+
+			let chatLog;
+
+			let timeStart;
+
+			let commentAmount;
+
+			let commentsDiv = document.getElementById('comments');
+
+			let videoPlayer = document.getElementById('video');
+
+			let vodLength = 0;
+			let archiveLength = 0;
+
+			let timeScale = 1;
+
+			let tickDelay = 300;
+
+			let ffz;
+			let bttv_channel;
+			let bttv_global;
+
+			//let staticEmotes = {
+			//	'SourPls': 'https://cdn.betterttv.net/emote/566ca38765dbbdab32ec0560/1x'
+			//};
+
+			String.prototype.replaceAll = function(search, replacement) {
+				var target = this;
+				search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				return target.replace(new RegExp(search, 'g'), replacement);
+			};
+
+			function commentTick(){
+
+				let timeNow = Date.now();
+
+				let timeRelative = ( timeNow - timeStart ) / 1000;
+
+				for( let i = 0; i < commentAmount; i++ ){
+
+					let comment = chatLog.comments[i];
+
+					if( comment.displayed ) continue;
+
+					if( timeRelative < ( comment.content_offset_seconds / timeScale ) ) continue;
+
+					// if skipped or something
+					let commentAge = timeRelative - ( comment.content_offset_seconds / timeScale )
+					if( commentAge > 60 ){
+						// console.log('comment too old', commentAge);
+						comment.displayed = true;
+						continue;
+					}
+
+					let commentDiv = document.createElement('div');
+					commentDiv.className = 'comment';
+
+
+					// calc time
+					let commentTime;
+					let minutes = Math.floor( comment.content_offset_seconds / 60 );
+					let hours = Math.floor( minutes / 60 );
+					let seconds = Math.floor( comment.content_offset_seconds - minutes * 60 );
+					commentTime = hours + ':' + minutes + ':' + seconds;
+
+
+					let timeC = document.createElement('span');
+					timeC.className = 'time';
+					timeC.innerHTML = '[' + commentTime + ']';
+					commentDiv.appendChild(timeC);
+
+					let nameC = document.createElement('span');
+					nameC.className = 'name';
+					nameC.innerHTML = comment.commenter.display_name + ':';
+					commentDiv.appendChild(nameC);
+
+					nameC.style.color = comment.message.user_color;
+
+					let bodyC = document.createElement('span');
+
+					// make message
+					for( let f of comment.message.fragments ){
+
+						if( f.emoticon ){
+
+							let emoC = document.createElement('img');
+							emoC.className = 'emote twitch';
+							emoC.src = 'https://static-cdn.jtvnw.net/emoticons/v1/' + f.emoticon.emoticon_id + '/1.0';
+							bodyC.appendChild(emoC);
+
+						}else{
+
+							let fragC = document.createElement('span');
+
+							let finalText = f.text;
+
+							// static emotes
+							/*
+							for( let e in staticEmotes ){
+								finalText = finalText.replaceAll(e, '<img class="emote static" src="' + staticEmotes[e] + '" />');
+							}
+							*/
+
+							// ffz
+							for( let fSet in ffz.sets ){
+								for( let fEmo of ffz.sets[fSet].emoticons ){
+									finalText = finalText.replaceAll(fEmo.name, '<img class="emote ffz" src="https:' + fEmo.urls[1] + '" />');
+								}
+							}
+
+							// bttv_channel
+							for( let fEmo of bttv_channel.emotes ){
+								finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_channel" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+							}
+
+							// bttv_global
+							for( let fEmo of bttv_global.emotes ){
+								finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_global" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+							}
+
+							fragC.innerHTML = finalText;
+
+							bodyC.appendChild(fragC);
+
+						}
+
+					}
+					
+					commentDiv.appendChild(bodyC);
+
+
+					commentsDiv.appendChild( commentDiv );
+
+					comment.displayed = true;
+
+				}
+
+				// update timeline
+				let minutes = Math.floor( timeRelative / 60 );
+				let hours = Math.floor( minutes / 60 );
+				let seconds = Math.floor( timeRelative - minutes * 60 );
+				let timelineText = 'C: ' + hours + ':' + minutes + ':' + seconds;
+
+				if( videoPlayer.currentTime ){
+					let minutes = Math.floor( videoPlayer.currentTime / 60 );
+					let hours = Math.floor( minutes / 60 );
+					let seconds = Math.floor( videoPlayer.currentTime - minutes * 60 );
+					timelineText += ' / V: ' + hours + ':' + minutes + ':' + seconds;
+				}
+
+				document.getElementById('timeline').innerHTML = timelineText;
+
+				// scroll
+				commentsDiv.scrollTop = commentsDiv.scrollHeight;
+
+				// remove old comments
+				if( commentsDiv.children.length > 100 ){
+					for( let i = commentsDiv.children.length; i > 100; i-- ){
+						commentsDiv.removeChild( commentsDiv.firstChild );
+					}
+				}
+
+				setTimeout(commentTick, tickDelay / timeScale);
+
+			}
+
+			function commentReset(){
+
+				commentsDiv.innerHTML = '';
+
+				for( let i = 0; i < commentAmount; i++ ){
+
+					let comment = chatLog.comments[i];
+
+					comment.displayed = null;
+
+				}
+
+			}
+
+			function setChat( dir ){
+				commentsDiv.className = dir;
+			}
+
+			function startPlayback(){
+
+				if(!chatLog){
+					alert('No chat log added');
+					return false;
+				}
+
+				timeStart = Date.now();
+
+				videoPlayer.play();
+
+				console.log('Start playback');
+
+				console.log('Offset: ' + document.getElementById('optionOffset').value );
+
+				applyOptions();	
+
+				// offset
+				timeStart += parseInt( document.getElementById('optionOffset').value ) * 1000;
+
+				commentTick();
+
+			}
+
+			function applyOptions(){
+
+				console.log('Applying options');
+
+				// timescale 
+				timeScale = parseInt( document.getElementById('optionTimescale').value );
+				console.log('Timescale: ' + timeScale);
+
+				// tick delay
+				tickDelay = parseInt( document.getElementById('optionTickDelay').value );
+				console.log('TickDelay: ' + tickDelay);
+
+			}
+
+			let URL = window.URL || window.webkitURL;
+
+			function loadFile(ev, f){
+
+				console.log('Load file: ' + f);
+
+				ev.preventDefault();
+
+				let file = ev.target.files[0];
+			    let type = file.type;
+
+				let fileURL = URL.createObjectURL(file);
+
+				if( f == 'video' ){
+
+					videoPlayer.src = fileURL;
+
+					document.getElementById('option-group-video').classList.add('ok');
+
+				}else{
+
+					document.getElementById('status-text-comments').innerHTML = 'Parsing...';
+
+					fetch( fileURL ).then( function(response){
+
+						return response.json();
+
+					}).then( function(json){
+
+						console.log('Returned JSON for chat');
+
+						chatLog = json;
+
+						commentAmount = Object.keys( chatLog.comments ).length;
+						console.log('Amount: ' + commentAmount);
+
+						vodLength = chatLog.video.length;
+						console.log('VOD length: ' + vodLength);
+
+						archiveLength = document.getElementById('video').duration;
+						console.log('Archive length: ' + archiveLength.toString() );
+
+						if( archiveLength > 0 ){
+							document.getElementById('optionOffset').value = parseInt( vodLength ) - parseInt( archiveLength );
+						}
+
+						channelName = chatLog.video.channel.name;
+
+						// ffz
+						fetch( 'https://api.frankerfacez.com/v1/room/' + channelName ).then( function(response){
+							return response.json();
+						}).then( function(json){
+							ffz = json;
+							console.log('ffz', ffz);
+							document.getElementById('status-text-ffz').innerHTML = 'OK!';
+						});
+
+						// bttv_channel
+						fetch( 'https://api.betterttv.net/2/channels/' + channelName ).then( function(response){
+							return response.json();
+						}).then( function(json){
+							bttv_channel = json;
+							console.log('bttv_channel', bttv_channel);
+							document.getElementById('status-text-bttv_channel').innerHTML = 'OK!';
+						});
+
+						// bttv_global
+						fetch( 'https://api.betterttv.net/2/emotes' ).then( function(response){
+							return response.json();
+						}).then( function(json){
+							bttv_global = json;
+							console.log('bttv_global', bttv_global);
+							document.getElementById('status-text-bttv_global').innerHTML = 'OK!';
+						});
+
+						document.getElementById('status-text-comments').innerHTML = 'OK!';
+						
+						document.getElementById('option-group-chat').classList.add('ok');
+						// alert('Chat loaded');
+
+					});
+
+				}
+
+			}
+		
+			videoPlayer.addEventListener('seeked', function( ev ){
+
+				if( chatLog ){
+
+					commentReset();
+
+					timeStart = Date.now() - ( videoPlayer.currentTime * 1000 );
+
+				}
+
+			});
+
+		</script>
+
+		<style>
+
+			@keyframes fade {
+				0% { opacity: 0; }
+				100% { opacity: 1; }
+			}
+
+			* { box-sizing: border-box; }
+
+			body {
+
+				font: 12px 'Arial';
+				
+				height: 100%;
+				margin: 0;
+				padding: 0;
+				/* background: #0f0; */
+				background: #111;
+			}
+
+			#comments {
+
+				padding: 5px;
+
+				font: 12px 'Arial';
+				color: #fff;
+
+				height: 100%;
+				max-width: 25%;
+				overflow: hidden;
+
+				position: absolute;
+				
+			}
+
+			#comments.left {
+
+				top: 0px;
+				left: 0px;
+
+				/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,7db9e8+100&1+0,0+100 */
+				background: -moz-linear-gradient(left, rgba(0,0,0,0.7) 0%, rgba(125,185,232,0) 100%); /* FF3.6-15 */
+				background: -webkit-linear-gradient(left, rgba(0,0,0,0.7) 0%,rgba(125,185,232,0) 100%); /* Chrome10-25,Safari5.1-6 */
+				background: linear-gradient(to right, rgba(0,0,0,0.7) 0%,rgba(125,185,232,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+				
+			}
+
+			#comments.right {
+
+				top: 0px;
+				right: 0px;
+
+				text-align: right;
+
+				/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,7db9e8+100&1+0,0+100 */
+				background: -moz-linear-gradient(right, rgba(0,0,0,0.7) 0%, rgba(125,185,232,0) 100%); /* FF3.6-15 */
+				background: -webkit-linear-gradient(right, rgba(0,0,0,0.7) 0%,rgba(125,185,232,0) 100%); /* Chrome10-25,Safari5.1-6 */
+				background: linear-gradient(to left, rgba(0,0,0,0.7) 0%,rgba(125,185,232,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+				
+			}
+
+			#comments .comment {
+				min-height: 20px;
+				/* display: flex; */
+				
+				text-shadow:
+				    -1px -1px 0 #111,  
+				    1px -1px 0 #111,
+				    -1px 1px 0 #111,
+				    1px 1px 0 #111,
+				    1px 1px 3px rgba(0,0,0,.7);
+
+				/* animation: fade 0.2s; */
+
+			}
+
+			#comments span {
+				padding: 2px;
+			}
+
+			#comments .time {
+				color: #777;
+			}
+
+			#comments .name {
+				font-weight: 700;
+				color: #ccc;
+			}
+
+			#comments .emote {
+				max-height: 32px;
+			}
+
+			#comments img {
+				vertical-align: middle;
+			}
+
+			#player {
+				width: 1280px;
+				height: 720px;
+				position: relative;
+				/* margin: auto; */
+			}
+
+			#video {
+				width: 1280px;
+				height: 720px;
+
+				/* background: #3D4470; */
+				background: #f0f;
+
+			}
+
+			#controls {
+				width: 1280px;
+				/* margin: auto; */
+				padding: 5px;
+			}
+
+			.fileselect-group {
+				display: flex;
+			}
+
+			.option-group {
+
+				margin: 5px;
+				padding: 5px;
+
+				border: 1px solid #666;
+				background: #222;
+				color: #ccc;
+
+			}
+
+			.option-group.ok {
+				background: #3B5134;
+				border-color: #5D963A;
+			}
+
+			#timeline {
+				font-size: 14px;
+				font-weight: 700;
+				width: 1280px;
+				padding: 5px;
+				background: #222;
+				color: #fff;
+			}
+
+			button {
+				background: #555;
+				border: 1px solid #666;
+				color: #ccc;
+				padding: 3px 10px;
+			}
+
+			button:hover {
+				background: #666;
+				color: #fff;
+				cursor: pointer;
+			}
+
+
+		</style>
+
+	</body>
+
+</html>
