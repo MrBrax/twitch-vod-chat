@@ -80,7 +80,9 @@
 						<option value="has-fill">Fill</option>
 						<option value="">None</option>
 					</select><br>
-					<label><input type="checkbox" checked="checked" id="optionChatStroke"> Stroke</label>
+					<label><input type="checkbox" checked="checked" id="optionChatStroke"> Stroke</label><br>
+					<label><input type="checkbox" checked="checked" id="optionChatEmotes"> Emotes</label><br>
+					<label><input type="checkbox" checked="checked" id="optionChatTimestamps"> Timestamps</label>
 				</div>
 
 			</div>
@@ -117,6 +119,9 @@
 					this.archiveLength 	= null;
 					this.channelName 	= null;
 
+					this.emotesEnabled		= true;
+					this.timestampsEnabled 	= true;
+
 				}
 
 				tick(){
@@ -144,15 +149,14 @@
 						let commentDiv = document.createElement('div');
 						commentDiv.className = 'comment';
 
-
-						// calc time
-						let commentTime = this.timeFormat( comment.content_offset_seconds );
-
-
-						let timeC = document.createElement('span');
-						timeC.className = 'time';
-						timeC.innerHTML = '[' + commentTime + ']';
-						commentDiv.appendChild(timeC);
+						if( this.timestampsEnabled ){
+							// calc time
+							let commentTime = this.timeFormat( comment.content_offset_seconds );
+							let timeC = document.createElement('span');
+							timeC.className = 'time';
+							timeC.innerHTML = '[' + commentTime + ']';
+							commentDiv.appendChild(timeC);
+						}
 
 						let nameC = document.createElement('span');
 						nameC.className = 'name';
@@ -166,7 +170,7 @@
 						// make message
 						for( let f of comment.message.fragments ){
 
-							if( f.emoticon ){
+							if( f.emoticon && this.emotesEnabled ){
 
 								let emoC = document.createElement('img');
 								emoC.className = 'emote twitch';
@@ -179,21 +183,25 @@
 
 								let finalText = f.text;
 
-								// ffz
-								for( let fSet in this.ffz.sets ){
-									for( let fEmo of this.ffz.sets[fSet].emoticons ){
-										finalText = finalText.replaceAll(fEmo.name, '<img class="emote ffz" src="https:' + fEmo.urls[1] + '" />');
+								if( this.emotesEnabled ){
+
+									// ffz
+									for( let fSet in this.ffz.sets ){
+										for( let fEmo of this.ffz.sets[fSet].emoticons ){
+											finalText = finalText.replaceAll(fEmo.name, '<img class="emote ffz" src="https:' + fEmo.urls[1] + '" />');
+										}
 									}
-								}
 
-								// bttv_channel
-								for( let fEmo of this.bttv_channel.emotes ){
-									finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_channel" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
-								}
+									// bttv_channel
+									for( let fEmo of this.bttv_channel.emotes ){
+										finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_channel" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+									}
 
-								// bttv_global
-								for( let fEmo of this.bttv_global.emotes ){
-									finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_global" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+									// bttv_global
+									for( let fEmo of this.bttv_global.emotes ){
+										finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_global" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+									}
+
 								}
 
 								fragC.innerHTML = finalText;
@@ -265,6 +273,8 @@
 
 							this.timeStart = Date.now() - ( this.elements.player.currentTime * 1000 );
 
+						}else{
+							console.error('No chat log loaded');
 						}
 
 					});
@@ -443,6 +453,16 @@
 				vodplayer.elements.comments.classList.toggle('has-stroke', ev.target.checked);
 			});
 
+			document.getElementById('optionChatEmotes').addEventListener('change', function(ev){
+				console.log('Set chat emotes');
+				vodplayer.emotesEnabled = ev.target.checked;
+			});
+
+			document.getElementById('optionChatTimestamps').addEventListener('change', function(ev){
+				console.log('Set chat timestamps');
+				vodplayer.timestampsEnabled = ev.target.checked;
+			});
+
 		</script>
 
 		<style>
@@ -456,7 +476,7 @@
 
 			body {
 
-				font: 12px 'Arial';
+				font: 12px 'Open Sans', 'Arial';
 				
 				height: 100%;
 				margin: 0;
@@ -469,7 +489,7 @@
 
 				padding: 5px;
 
-				font: 12px 'Arial';
+				font-size: 12px;
 				color: #fff;
 
 				height: 100%;
@@ -477,22 +497,19 @@
 				overflow: hidden;
 
 				position: absolute;
+
+				pointer-events: none;
 				
 			}
 
 			#comments.left {
-
 				top: 0px;
-				left: 0px;
-
-				
+				left: 0px;				
 			}
 
 			#comments.right {
-
 				top: 0px;
 				right: 0px;
-
 				text-align: right;
 			}
 
@@ -516,9 +533,7 @@
 
 			#comments .comment {
 				min-height: 20px;
-				
 				/* animation: fade 0.2s; */
-
 			}
 
 			#comments.has-stroke .comment {
@@ -531,7 +546,7 @@
 			}
 
 			#comments span {
-				padding: 2px;
+				padding: 0 2px;
 			}
 
 			#comments .time {
@@ -561,10 +576,8 @@
 			#video {
 				width: 1280px;
 				height: 720px;
-
 				/* background: #3D4470; */
 				background: #f0f;
-
 			}
 
 			#controls {
@@ -628,7 +641,7 @@
 
 			input {
 				background: #555;
-				border: 1px solid #666;
+				border: 1px solid #717171;
 				color: #ccc;
 				padding: 3px 6px;
 			}
