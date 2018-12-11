@@ -79,16 +79,17 @@
 						<option value="has-fill">Fill</option>
 						<option value="">None</option>
 					</select><br>
-					<label><input type="checkbox" checked="checked" id="optionChatStroke"> Stroke</label><br>
+					<label><input type="checkbox" checked="checked" id="optionChatStroke"> Stroke</label>
 					<label><input type="checkbox" checked="checked" id="optionChatEmotes"> Emotes</label><br>
 					<label><input type="checkbox" checked="checked" id="optionChatTimestamps"> Timestamps</label>
+					<label><input type="checkbox" checked="checked" id="optionChatBadges"> Badges</label>
 				</div>
 
 			</div>
 
 			<div class="option-group">
-				<button onclick="vodplayer.play()">Start</button>
-				<button onclick="vodplayer.apply()">Apply</button>
+				<button onclick="vodplayer.play()" id="buttonStart">Start</button>
+				<button onclick="vodplayer.apply()" id="buttonApply">Apply</button>
 			</div>
 
 		</div>
@@ -123,6 +124,7 @@
 
 					this.emotesEnabled		= true;
 					this.timestampsEnabled 	= true;
+					this.badgesEnabled		= true;
 
 					this.noVideo		= false;
 
@@ -153,6 +155,7 @@
 						let commentDiv = document.createElement('div');
 						commentDiv.className = 'comment';
 
+						// timestamp
 						if( this.timestampsEnabled ){
 							// calc time
 							let commentTime = this.timeFormat( comment.content_offset_seconds );
@@ -162,12 +165,26 @@
 							commentDiv.appendChild(timeC);
 						}
 
+						// badges
+						if( this.badgesEnabled && comment.message.user_badges ){
+
+							for( let b of comment.message.user_badges ){
+								if( b._id == 'sub-gifter' ) continue;
+								let badgeC = document.createElement('span');
+								badgeC.className = 'badge ' + b._id;
+								badgeC.innerHTML = b._id.substr(0, 1).toUpperCase();
+								commentDiv.appendChild(badgeC);
+							}
+
+						}
+
+						// name
 						let nameC = document.createElement('span');
 						nameC.className = 'name';
 						nameC.innerHTML = comment.commenter.display_name + ':';
-						commentDiv.appendChild(nameC);
-
 						nameC.style.color = comment.message.user_color;
+						commentDiv.appendChild(nameC);
+					
 
 						let bodyC = document.createElement('span');
 
@@ -294,6 +311,8 @@
 						}
 
 					});
+
+					document.getElementById('buttonStart').disabled = true;
 
 				}
 
@@ -454,7 +473,7 @@
 
 			String.prototype.replaceAll = function(search, replacement) {
 				var target = this;
-				search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex
 				return target.replace(new RegExp(search, 'g'), replacement);
 			};
 
@@ -478,6 +497,11 @@
 			document.getElementById('optionChatTimestamps').addEventListener('change', function(ev){
 				console.log('Set chat timestamps');
 				vodplayer.timestampsEnabled = ev.target.checked;
+			});
+
+			document.getElementById('optionChatBadges').addEventListener('change', function(ev){
+				console.log('Set chat badges');
+				vodplayer.badgesEnabled = ev.target.checked;
 			});
 
 		</script>
@@ -570,6 +594,20 @@
 				color: #777;
 			}
 
+			#comments .badge {
+				display: inline-block;
+				font-weight: 700;
+				color: #eee;
+				padding: 0 3px;
+				background: #832B2B;
+				border-radius: 3px;
+				margin: 0 2px;
+			}
+
+			#comments .badge.premium {
+				background: #427EBC;
+			}
+
 			#comments .name {
 				font-weight: 700;
 				color: #ccc;
@@ -660,11 +698,16 @@
 				padding: 4px 15px;
 			}
 
-			button:hover {
+			button:not(:disabled):hover {
 				background: #666;
 				border-color: #999;
 				color: #fff;
 				cursor: pointer;
+			}
+
+			button:disabled {
+				color: #777;
+				cursor: not-allowed;
 			}
 
 			input {
