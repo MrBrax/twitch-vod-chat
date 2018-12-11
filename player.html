@@ -8,11 +8,17 @@
 
 		<div id="player">
 
-			<video id="video" src=""></video>
+			<video id="video"></video>
 
 			<div id="comments" class="left has-gradient has-stroke">
-				<div class="comment">Waiting to start</span>
+				<div class="comment">
+					<span class="time">[00:00:00]</span>
+					<span class="name">Username:</span>
+					<span class="body">Body text</span>
+				</div>
 			</div>
+
+			<div id="osd">OSD Text</div>
 
 		</div>
 
@@ -21,13 +27,6 @@
 		</div>
 
 		<div id="controls">
-
-			<!--
-			
-				<div class="dropzone video" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">Video</div>
-				<div class="dropzone chat" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">Chat</div>
-			</div>
-		-->
 
 			<div class="option-row">
 				
@@ -96,6 +95,8 @@
 
 		<script>
 
+			'use strict';
+
 			class VODPlayer {
 
 				constructor(){
@@ -107,6 +108,7 @@
 					this.bttv_global 	= null;
 
 					this.timeStart		= null;
+					this.chatOffset		= 0;
 
 					this.commentAmount	= null;
 
@@ -121,6 +123,8 @@
 
 					this.emotesEnabled		= true;
 					this.timestampsEnabled 	= true;
+
+					this.noVideo		= false;
 
 				}
 
@@ -221,13 +225,17 @@
 					}
 
 					// update timeline
-					let timelineText = 'C: ' + this.timeFormat(timeRelative);
+					let timelineText = 'C: ' + this.timeFormat( timeRelative * this.timeScale );
 
 					if( this.elements.player.currentTime ){
 						timelineText += ' / V: ' + this.timeFormat(this.elements.player.currentTime);
 					}
 
 					document.getElementById('timeline').innerHTML = timelineText;
+
+					if( this.noVideo ){
+						this.elements.osd.innerHTML = 'Sync: ' + this.timeFormat( timeRelative * this.timeScale ) + '<br>Scale: ' + this.timeScale + '<br>Offset: ' + this.chatOffset  + '<br>Tick: ' + this.tickDelay;
+					}
 
 					// scroll
 					this.elements.comments.scrollTop = this.elements.comments.scrollHeight;
@@ -254,23 +262,31 @@
 
 					this.timeStart = Date.now();
 
-					this.elements.player.play();
+					if( this.elements.player.src ){
+						this.elements.player.play();
+						this.noVideo = false;
+					}else{
+						this.elements.osd.style.display = 'block';
+						this.noVideo = true;
+					}
 
 					console.log('Offset: ' + document.getElementById('optionOffset').value );
 
-					this.apply();	
+					this.apply();
 
 					// offset
-					this.timeStart += parseInt( document.getElementById('optionOffset').value ) * 1000;
+					this.timeStart += this.chatOffset;
 
 					this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
 
+					// seeking on video player
 					this.elements.player.addEventListener('seeked', (ev) => {
 
 						if( this.chatLog ){
 
 							this.reset();
 
+							// offset chat
 							this.timeStart = Date.now() - ( this.elements.player.currentTime * 1000 );
 
 						}else{
@@ -306,6 +322,8 @@
 					// tick delay
 					this.tickDelay = parseInt( document.getElementById('optionTickDelay').value );
 					console.log('TickDelay: ' + this.tickDelay);
+
+					this.chatOffset = parseInt( document.getElementById('optionOffset').value ) * 1000;
 
 					if( this.interval ){
 						clearInterval( this.interval );
@@ -426,12 +444,11 @@
 
 			}
 
-			let vodplayer = new VODPlayer();
+			const vodplayer = new VODPlayer();
 
 			vodplayer.elements.player 	= document.getElementById('video');
 			vodplayer.elements.comments = document.getElementById('comments');
-
-			// vodplayer.play();
+			vodplayer.elements.osd 		= document.getElementById('osd');
 
 			console.log(vodplayer);
 
@@ -578,6 +595,17 @@
 				height: 720px;
 				/* background: #3D4470; */
 				background: #f0f;
+			}
+
+			#osd {
+				display: none;
+				position: absolute;
+				left: 640px;
+				top: 360px;
+				background: #00f;
+				color: #fff;
+				padding: 10px;
+				font-family: Consolas, monospace;
 			}
 
 			#controls {
