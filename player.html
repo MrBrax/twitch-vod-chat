@@ -52,24 +52,27 @@
 			<div class="option-row">
 
 				<div class="option-group">
-					<h2>Chat location</h2>
-					<button onclick="vodplayer.alignChat('left')">Left</button>
-					<button onclick="vodplayer.alignChat('right')">Right</button>
-				</div>
-
-				<div class="option-group">
 					<h2>Chat offset in seconds</h2>
+					<p class="help-text">Offset from the video, if recording started too late.</p>
 					<input id="optionOffset" value="0">
 				</div>
 
 				<div class="option-group">
 					<h2>Chat timescale</h2>
+					<p class="help-text">1 is standard, 2 is twice as fast etc.</p>
 					<input id="optionTimescale" value="1">
 				</div>
 
 				<div class="option-group">
 					<h2>Update frequency in ms</h2>
+					<p class="help-text">The lower the smoother. 16.67 - 60fps, 33.33 - 30fps</p>
 					<input id="optionTickDelay" value="300">
+				</div>
+
+				<div class="option-group">
+					<h2>Chat location</h2>
+					<button onclick="vodplayer.alignChat('left')">Left</button>
+					<button onclick="vodplayer.alignChat('right')">Right</button>
 				</div>
 
 				<div class="option-group">
@@ -648,8 +651,6 @@
 
 			#controls {
 				width: 1280px;
-				/* margin: auto; */
-				padding: 5px;
 			}
 
 			.option-row {
@@ -679,7 +680,7 @@
 			.option-group h2 {
 				font-size: 16px;
 				margin: 0;
-				padding: 0 0 5px 0;
+				padding: 0 0 1px 0;
 			}
 
 			#timeline {
@@ -689,6 +690,12 @@
 				padding: 5px;
 				background: #222;
 				color: #fff;
+			}
+
+			.help-text {
+				color: #aaa;
+				font-weight: 300;
+				font-size: 90%;
 			}
 
 			button {
@@ -722,6 +729,10 @@
 				color: #fff;
 			}
 
+			p {
+				margin: 3px 0;
+				padding: 0;
+			}
 
 		</style>
 
