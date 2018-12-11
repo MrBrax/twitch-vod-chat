@@ -24,6 +24,8 @@ Record at a high bitrate.
 
 ---
 
-One idea i had when making this, is the time scale slider. If you put it on 5 and record at max fps, you can then slow down the footage in your editing software, making the required realtime record time 5 times less. I have however not tested this to make sure the sync is working.
+One idea i had when making this, is the time scale slider. If you put it on 5 and record at max fps, you can then slow down the footage in your editing software, making the required realtime record time 5 times less.
+
+It seems to sync fine, but the gif emotes won't have the same speed.
 
 Turning down the tick ms is required too.
