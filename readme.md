@@ -1,3 +1,9 @@
+# Demo
+
+http://vod.dongers.net/player.html
+
+Some other stuff exists on root as well.
+
 # Setting up
 
 Download a vod chat:
