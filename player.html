@@ -33,14 +33,21 @@
 				<div class="option-group" id="option-group-video">
 					<h2>Video</h2>
 					<input type="file" id="inputVideo" accept="video/*" onchange="vodplayer.load(event, 'video'); return false;" />
+					<p class="help-text">
+						These files will not be uploaded to anywhere, they're played on your device locally.
+					</p>
 				</div>
 
 				<div class="option-group" id="option-group-chat">
 					<h2>Chat</h2>
 					<input type="file" id="inputChat" accept="application/json" onchange="vodplayer.load(event, 'chat'); return false;" />
+					<p class="help-text">
+						Chat logs may take a while to load, don't worry.
+					</p>
 				</div>
 
 				<div class="option-group">
+					<strong>Video:</strong> <span id="status-text-video">Waiting</span><br>
 					<strong>Comments:</strong> <span id="status-text-comments">Waiting</span><br>
 					<strong>FFZ:</strong> <span id="status-text-ffz">Waiting</span><br>
 					<strong>BTTV Channel:</strong> <span id="status-text-bttv_channel">Waiting</span><br>
@@ -53,24 +60,37 @@
 
 				<div class="option-group">
 					<h2>Chat offset in seconds</h2>
-					<p class="help-text">Offset from the video, if recording started too late.</p>
+					<p class="help-text">
+						Offset from the video, if recording started too late.
+						It will be set automatically based on how long the chat dump is
+						and the video length, remember to set it to 0 if you want it that way.
+					</p>
 					<input id="optionOffset" value="0">
 				</div>
 
 				<div class="option-group">
 					<h2>Chat timescale</h2>
-					<p class="help-text">1 is standard, 2 is twice as fast etc.</p>
+					<p class="help-text">
+						1 is standard, 2 is twice as fast etc.
+						Slow the captured video down with this amount to reduce live recording time
+					</p>
 					<input id="optionTimescale" value="1">
 				</div>
 
 				<div class="option-group">
 					<h2>Update frequency in ms</h2>
-					<p class="help-text">The lower the smoother. 16.67 - 60fps, 33.33 - 30fps</p>
+					<p class="help-text">
+						The lower the smoother. 16.67 - 60fps, 33.33 - 30fps.
+						Missed ticks shouldn't matter, as the parser is dependent on system time.
+					</p>
 					<input id="optionTickDelay" value="300">
 				</div>
 
 				<div class="option-group">
 					<h2>Chat location</h2>
+					<p class="help-text">
+						This can be changed at any time, if it's in the way of something in the VOD.
+					</p>
 					<button onclick="vodplayer.alignChat('left')">Left</button>
 					<button onclick="vodplayer.alignChat('right')">Right</button>
 				</div>
@@ -82,10 +102,16 @@
 						<option value="has-fill">Fill</option>
 						<option value="">None</option>
 					</select><br>
+
 					<label><input type="checkbox" checked="checked" id="optionChatStroke"> Stroke</label>
 					<label><input type="checkbox" checked="checked" id="optionChatEmotes"> Emotes</label><br>
 					<label><input type="checkbox" checked="checked" id="optionChatTimestamps"> Timestamps</label>
 					<label><input type="checkbox" checked="checked" id="optionChatBadges"> Badges</label>
+
+					<p class="help-text">
+						These will only apply to newly displayed messages.
+					</p>
+
 				</div>
 
 			</div>
@@ -299,22 +325,6 @@
 
 					this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
 
-					// seeking on video player
-					this.elements.player.addEventListener('seeked', (ev) => {
-
-						if( this.chatLog ){
-
-							this.reset();
-
-							// offset chat
-							this.timeStart = Date.now() - ( this.elements.player.currentTime * 1000 );
-
-						}else{
-							console.error('No chat log loaded');
-						}
-
-					});
-
 					document.getElementById('buttonStart').disabled = true;
 
 				}
@@ -371,7 +381,7 @@
 
 						this.elements.player.src = fileURL;
 
-						document.getElementById('option-group-video').classList.add('ok');
+						document.getElementById('status-text-video').innerHTML = 'Loading...';
 
 					}else{
 
@@ -393,8 +403,8 @@
 							this.vodLength = this.chatLog.video.length;
 							console.log('VOD length: ' + this.vodLength);
 
-							this.archiveLength = document.getElementById('video').duration;
-							console.log('Archive length: ' + this.archiveLength.toString() );
+							this.archiveLength = this.elements.player.duration;
+							console.log('Archive length: ' + this.archiveLength );
 
 							if( this.archiveLength > 0 ){
 								document.getElementById('optionOffset').value = parseInt( this.vodLength ) - parseInt( this.archiveLength );
@@ -432,7 +442,7 @@
 								document.getElementById('status-text-bttv_global').innerHTML = 'OK!';
 							});
 
-							document.getElementById('status-text-comments').innerHTML = 'OK (' + this.channelName + ')!';
+							document.getElementById('status-text-comments').innerHTML = 'OK (' + this.channelName + ', ' + this.commentAmount + 'c, ' + this.vodLength + 's)!';
 							
 							document.getElementById('option-group-chat').classList.add('ok');
 							// alert('Chat loaded');
@@ -440,6 +450,32 @@
 						});
 
 					}
+
+				}
+
+				hooks(){
+
+					// seeking on video player
+					this.elements.player.addEventListener('seeked', (ev) => {
+
+						if( this.chatLog ){
+
+							this.reset();
+
+							// offset chat
+							this.timeStart = Date.now() - ( this.elements.player.currentTime * 1000 );
+
+						}else{
+							console.error('No chat log loaded');
+						}
+
+					});
+
+					// on ready
+					this.elements.player.addEventListener('canplay', (ev) => {
+						document.getElementById('status-text-video').innerHTML = 'Loaded (' + this.elements.player.duration + 's)';
+						document.getElementById('option-group-video').classList.add('ok');
+					});
 
 				}
 
@@ -471,6 +507,8 @@
 			vodplayer.elements.player 	= document.getElementById('video');
 			vodplayer.elements.comments = document.getElementById('comments');
 			vodplayer.elements.osd 		= document.getElementById('osd');
+
+			vodplayer.hooks();
 
 			console.log(vodplayer);
 
@@ -572,7 +610,7 @@
 			}
 
 			#comments.has-fill {
-				background: rgba(0, 0, 0, .6);
+				background: rgba(0, 0, 0, .4);
 			}
 
 			#comments .comment {
@@ -590,11 +628,11 @@
 			}
 
 			#comments span {
-				padding: 0 2px;
+				padding: 0 1px;
 			}
 
 			#comments .time {
-				color: #777;
+				color: #aaa;
 			}
 
 			#comments .badge {
@@ -659,6 +697,7 @@
 
 			.option-row .option-group {
 				flex-grow: 1;
+				flex-basis: 33%;
 			}
 
 			.option-group {
