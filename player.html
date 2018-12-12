@@ -2,6 +2,7 @@
 
 	<head>
 		<title>braxen's vod replay</title>
+		<link href="https://cdn.betterttv.net/betterttv.css" type="text/css" rel="stylesheet" />
 	</head>
 	
 	<body>
@@ -18,7 +19,7 @@
 				</div>
 			</div>
 
-			<div id="osd">OSD Text</div>
+			<div id="osd">SYNC NOT STARTED</div>
 
 		</div>
 
@@ -168,6 +169,12 @@
 
 					let timeRelative = ( timeNow - this.timeStart ) / 1000;
 
+					if( ( timeRelative * this.timeScale ) > this.vodLength + 5 ){
+						alert('Stopped playback');
+						clearInterval( this.interval );
+						return;
+					}
+
 					for( let i = 0; i < this.commentAmount; i++ ){
 
 						let comment = this.chatLog.comments[i];
@@ -247,12 +254,12 @@
 
 									// bttv_channel
 									for( let fEmo of this.bttv_channel.emotes ){
-										finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_channel" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+										finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_channel bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
 									}
 
 									// bttv_global
 									for( let fEmo of this.bttv_global.emotes ){
-										finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_global" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+										finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_global bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
 									}
 
 								}
@@ -276,14 +283,17 @@
 					// update timeline
 					let timelineText = 'C: ' + this.timeFormat( timeRelative * this.timeScale );
 
-					if( this.elements.player.currentTime ){
-						timelineText += ' / V: ' + this.timeFormat(this.elements.player.currentTime);
+					if( this.elements.video.currentTime ){
+						timelineText += ' / V: ' + this.timeFormat(this.elements.video.currentTime);
 					}
 
 					document.getElementById('timeline').innerHTML = timelineText;
 
 					if( this.noVideo ){
 						this.elements.osd.innerHTML = 'Sync: ' + this.timeFormat( timeRelative * this.timeScale ) + '<br>Scale: ' + this.timeScale + '<br>Offset: ' + this.chatOffset  + '<br>Tick: ' + this.tickDelay;
+						if( !this.elements.osd.classList.contains('running') ){
+							this.elements.osd.classList.add('running');
+						}
 					}
 
 					// scroll
@@ -316,8 +326,8 @@
 
 					this.timeStart = Date.now();
 
-					if( this.elements.player.src ){
-						this.elements.player.play();
+					if( this.elements.video.src ){
+						this.elements.video.play();
 						this.noVideo = false;
 					}else{
 						this.elements.osd.style.display = 'block';
@@ -405,7 +415,7 @@
 
 					if( f == 'video' ){
 
-						this.elements.player.src = fileURL;
+						this.elements.video.src = fileURL;
 
 						document.getElementById('status-text-video').innerHTML = 'Loading...';
 
@@ -429,7 +439,7 @@
 							this.vodLength = this.chatLog.video.length;
 							console.log('VOD length: ' + this.vodLength);
 
-							this.archiveLength = this.elements.player.duration;
+							this.archiveLength = this.elements.video.duration;
 							console.log('Archive length: ' + this.archiveLength );
 
 							if( this.archiveLength > 0 ){
@@ -482,14 +492,14 @@
 				hooks(){
 
 					// seeking on video player
-					this.elements.player.addEventListener('seeked', (ev) => {
+					this.elements.video.addEventListener('seeked', (ev) => {
 
 						if( this.chatLog ){
 
 							this.reset();
 
 							// offset chat
-							this.timeStart = Date.now() - ( this.elements.player.currentTime * 1000 );
+							this.timeStart = Date.now() - ( this.elements.video.currentTime * 1000 );
 
 						}else{
 							console.error('No chat log loaded');
@@ -498,13 +508,13 @@
 					});
 
 					// on ready
-					this.elements.player.addEventListener('canplay', (ev) => {
-						document.getElementById('status-text-video').innerHTML = 'Loaded (' + this.elements.player.duration + 's)';
+					this.elements.video.addEventListener('canplay', (ev) => {
+						document.getElementById('status-text-video').innerHTML = 'Loaded (' + this.elements.video.duration + 's)';
 						document.getElementById('option-group-video').classList.add('ok');
 					});
 
 					// space to play
-					document.getElementById('player').addEventListener('keyup', (ev) => {
+					this.elements.player.addEventListener('keyup', (ev) => {
 						if(ev.keyCode == 32){
 							ev.preventDefault();
 							this.play();
@@ -539,7 +549,8 @@
 
 			const vodplayer = new VODPlayer();
 
-			vodplayer.elements.player 	= document.getElementById('video');
+			vodplayer.elements.player 	= document.getElementById('player');
+			vodplayer.elements.video 	= document.getElementById('video');
 			vodplayer.elements.comments = document.getElementById('comments');
 			vodplayer.elements.osd 		= document.getElementById('osd');
 
@@ -721,10 +732,14 @@
 				position: absolute;
 				left: 640px;
 				top: 360px;
-				background: #00f;
+				background: #f00;
 				color: #fff;
 				padding: 10px;
 				font-family: Consolas, monospace;
+			}
+
+			#osd.running {
+				background: #00f;
 			}
 
 			#controls {
