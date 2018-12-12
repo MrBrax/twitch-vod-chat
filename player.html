@@ -119,6 +119,7 @@
 			<div class="option-group">
 				<button onclick="vodplayer.play()" id="buttonStart">Start</button>
 				<button onclick="vodplayer.apply()" id="buttonApply">Apply</button>
+				<button onclick="vodplayer.fullscreen()" id="buttonFullscreen">Fullscreen</button>
 			</div>
 
 		</div>
@@ -156,6 +157,8 @@
 					this.badgesEnabled		= true;
 
 					this.noVideo		= false;
+
+					this.playing		= false;
 
 				}
 
@@ -299,6 +302,11 @@
 
 				play(){
 
+					if( this.playing ){
+						alert('Already playing');
+						return false;
+					}
+
 					console.log('Started playback');
 
 					if(!this.chatLog){
@@ -326,6 +334,8 @@
 					this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
 
 					document.getElementById('buttonStart').disabled = true;
+
+					this.playing = true;
 
 				}
 
@@ -361,6 +371,22 @@
 						clearInterval( this.interval );
 						this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
 					}
+
+				}
+
+				fullscreen(){
+
+					let element = document.getElementById('player');
+
+					if (element.requestFullscreen) {
+						element.requestFullscreen();
+				    } else if (element.mozRequestFullScreen) {
+						element.mozRequestFullScreen();
+				    } else if (element.webkitRequestFullscreen) {
+						element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+				    } else if (element.msRequestFullscreen) {
+						element.msRequestFullscreen();
+				    }
 
 				}
 
@@ -475,6 +501,15 @@
 					this.elements.player.addEventListener('canplay', (ev) => {
 						document.getElementById('status-text-video').innerHTML = 'Loaded (' + this.elements.player.duration + 's)';
 						document.getElementById('option-group-video').classList.add('ok');
+					});
+
+					// space to play
+					document.getElementById('player').addEventListener('keyup', (ev) => {
+						if(ev.keyCode == 32){
+							ev.preventDefault();
+							this.play();
+							return false;
+						}
 					});
 
 				}
@@ -669,9 +704,14 @@
 				/* margin: auto; */
 			}
 
+			#player:fullscreen {
+				width: 100%;
+				height: 100%;
+			}
+
 			#video {
-				width: 1280px;
-				height: 720px;
+				width: 100%;
+				height: 100%;
 				/* background: #3D4470; */
 				background: #f0f;
 			}
