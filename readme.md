@@ -20,6 +20,8 @@ Set settings as wanted, then press Start. Pressing apply while playing will appl
 
 Right clicking the video and showing controls makes it so you can seek the video.
 
+Press space when player is focused to play, useful if you've toggled fullscreen.
+
 # Recording
 
 Make the browser window fullscreen (F11). It's optimized for a 1920x1080 screen at the minimum.

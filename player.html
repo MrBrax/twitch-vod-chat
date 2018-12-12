@@ -43,7 +43,7 @@
 					<h2>Chat</h2>
 					<input type="file" id="inputChat" accept="application/json" onchange="vodplayer.load(event, 'chat'); return false;" />
 					<p class="help-text">
-						Chat logs may take a while to load, don't worry.
+						Chat logs may take a while to parse, don't worry.
 					</p>
 				</div>
 
@@ -287,7 +287,7 @@
 						timelineText += ' / V: ' + this.timeFormat(this.elements.video.currentTime);
 					}
 
-					document.getElementById('timeline').innerHTML = timelineText;
+					this.elements.timeline.innerHTML = timelineText;
 
 					if( this.noVideo ){
 						this.elements.osd.innerHTML = 'Sync: ' + this.timeFormat( timeRelative * this.timeScale ) + '<br>Scale: ' + this.timeScale + '<br>Offset: ' + this.chatOffset  + '<br>Tick: ' + this.tickDelay;
@@ -344,6 +344,8 @@
 					this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
 
 					document.getElementById('buttonStart').disabled = true;
+					document.getElementById('inputVideo').disabled = true;
+					document.getElementById('inputChat').disabled = true;
 
 					this.playing = true;
 
@@ -386,7 +388,7 @@
 
 				fullscreen(){
 
-					let element = document.getElementById('player');
+					let element = this.elements.player;
 
 					if (element.requestFullscreen) {
 						element.requestFullscreen();
@@ -553,6 +555,7 @@
 			vodplayer.elements.video 	= document.getElementById('video');
 			vodplayer.elements.comments = document.getElementById('comments');
 			vodplayer.elements.osd 		= document.getElementById('osd');
+			vodplayer.elements.timeline = document.getElementById('timeline');
 
 			vodplayer.hooks();
 
