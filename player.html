@@ -94,6 +94,8 @@
 					</p>
 					<button onclick="vodplayer.alignChat('left')">Left</button>
 					<button onclick="vodplayer.alignChat('right')">Right</button>
+					<label><input type="range" min="0" max="100" value="0" id="optionChatTop"> Top</label>
+					<label><input type="range" min="0" max="100" value="0" id="optionChatBottom"> Bottom</label>
 				</div>
 
 				<div class="option-group">
@@ -160,6 +162,9 @@
 					this.noVideo		= false;
 
 					this.playing		= false;
+
+					this._chatTop		= 0;
+					this._chatBottom	= 100;
 
 				}
 
@@ -547,6 +552,16 @@
 					this.elements.comments.classList.add(dir);
 				}
 
+				set chatTop( v ){
+					this.elements.comments.style.top = v + '%';
+					this._chatTop = v;
+				}
+
+				set chatBottom( v ){
+					this.elements.comments.style.bottom = v + '%';
+					this._chatTop = v;
+				}
+
 			}
 
 			const vodplayer = new VODPlayer();
@@ -594,6 +609,16 @@
 				vodplayer.badgesEnabled = ev.target.checked;
 			});
 
+			document.getElementById('optionChatTop').addEventListener('change', function(ev){
+				console.log('Set chat top');
+				vodplayer.chatTop = ev.target.value;
+			});
+
+			document.getElementById('optionChatBottom').addEventListener('change', function(ev){
+				console.log('Set chat bottom');
+				vodplayer.chatBottom = ev.target.value;
+			});
+
 		</script>
 
 		<style>
@@ -623,11 +648,13 @@
 				font-size: 12px;
 				color: #fff;
 
-				height: 100%;
+				/* height: 100%; */
 				width: 25%;
 				overflow: hidden;
 
 				position: absolute;
+				top: 0%;
+				bottom: 0%;
 
 				pointer-events: none;
 				
@@ -819,6 +846,7 @@
 				border: 1px solid #717171;
 				color: #ccc;
 				padding: 3px 6px;
+				margin: 0;
 			}
 
 			input:focus {
