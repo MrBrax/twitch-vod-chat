@@ -10,7 +10,9 @@ Download a vod chat:
 
 Needs https://github.com/PetterKraabol/Twitch-Chat-Downloader
 
-`python app.py -v {id} --format json`
+`pip install tcd`
+
+`tcd --video <id> --format json`
 
 Download the VOD file with youtube-dl
 
