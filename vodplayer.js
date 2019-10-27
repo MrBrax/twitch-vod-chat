@@ -12,6 +12,11 @@ class VODPlayer {
             bttv_global: null
         };
 
+        this.badges = {
+            global: null,
+            channel: null
+        };
+
         // this.ffz            = null;
         // this.bttv_channel   = null;
         // this.bttv_global    = null;
@@ -40,6 +45,10 @@ class VODPlayer {
 
         this._chatTop       = 0;
         this._chatBottom    = 100;
+
+        this.twitchBadges   = {};
+
+        this.twitchClientId = '';
 
     }
 
@@ -85,14 +94,38 @@ class VODPlayer {
             }
 
             // badges
-            if( this.badgesEnabled && comment.message.user_badges ){
+            if( this.badgesEnabled && comment.message.user_badges && this.badges.global && this.badges.channel){
 
                 for( let b of comment.message.user_badges ){
-                    if( b._id == 'sub-gifter' ) continue;
+                    // if( b._id == 'sub-gifter' ) continue;
+                    /*
                     let badgeC = document.createElement('span');
                     badgeC.className = 'badge ' + b._id;
                     badgeC.innerHTML = b._id.substr(0, 1).toUpperCase();
                     commentDiv.appendChild(badgeC);
+                    */
+                    
+                    let badgeId = b._id;
+                    let badgeVersion = b.version;
+
+                    let imageSrc = null;
+
+                    if( this.badges.global[ badgeId ] && this.badges.global[ badgeId ].versions[ badgeVersion ] )
+                        imageSrc = this.badges.global[ badgeId ].versions[ badgeVersion ].image_url_1x;
+                    
+                    if( this.badges.channel[ badgeId ] && this.badges.channel[ badgeId ].versions[ badgeVersion ] )
+                        imageSrc = this.badges.channel[ badgeId ].versions[ badgeVersion ].image_url_1x;
+                    
+                    if(!imageSrc){
+                        console.error('no badge', badgeId, badgeVersion, this.twitchBadges);
+                        continue;
+                    }
+
+                    let badgeImage = document.createElement('img');
+                    badgeImage.className = 'badge ' + b._id;
+                    badgeImage.src = imageSrc;
+                    commentDiv.appendChild(badgeImage);
+
                 }
 
             }
@@ -345,37 +378,11 @@ class VODPlayer {
                     document.getElementById('optionOffset').value = parseInt( this.vodLength ) - parseInt( this.archiveLength );
                 }
 
-                this.channelName = this.chatLog.video.user_name;
+                this.channelName    = this.chatLog.video.user_name;
+                this.channelId      = this.chatLog.video.user_id;
 
-                // ffz
-                console.log('Fetching FFZ');
-                fetch( 'https://api.frankerfacez.com/v1/room/' + this.channelName.toLowerCase() ).then( function(response){
-                    return response.json();
-                }).then( (json2) => {
-                    this.emotes.ffz = json2;
-                    console.log('ffz', this.emotes.ffz);
-                    document.getElementById('status-text-ffz').innerHTML = 'OK!';
-                });
-
-                // bttv_channel
-                console.log('Fetching BTTV_Channel');
-                fetch( 'https://api.betterttv.net/2/channels/' + this.channelName ).then( function(response){
-                    return response.json();
-                }).then( (json2) => {
-                    this.emotes.bttv_channel = json2;
-                    console.log('bttv_channel', this.emotes.bttv_channel);
-                    document.getElementById('status-text-bttv_channel').innerHTML = 'OK!';
-                });
-
-                // bttv_global
-                console.log('Fetching BTTV_Global');
-                fetch( 'https://api.betterttv.net/2/emotes' ).then( function(response){
-                    return response.json();
-                }).then( (json2) => {
-                    this.emotes.bttv_global = json2;
-                    console.log('bttv_global', this.emotes.bttv_global);
-                    document.getElementById('status-text-bttv_global').innerHTML = 'OK!';
-                });
+                this.fetchBadges();
+                this.fetchEmotes();
 
                 document.getElementById('status-text-comments').innerHTML = 'OK (' + this.channelName + ', ' + this.commentAmount + 'c, ' + this.vodLength + 's)!';
                 
@@ -385,6 +392,94 @@ class VODPlayer {
             });
 
         }
+
+    }
+
+    fetchBadges(){
+
+        if(!this.channelId){
+            console.error('No channel id for badges');
+            return false;
+        }
+
+        /*
+        fetch( 'https://api.twitch.tv/kraken/chat/' + this.channelId + '/badges', {
+            // mode: 'no-cors',
+            headers: {
+                'Accept': 'application/vnd.twitchtv.v5+json',
+                'Client-ID': this.twitchClientId
+            }
+        }).then( function(response){
+            console.log('badges response', response);
+            return response.json();
+        }).then( (json2) => {
+            this.twitchBadges = json2;
+            console.log('twitch badges', this.twitchBadges);
+        });
+        */  
+
+        // global badges
+        fetch( 'https://badges.twitch.tv/v1/badges/global/display').then( function(response){
+            return response.json();
+        }).then( (json2) => {
+
+            if( json2.badge_sets ){
+                this.badges.global = json2.badge_sets;
+                console.log('twitch badges channel', this.badges.global);
+            }
+
+        });
+
+        // global badges
+        fetch( 'https://badges.twitch.tv/v1/badges/channels/' + this.channelId + '/display').then( function(response){
+            return response.json();
+        }).then( (json2) => {
+
+            if( json2.badge_sets ){
+                this.badges.channel = json2.badge_sets;
+                console.log('twitch badges global', this.badges.channel);
+            }
+
+        });
+
+    }
+
+    fetchEmotes(){
+
+        if(!this.channelName){
+            console.error('No channel name for emotes');
+            return false;
+        }
+
+        // ffz
+        console.log('Fetching FFZ');
+        fetch( 'https://api.frankerfacez.com/v1/room/' + this.channelName.toLowerCase() ).then( function(response){
+            return response.json();
+        }).then( (json2) => {
+            this.emotes.ffz = json2;
+            console.log('ffz', this.emotes.ffz);
+            document.getElementById('status-text-ffz').innerHTML = 'OK!';
+        });
+
+        // bttv_channel
+        console.log('Fetching BTTV_Channel');
+        fetch( 'https://api.betterttv.net/2/channels/' + this.channelName ).then( function(response){
+            return response.json();
+        }).then( (json2) => {
+            this.emotes.bttv_channel = json2;
+            console.log('bttv_channel', this.emotes.bttv_channel);
+            document.getElementById('status-text-bttv_channel').innerHTML = 'OK!';
+        });
+
+        // bttv_global
+        console.log('Fetching BTTV_Global');
+        fetch( 'https://api.betterttv.net/2/emotes' ).then( function(response){
+            return response.json();
+        }).then( (json2) => {
+            this.emotes.bttv_global = json2;
+            console.log('bttv_global', this.emotes.bttv_global);
+            document.getElementById('status-text-bttv_global').innerHTML = 'OK!';
+        });
 
     }
 
