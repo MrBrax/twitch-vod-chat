@@ -2,448 +2,456 @@
 
 class VODPlayer {
 
-	constructor(){
+    constructor(){
 
-		this.chatLog		= null;
+        this.chatLog        = null;
 
-		this.ffz 			= null;
-		this.bttv_channel 	= null;
-		this.bttv_global 	= null;
+        this.emotes = {
+            ffz: null,
+            bttv_channel: null,
+            bttv_global: null
+        };
 
-		this.timeStart		= null;
-		this.chatOffset		= 0;
+        // this.ffz            = null;
+        // this.bttv_channel   = null;
+        // this.bttv_global    = null;
 
-		this.commentAmount	= null;
+        this.timeStart      = null;
+        this.chatOffset     = 0;
 
-		this.elements 		= {};
+        this.commentAmount  = null;
 
-		this.tickDelay 		= 300;
-		this.timeScale 		= 1;
+        this.elements       = {};
 
-		this.vodLength 		= null;
-		this.archiveLength 	= null;
-		this.channelName 	= null;
+        this.tickDelay      = 300;
+        this.timeScale      = 1;
 
-		this.emotesEnabled		= true;
-		this.timestampsEnabled 	= true;
-		this.badgesEnabled		= true;
+        this.vodLength      = null;
+        this.archiveLength  = null;
+        this.channelName    = null;
 
-		this.noVideo		= false;
+        this.emotesEnabled      = true;
+        this.timestampsEnabled  = true;
+        this.badgesEnabled      = true;
 
-		this.playing		= false;
+        this.noVideo        = false;
 
-		this._chatTop		= 0;
-		this._chatBottom	= 100;
+        this.playing        = false;
 
-	}
+        this._chatTop       = 0;
+        this._chatBottom    = 100;
 
-	tick(){
+    }
 
-		let timeNow = Date.now();
+    tick(){
 
-		let timeRelative = ( timeNow - this.timeStart ) / 1000;
+        let timeNow = Date.now();
 
-		if( ( timeRelative * this.timeScale ) > this.vodLength + 5 ){
-			alert('Stopped playback');
-			clearInterval( this.interval );
-			return;
-		}
+        let timeRelative = ( timeNow - this.timeStart ) / 1000;
 
-		for( let i = 0; i < this.commentAmount; i++ ){
+        if( ( timeRelative * this.timeScale ) > this.vodLength + 5 ){
+            alert('Stopped playback');
+            clearInterval( this.interval );
+            return;
+        }
 
-			let comment = this.chatLog.comments[i];
+        for( let i = 0; i < this.commentAmount; i++ ){
 
-			if( comment.displayed ) continue;
+            let comment = this.chatLog.comments[i];
 
-			if( timeRelative < ( comment.content_offset_seconds / this.timeScale ) ) continue;
+            if( comment.displayed ) continue;
 
-			// if skipped or something
-			let commentAge = timeRelative - ( comment.content_offset_seconds / this.timeScale )
-			if( commentAge > 60 ){
-				// console.log('comment too old', commentAge);
-				comment.displayed = true;
-				continue;
-			}
+            if( timeRelative < ( comment.content_offset_seconds / this.timeScale ) ) continue;
 
-			let commentDiv = document.createElement('div');
-			commentDiv.className = 'comment';
+            // if skipped or something
+            let commentAge = timeRelative - ( comment.content_offset_seconds / this.timeScale )
+            if( commentAge > 60 ){
+                // console.log('comment too old', commentAge);
+                comment.displayed = true;
+                continue;
+            }
 
-			// timestamp
-			if( this.timestampsEnabled ){
-				// calc time
-				let commentTime = this.timeFormat( comment.content_offset_seconds );
-				let timeC = document.createElement('span');
-				timeC.className = 'time';
-				timeC.innerHTML = '[' + commentTime + ']';
-				commentDiv.appendChild(timeC);
-			}
+            let commentDiv = document.createElement('div');
+            commentDiv.className = 'comment';
 
-			// badges
-			if( this.badgesEnabled && comment.message.user_badges ){
+            // timestamp
+            if( this.timestampsEnabled ){
+                // calc time
+                let commentTime = this.timeFormat( comment.content_offset_seconds );
+                let timeC = document.createElement('span');
+                timeC.className = 'time';
+                timeC.innerHTML = '[' + commentTime + ']';
+                commentDiv.appendChild(timeC);
+            }
 
-				for( let b of comment.message.user_badges ){
-					if( b._id == 'sub-gifter' ) continue;
-					let badgeC = document.createElement('span');
-					badgeC.className = 'badge ' + b._id;
-					badgeC.innerHTML = b._id.substr(0, 1).toUpperCase();
-					commentDiv.appendChild(badgeC);
-				}
+            // badges
+            if( this.badgesEnabled && comment.message.user_badges ){
 
-			}
+                for( let b of comment.message.user_badges ){
+                    if( b._id == 'sub-gifter' ) continue;
+                    let badgeC = document.createElement('span');
+                    badgeC.className = 'badge ' + b._id;
+                    badgeC.innerHTML = b._id.substr(0, 1).toUpperCase();
+                    commentDiv.appendChild(badgeC);
+                }
 
-			// name
-			let nameC = document.createElement('span');
-			nameC.className = 'name';
-			nameC.innerHTML = comment.commenter.display_name + ':';
-			nameC.style.color = comment.message.user_color;
-			commentDiv.appendChild(nameC);
-		
+            }
 
-			let bodyC = document.createElement('span');
+            // name
+            let nameC = document.createElement('span');
+            nameC.className = 'name';
+            nameC.innerHTML = comment.commenter.display_name + ':';
+            nameC.style.color = comment.message.user_color;
+            commentDiv.appendChild(nameC);
+        
 
-			// make message
-			for( let f of comment.message.fragments ){
+            let bodyC = document.createElement('span');
 
-				if( f.emoticon && this.emotesEnabled ){
+            // make message
+            for( let f of comment.message.fragments ){
 
-					let emoC = document.createElement('img');
-					emoC.className = 'emote twitch';
-					emoC.src = 'https://static-cdn.jtvnw.net/emoticons/v1/' + f.emoticon.emoticon_id + '/1.0';
-					bodyC.appendChild(emoC);
+                if( f.emoticon && this.emotesEnabled ){
 
-				}else{
+                    let emoC = document.createElement('img');
+                    emoC.className = 'emote twitch';
+                    emoC.src = 'https://static-cdn.jtvnw.net/emoticons/v1/' + f.emoticon.emoticon_id + '/1.0';
+                    bodyC.appendChild(emoC);
 
-					let fragC = document.createElement('span');
+                }else{
 
-					let finalText = f.text;
+                    let fragC = document.createElement('span');
 
-					if( this.emotesEnabled ){
+                    let finalText = f.text;
 
-						// ffz
-						for( let fSet in this.ffz.sets ){
-							for( let fEmo of this.ffz.sets[fSet].emoticons ){
-								finalText = finalText.replaceAll(fEmo.name, '<img class="emote ffz" src="https:' + fEmo.urls[1] + '" />');
-							}
-						}
+                    if( this.emotesEnabled ){
 
-						// bttv_channel
-						for( let fEmo of this.bttv_channel.emotes ){
-							finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_channel bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
-						}
+                        // ffz
+                        for( let fSet in this.emotes.ffz.sets ){
+                            for( let fEmo of this.emotes.ffz.sets[fSet].emoticons ){
+                                finalText = finalText.replaceAll(fEmo.name, '<img class="emote ffz" src="https:' + fEmo.urls[1] + '" />');
+                            }
+                        }
 
-						// bttv_global
-						for( let fEmo of this.bttv_global.emotes ){
-							finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_global bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
-						}
+                        // bttv_channel
+                        if( this.emotes.bttv_channel && this.emotes.bttv_channel.emotes ){
+                            for( let fEmo of this.emotes.bttv_channel.emotes ){
+                                finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_channel bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+                            }
+                        }
 
-					}
+                        // bttv_global
+                        for( let fEmo of this.emotes.bttv_global.emotes ){
+                            finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_global bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+                        }
 
-					fragC.innerHTML = finalText;
+                    }
 
-					bodyC.appendChild(fragC);
+                    fragC.innerHTML = finalText;
 
-				}
+                    bodyC.appendChild(fragC);
 
-			}
-			
-			commentDiv.appendChild(bodyC);
+                }
 
-			this.elements.comments.appendChild( commentDiv );
+            }
+            
+            commentDiv.appendChild(bodyC);
 
-			comment.displayed = true;
+            this.elements.comments.appendChild( commentDiv );
 
-		}
+            comment.displayed = true;
 
-		// update timeline
-		let timelineText = 'C: ' + this.timeFormat( timeRelative * this.timeScale );
+        }
 
-		if( this.elements.video.currentTime ){
-			timelineText += ' / V: ' + this.timeFormat(this.elements.video.currentTime);
-		}
+        // update timeline
+        let timelineText = 'C: ' + this.timeFormat( timeRelative * this.timeScale );
 
-		this.elements.timeline.innerHTML = timelineText;
+        if( this.elements.video.currentTime ){
+            timelineText += ' / V: ' + this.timeFormat(this.elements.video.currentTime);
+        }
 
-		if( this.noVideo ){
-			this.elements.osd.innerHTML = 'Sync: ' + this.timeFormat( timeRelative * this.timeScale ) + '<br>Scale: ' + this.timeScale + '<br>Offset: ' + this.chatOffset  + '<br>Tick: ' + this.tickDelay;
-			if( !this.elements.osd.classList.contains('running') ){
-				this.elements.osd.classList.add('running');
-			}
-		}
+        this.elements.timeline.innerHTML = timelineText;
 
-		// scroll
-		this.elements.comments.scrollTop = this.elements.comments.scrollHeight;
+        if( this.noVideo ){
+            this.elements.osd.innerHTML = 'Sync: ' + this.timeFormat( timeRelative * this.timeScale ) + '<br>Scale: ' + this.timeScale + '<br>Offset: ' + this.chatOffset  + '<br>Tick: ' + this.tickDelay;
+            if( !this.elements.osd.classList.contains('running') ){
+                this.elements.osd.classList.add('running');
+            }
+        }
 
-		// remove old comments
-		if( this.elements.comments.children.length > 100 ){
-			for( let i = this.elements.comments.children.length; i > 100; i-- ){
-				this.elements.comments.removeChild( this.elements.comments.firstChild );
-			}
-		}
+        // scroll
+        this.elements.comments.scrollTop = this.elements.comments.scrollHeight;
 
-		
+        // remove old comments
+        if( this.elements.comments.children.length > 100 ){
+            for( let i = this.elements.comments.children.length; i > 100; i-- ){
+                this.elements.comments.removeChild( this.elements.comments.firstChild );
+            }
+        }
 
-	}
+        
 
-	play(){
+    }
 
-		if( this.playing ){
-			alert('Already playing');
-			return false;
-		}
+    play(){
 
-		console.log('Started playback');
+        if( this.playing ){
+            alert('Already playing');
+            return false;
+        }
 
-		if(!this.chatLog){
-			alert('No chat log added');
-			return false;
-		}
+        console.log('Started playback');
 
-		this.timeStart = Date.now();
+        if(!this.chatLog){
+            alert('No chat log added');
+            return false;
+        }
 
-		if( this.elements.video.src ){
-			this.elements.video.play();
-			this.noVideo = false;
-		}else{
-			this.elements.osd.style.display = 'block';
-			this.noVideo = true;
-		}
+        this.timeStart = Date.now();
 
-		console.log('Offset: ' + document.getElementById('optionOffset').value );
+        if( this.elements.video.src ){
+            this.elements.video.play();
+            this.noVideo = false;
+        }else{
+            this.elements.osd.style.display = 'block';
+            this.noVideo = true;
+        }
 
-		this.apply();
+        console.log('Offset: ' + document.getElementById('optionOffset').value );
 
-		// offset
-		this.timeStart += this.chatOffset;
+        this.apply();
 
-		this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
+        // offset
+        this.timeStart += this.chatOffset;
 
-		document.getElementById('buttonStart').disabled = true;
-		document.getElementById('inputVideo').disabled = true;
-		document.getElementById('inputChat').disabled = true;
+        this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
 
-		this.playing = true;
+        document.getElementById('buttonStart').disabled = true;
+        document.getElementById('inputVideo').disabled = true;
+        document.getElementById('inputChat').disabled = true;
 
-	}
+        this.playing = true;
 
-	reset(){
+    }
 
-		this.elements.comments.innerHTML = '';
+    reset(){
 
-		for( let i = 0; i < this.commentAmount; i++ ){
+        this.elements.comments.innerHTML = '';
 
-			let comment = this.chatLog.comments[i];
+        for( let i = 0; i < this.commentAmount; i++ ){
 
-			comment.displayed = null;
+            let comment = this.chatLog.comments[i];
 
-		}
+            comment.displayed = null;
 
-	}
+        }
 
-	apply(){
+    }
 
-		console.log('Applying options');
+    apply(){
 
-		// timescale 
-		this.timeScale = parseInt( document.getElementById('optionTimescale').value );
-		console.log('Timescale: ' + this.timeScale);
+        console.log('Applying options');
 
-		// tick delay
-		this.tickDelay = parseInt( document.getElementById('optionTickDelay').value );
-		console.log('TickDelay: ' + this.tickDelay);
+        // timescale 
+        this.timeScale = parseInt( document.getElementById('optionTimescale').value );
+        console.log('Timescale: ' + this.timeScale);
 
-		this.chatOffset = parseInt( document.getElementById('optionOffset').value ) * 1000;
+        // tick delay
+        this.tickDelay = parseInt( document.getElementById('optionTickDelay').value );
+        console.log('TickDelay: ' + this.tickDelay);
 
-		if( this.interval ){
-			clearInterval( this.interval );
-			this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
-		}
+        this.chatOffset = parseInt( document.getElementById('optionOffset').value ) * 1000;
 
-	}
+        if( this.interval ){
+            clearInterval( this.interval );
+            this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
+        }
 
-	fullscreen(){
+    }
 
-		let element = this.elements.player;
+    fullscreen(){
 
-		if (element.requestFullscreen) {
-			element.requestFullscreen();
-	    } else if (element.mozRequestFullScreen) {
-			element.mozRequestFullScreen();
-	    } else if (element.webkitRequestFullscreen) {
-			element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-	    } else if (element.msRequestFullscreen) {
-			element.msRequestFullscreen();
-	    }
+        let element = this.elements.player;
 
-	}
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
+        }
 
-	load(ev, f){
+    }
 
-		let URL = window.URL || window.webkitURL;
+    load(ev, f){
 
-		console.log('Load file: ' + f);
+        let URL = window.URL || window.webkitURL;
 
-		ev.preventDefault();
+        console.log('Load file: ' + f);
 
-		let file = ev.target.files[0];
-	    let type = file.type;
+        ev.preventDefault();
 
-		let fileURL = URL.createObjectURL(file);
+        let file = ev.target.files[0];
+        let type = file.type;
 
-		if( f == 'video' ){
+        let fileURL = URL.createObjectURL(file);
 
-			this.elements.video.src = fileURL;
+        if( f == 'video' ){
 
-			document.getElementById('status-text-video').innerHTML = 'Loading...';
+            this.elements.video.src = fileURL;
 
-		}else{
+            document.getElementById('status-text-video').innerHTML = 'Loading...';
 
-			document.getElementById('status-text-comments').innerHTML = 'Parsing...';
+        }else{
 
-			fetch( fileURL ).then( function(response){
+            document.getElementById('status-text-comments').innerHTML = 'Parsing...';
 
-				return response.json();
+            fetch( fileURL ).then( function(response){
 
-			}).then( (json) => {
+                return response.json();
 
-				console.log('Returned JSON for chat');
+            }).then( (json) => {
 
-				this.chatLog = json;
+                console.log('Returned JSON for chat');
 
-				this.commentAmount = Object.keys( this.chatLog.comments ).length;
-				console.log('Amount: ' + this.commentAmount);
+                this.chatLog = json;
 
-				// get duration, this changed in the new api. if you know of a better parsing solution, please fix this
-				let rawDuration = this.chatLog.video.duration;
+                this.commentAmount = Object.keys( this.chatLog.comments ).length;
+                console.log('Amount: ' + this.commentAmount);
 
-				let durHours = rawDuration.match(/([0-9]+)h/);
-				let durMinutes = rawDuration.match(/([0-9]+)m/);
-				let durSeconds = rawDuration.match(/([0-9]+)s/);
+                // get duration, this changed in the new api. if you know of a better parsing solution, please fix this
+                let rawDuration = this.chatLog.video.duration;
 
-				durHours = durHours ? parseInt(durHours[1]) : 0;
-				durMinutes = durMinutes ? parseInt(durMinutes[1]) : 0;
-				durSeconds = durSeconds ? parseInt(durSeconds[1]) : 0;
-				
-				console.log(durHours, durMinutes, durSeconds);
+                let durHours = rawDuration.match(/([0-9]+)h/);
+                let durMinutes = rawDuration.match(/([0-9]+)m/);
+                let durSeconds = rawDuration.match(/([0-9]+)s/);
 
+                durHours = durHours ? parseInt(durHours[1]) : 0;
+                durMinutes = durMinutes ? parseInt(durMinutes[1]) : 0;
+                durSeconds = durSeconds ? parseInt(durSeconds[1]) : 0;
+                
+                console.log(durHours, durMinutes, durSeconds);
 
-				this.vodLength = ( durHours * 60 * 60 ) + ( durMinutes * 60 ) + durSeconds;
-				// this.vodLength = this.chatLog.video.length;
-				console.log('VOD length: ' + this.vodLength);
 
-				this.archiveLength = this.elements.video.duration;
-				console.log('Archive length: ' + this.archiveLength );
+                this.vodLength = ( durHours * 60 * 60 ) + ( durMinutes * 60 ) + durSeconds;
+                // this.vodLength = this.chatLog.video.length;
+                console.log('VOD length: ' + this.vodLength);
 
-				if( this.archiveLength > 0 ){
-					document.getElementById('optionOffset').value = parseInt( this.vodLength ) - parseInt( this.archiveLength );
-				}
+                this.archiveLength = this.elements.video.duration;
+                console.log('Archive length: ' + this.archiveLength );
 
-				this.channelName = this.chatLog.video.user_name;
+                if( this.archiveLength > 0 ){
+                    document.getElementById('optionOffset').value = parseInt( this.vodLength ) - parseInt( this.archiveLength );
+                }
 
-				// ffz
-				console.log('Fetching FFZ');
-				fetch( 'https://api.frankerfacez.com/v1/room/' + this.channelName.toLowerCase() ).then( function(response){
-					return response.json();
-				}).then( (json2) => {
-					this.ffz = json2;
-					console.log('ffz', this.ffz);
-					document.getElementById('status-text-ffz').innerHTML = 'OK!';
-				});
+                this.channelName = this.chatLog.video.user_name;
 
-				// bttv_channel
-				console.log('Fetching BTTV_Channel');
-				fetch( 'https://api.betterttv.net/2/channels/' + this.channelName ).then( function(response){
-					return response.json();
-				}).then( (json2) => {
-					this.bttv_channel = json2;
-					console.log('bttv_channel', this.bttv_channel);
-					document.getElementById('status-text-bttv_channel').innerHTML = 'OK!';
-				});
+                // ffz
+                console.log('Fetching FFZ');
+                fetch( 'https://api.frankerfacez.com/v1/room/' + this.channelName.toLowerCase() ).then( function(response){
+                    return response.json();
+                }).then( (json2) => {
+                    this.emotes.ffz = json2;
+                    console.log('ffz', this.emotes.ffz);
+                    document.getElementById('status-text-ffz').innerHTML = 'OK!';
+                });
 
-				// bttv_global
-				console.log('Fetching BTTV_Global');
-				fetch( 'https://api.betterttv.net/2/emotes' ).then( function(response){
-					return response.json();
-				}).then( (json2) => {
-					this.bttv_global = json2;
-					console.log('bttv_global', this.bttv_global);
-					document.getElementById('status-text-bttv_global').innerHTML = 'OK!';
-				});
+                // bttv_channel
+                console.log('Fetching BTTV_Channel');
+                fetch( 'https://api.betterttv.net/2/channels/' + this.channelName ).then( function(response){
+                    return response.json();
+                }).then( (json2) => {
+                    this.emotes.bttv_channel = json2;
+                    console.log('bttv_channel', this.emotes.bttv_channel);
+                    document.getElementById('status-text-bttv_channel').innerHTML = 'OK!';
+                });
 
-				document.getElementById('status-text-comments').innerHTML = 'OK (' + this.channelName + ', ' + this.commentAmount + 'c, ' + this.vodLength + 's)!';
-				
-				document.getElementById('option-group-chat').classList.add('ok');
-				// alert('Chat loaded');
+                // bttv_global
+                console.log('Fetching BTTV_Global');
+                fetch( 'https://api.betterttv.net/2/emotes' ).then( function(response){
+                    return response.json();
+                }).then( (json2) => {
+                    this.emotes.bttv_global = json2;
+                    console.log('bttv_global', this.emotes.bttv_global);
+                    document.getElementById('status-text-bttv_global').innerHTML = 'OK!';
+                });
 
-			});
+                document.getElementById('status-text-comments').innerHTML = 'OK (' + this.channelName + ', ' + this.commentAmount + 'c, ' + this.vodLength + 's)!';
+                
+                document.getElementById('option-group-chat').classList.add('ok');
+                // alert('Chat loaded');
 
-		}
+            });
 
-	}
+        }
 
-	hooks(){
+    }
 
-		// seeking on video player
-		this.elements.video.addEventListener('seeked', (ev) => {
+    hooks(){
 
-			if( this.chatLog ){
+        // seeking on video player
+        this.elements.video.addEventListener('seeked', (ev) => {
 
-				this.reset();
+            if( this.chatLog ){
 
-				// offset chat
-				this.timeStart = Date.now() - ( this.elements.video.currentTime * 1000 );
+                this.reset();
 
-			}else{
-				console.error('No chat log loaded');
-			}
+                // offset chat
+                this.timeStart = Date.now() - ( this.elements.video.currentTime * 1000 );
 
-		});
+            }else{
+                console.error('No chat log loaded');
+            }
 
-		// on ready
-		this.elements.video.addEventListener('canplay', (ev) => {
-			document.getElementById('status-text-video').innerHTML = 'Loaded (' + this.elements.video.duration + 's)';
-			document.getElementById('option-group-video').classList.add('ok');
-		});
+        });
 
-		// space to play
-		this.elements.player.addEventListener('keyup', (ev) => {
-			if(ev.keyCode == 32){
-				ev.preventDefault();
-				this.play();
-				return false;
-			}
-		});
+        // on ready
+        this.elements.video.addEventListener('canplay', (ev) => {
+            document.getElementById('status-text-video').innerHTML = 'Loaded (' + this.elements.video.duration + 's)';
+            document.getElementById('option-group-video').classList.add('ok');
+        });
 
-	}
+        // space to play
+        this.elements.player.addEventListener('keyup', (ev) => {
+            if(ev.keyCode == 32){
+                ev.preventDefault();
+                this.play();
+                return false;
+            }
+        });
 
-	timeFormat( seconds ){
+    }
 
-		/*
-		let minutes = Math.floor( timeRelative / 60 );
-		let hours = Math.floor( minutes / 60 );
-		let seconds = Math.floor( timeRelative - minutes * 60 );
-		
-		return hours + ':' + minutes + ':' + seconds;
-		*/
-	
-		let date = new Date(null);
-		date.setSeconds( seconds ); // specify value for SECONDS here
-		return date.toISOString().substr(11, 8);
+    timeFormat( seconds ){
 
-	}
+        /*
+        let minutes = Math.floor( timeRelative / 60 );
+        let hours = Math.floor( minutes / 60 );
+        let seconds = Math.floor( timeRelative - minutes * 60 );
+        
+        return hours + ':' + minutes + ':' + seconds;
+        */
+    
+        let date = new Date(null);
+        date.setSeconds( seconds ); // specify value for SECONDS here
+        return date.toISOString().substr(11, 8);
 
-	alignChat( dir ){
-		this.elements.comments.classList.remove('left', 'right');
-		this.elements.comments.classList.add(dir);
-	}
+    }
 
-	set chatTop( v ){
-		this.elements.comments.style.top = v + '%';
-		this._chatTop = v;
-	}
+    alignChat( dir ){
+        this.elements.comments.classList.remove('left', 'right');
+        this.elements.comments.classList.add(dir);
+    }
 
-	set chatBottom( v ){
-		this.elements.comments.style.bottom = v + '%';
-		this._chatTop = v;
-	}
+    set chatTop( v ){
+        this.elements.comments.style.top = v + '%';
+        this._chatTop = v;
+    }
+
+    set chatBottom( v ){
+        this.elements.comments.style.bottom = v + '%';
+        this._chatTop = v;
+    }
 
 }
