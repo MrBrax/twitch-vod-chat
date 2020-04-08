@@ -5,6 +5,7 @@
 		<link href="https://cdn.betterttv.net/betterttv.css" type="text/css" rel="stylesheet" />
 		<link href="player.css" type="text/css" rel="stylesheet" />
 		<script src="https://embed.twitch.tv/embed/v1.js"></script>
+		<script src= "https://player.twitch.tv/js/embed/v1.js"></script>
 	</head>
 	
 	<body>
@@ -91,13 +92,17 @@
 
 				<div class="option-group">
 					<h2>Chat location</h2>
-					<p class="help-text">
-						This can be changed at any time, if it's in the way of something in the VOD.
-					</p>
-					<button onclick="vodplayer.alignChat('left')">Left</button>
-					<button onclick="vodplayer.alignChat('right')">Right</button>
-					<label><input type="range" min="0" max="100" value="0" id="optionChatTop"> Top</label>
-					<label><input type="range" min="0" max="100" value="0" id="optionChatBottom"> Bottom</label>
+					<div class="button-group">
+						<button class="button is-small" onclick="vodplayer.alignChat('left')">Left side</button>
+						<button class="button is-small" onclick="vodplayer.alignChat('right')">Right side</button>
+					</div>
+					<div class="button-group">
+						<button class="button is-small" onclick="vodplayer.alignText('left')">Left text</button>
+						<button class="button is-small" onclick="vodplayer.alignText('right')">Right text</button>
+					</div>
+					<label><input class="input-range" type="range" min="0" max="100" value="0" id="optionChatTop"> Top</label>
+					<label><input class="input-range" type="range" min="0" max="100" value="0" id="optionChatBottom"> Bottom</label>
+					<label><input class="input-range" type="range" min="0" max="100" value="0" id="optionChatWidth"> Width</label>
 				</div>
 
 				<div class="option-group">
@@ -122,9 +127,9 @@
 			</div>
 
 			<div class="option-group">
-				<button onclick="vodplayer.play()" id="buttonStart">Start</button>
-				<button onclick="vodplayer.apply()" id="buttonApply">Apply</button>
-				<button onclick="vodplayer.fullscreen()" id="buttonFullscreen">Fullscreen</button>
+				<button class="button color-green" onclick="vodplayer.play()" id="buttonStart">Start</button>
+				<button class="button" onclick="vodplayer.apply()" id="buttonApply">Apply</button>
+				<button class="button" onclick="vodplayer.fullscreen()" id="buttonFullscreen">Fullscreen</button>
 			</div>
 
 		</div>
@@ -188,6 +193,11 @@
 			document.getElementById('optionChatBottom').addEventListener('change', function(ev){
 				console.log('Set chat bottom');
 				vodplayer.chatBottom = ev.target.value;
+			});
+
+			document.getElementById('optionChatWidth').addEventListener('change', function(ev){
+				console.log('Set chat width');
+				vodplayer.chatWidth = ev.target.value;
 			});
 
 		</script>

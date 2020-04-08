@@ -38,6 +38,9 @@ class VODPlayer {
     elements: { video: any; comments: any; timeline: any; osd: any; player: any };
     embedPlayer: any;
     embedPlayerPog: any;
+    videoLoaded: boolean;
+    chatLoaded: boolean;
+    _chatWidth: number;
 
     constructor(){
 
@@ -60,6 +63,9 @@ class VODPlayer {
 
         this.timeStart      = null;
         this.chatOffset     = 0;
+
+        this.videoLoaded = false;
+        this.chatLoaded = false;
 
         this.commentAmount  = null;
 
@@ -286,17 +292,29 @@ class VODPlayer {
 
         this.timeStart = Date.now();
 
-        if( this.elements.video.src ){
+        if( this.videoLoaded ){
+
+            console.log("Video loaded, playing");
+
             this.elements.video.play();
             this.noVideo = false;
+
         }else if( this.embedPlayer ){
+
+            console.log("Embed loaded, playing");
+
             this.embedPlayer.seek( 0 );
             this.embedPlayer.setMuted(false);
             this.embedPlayer.setVolume(1.0);
             this.embedPlayer.play();
+
         }else {
+
+            console.log("No video loaded");
+
             this.elements.osd.style.display = 'block';
             this.noVideo = true;
+
         }
 
         console.log('Offset: ' + (<HTMLInputElement>document.getElementById('optionOffset')).value );
@@ -438,30 +456,111 @@ class VODPlayer {
                 document.getElementById('status-text-comments').innerHTML = 'OK (' + this.channelName + ', ' + this.commentAmount + 'c, ' + this.vodLength + 's)!';
                 
                 document.getElementById('option-group-chat').classList.add('ok');
+
+                this.chatLoaded = true;
                 
-                if( !this.elements.video.src ){
+                if( !this.videoLoaded ){
 
-                    let embedPlayerElement = document.createElement('twitch-embed-player');
-                    this.elements.player.appendChild(embedPlayerElement);
+                    // alert("You have loaded the chat before the video.\nThe embed player will be used.\nIf the video buffers, chat will not be synced.\nIt is recommended that you download the VOD.");
 
-                    this.embedPlayerPog = new Twitch.Embed(embedPlayerElement, {
-                        width: 1280,
-                        height: 720,
-                        video: this.videoId
-                    });
-                    
-                    this.embedPlayerPog.addEventListener(Twitch.Embed.VIDEO_READY, () => {
-                        this.embedPlayer = this.embedPlayerPog.getPlayer();
-                        this.embedPlayer.pause();
-                    });
-
-                    this.elements.video.style.display = 'none';
+                    this.setupEmbedPlayer();
 
                 }
 
             });
 
         }
+
+    }
+
+    setupEmbedPlayer(){
+
+        console.log("Setup embed player");
+
+        let embedPlayerElement = document.createElement('twitch-embed-player');
+        this.elements.player.appendChild(embedPlayerElement);
+        
+        /*
+        this.embedPlayerPog = new Twitch.Embed(embedPlayerElement, {
+            width: '100%',
+            height: '100%',
+            video: this.videoId
+        });
+        
+        this.embedPlayerPog.addEventListener(Twitch.Embed.VIDEO_READY, () => {
+            
+            this.embedPlayer = this.embedPlayerPog.getPlayer();
+            this.embedPlayer.seek(0);
+            this.embedPlayer.pause();
+
+            setTimeout(() => {
+                this.embedPlayer.pause();
+            }, 500);
+
+
+            console.log("init pause video");
+
+        });
+        */
+
+        this.embedPlayer = new Twitch.Player(embedPlayerElement, {
+            width: '100%',
+            height: '100%',
+            video: this.videoId,
+            autoplay: false
+        });
+
+        console.log("Embed player created", this.embedPlayer);
+
+        // console.log("Embed player test", this.embedPlayer.getPlayer() );
+
+        //this.embedPlayer.seek(0);
+        // this.embedPlayer.pause();
+
+        console.log("Add event listeners");
+
+        this.embedPlayer.addEventListener(Twitch.Player.READY, () => {
+            console.log("embed player ready");
+            this.embedPlayer.seek(0);
+            this.embedPlayer.pause();
+            this.embedPlayer.setMuted(false);
+            //setTimeout(() => {
+            // this.embedPlayer.seek(0);
+            // this.embedPlayer.pause();
+            //}, 500);
+        });
+        
+        /*
+        this.embedPlayer.addEventListener("play", () => {
+            
+            console.log("seek in embed player");
+
+            this.reset();
+
+            // offset chat
+            this.timeStart = Date.now() - ( this.embedPlayer.getCurrentTime() * 1000 );
+
+        });
+
+        this.embedPlayer.addEventListener("pause", () => {
+            
+            console.log("pause in embed player");
+
+        });
+
+        this.embedPlayer.addEventListener("playing", () => {
+            
+            console.log("seek2 in embed player");
+
+            this.reset();
+
+            // offset chat
+            this.timeStart = Date.now() - ( this.embedPlayer.getCurrentTime() * 1000 );
+
+        });
+        */
+
+        this.elements.video.style.display = 'none';
 
     }
 
@@ -612,6 +711,11 @@ class VODPlayer {
         this.elements.comments.classList.add(dir);
     }
 
+    alignText( dir: string ){
+        this.elements.comments.classList.remove('text-left', 'text-right');
+        this.elements.comments.classList.add('text-' + dir);
+    }
+
     set chatTop( v: number ){
         this.elements.comments.style.top = v + '%';
         this._chatTop = v;
@@ -620,6 +724,11 @@ class VODPlayer {
     set chatBottom( v: number ){
         this.elements.comments.style.bottom = v + '%';
         this._chatTop = v;
+    }
+
+    set chatWidth( v: number ){
+        this.elements.comments.style.width = v + '%';
+        this._chatWidth = v;
     }
 
 }

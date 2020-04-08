@@ -13,6 +13,8 @@ class VODPlayer {
         };
         this.timeStart = null;
         this.chatOffset = 0;
+        this.videoLoaded = false;
+        this.chatLoaded = false;
         this.commentAmount = null;
         this.elements = {
             video: null,
@@ -152,17 +154,20 @@ class VODPlayer {
             return false;
         }
         this.timeStart = Date.now();
-        if (this.elements.video.src) {
+        if (this.videoLoaded) {
+            console.log("Video loaded, playing");
             this.elements.video.play();
             this.noVideo = false;
         }
         else if (this.embedPlayer) {
+            console.log("Embed loaded, playing");
             this.embedPlayer.seek(0);
             this.embedPlayer.setMuted(false);
             this.embedPlayer.setVolume(1.0);
             this.embedPlayer.play();
         }
         else {
+            console.log("No video loaded");
             this.elements.osd.style.display = 'block';
             this.noVideo = true;
         }
@@ -251,22 +256,32 @@ class VODPlayer {
                 this.fetchEmotes();
                 document.getElementById('status-text-comments').innerHTML = 'OK (' + this.channelName + ', ' + this.commentAmount + 'c, ' + this.vodLength + 's)!';
                 document.getElementById('option-group-chat').classList.add('ok');
-                if (!this.elements.video.src) {
-                    let embedPlayerElement = document.createElement('twitch-embed-player');
-                    this.elements.player.appendChild(embedPlayerElement);
-                    this.embedPlayerPog = new Twitch.Embed(embedPlayerElement, {
-                        width: 1280,
-                        height: 720,
-                        video: this.videoId
-                    });
-                    this.embedPlayerPog.addEventListener(Twitch.Embed.VIDEO_READY, () => {
-                        this.embedPlayer = this.embedPlayerPog.getPlayer();
-                        this.embedPlayer.pause();
-                    });
-                    this.elements.video.style.display = 'none';
+                this.chatLoaded = true;
+                if (!this.videoLoaded) {
+                    this.setupEmbedPlayer();
                 }
             });
         }
+    }
+    setupEmbedPlayer() {
+        console.log("Setup embed player");
+        let embedPlayerElement = document.createElement('twitch-embed-player');
+        this.elements.player.appendChild(embedPlayerElement);
+        this.embedPlayer = new Twitch.Player(embedPlayerElement, {
+            width: '100%',
+            height: '100%',
+            video: this.videoId,
+            autoplay: false
+        });
+        console.log("Embed player created", this.embedPlayer);
+        console.log("Add event listeners");
+        this.embedPlayer.addEventListener(Twitch.Player.READY, () => {
+            console.log("embed player ready");
+            this.embedPlayer.seek(0);
+            this.embedPlayer.pause();
+            this.embedPlayer.setMuted(false);
+        });
+        this.elements.video.style.display = 'none';
     }
     fetchBadges() {
         if (!this.channelId) {
@@ -354,6 +369,10 @@ class VODPlayer {
         this.elements.comments.classList.remove('left', 'right');
         this.elements.comments.classList.add(dir);
     }
+    alignText(dir) {
+        this.elements.comments.classList.remove('text-left', 'text-right');
+        this.elements.comments.classList.add('text-' + dir);
+    }
     set chatTop(v) {
         this.elements.comments.style.top = v + '%';
         this._chatTop = v;
@@ -361,6 +380,10 @@ class VODPlayer {
     set chatBottom(v) {
         this.elements.comments.style.bottom = v + '%';
         this._chatTop = v;
+    }
+    set chatWidth(v) {
+        this.elements.comments.style.width = v + '%';
+        this._chatWidth = v;
     }
 }
 //# sourceMappingURL=vodplayer.js.map
