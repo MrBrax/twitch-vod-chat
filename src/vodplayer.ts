@@ -164,12 +164,13 @@ export default class VODPlayer {
             }
 
             // main comment element
-            let commentDiv = document.createElement('div');
-            commentDiv.className = 'comment';
+            // let commentDiv = document.createElement('div');
+            // commentDiv.className = 'comment';
 
             let commentObj : any = {};
 
             // timestamp
+            /*
             if( this.timestampsEnabled ){
                 // calc time
                 let commentTime = this.timeFormat( comment.content_offset_seconds );
@@ -178,6 +179,7 @@ export default class VODPlayer {
                 timeC.innerHTML = '[' + commentTime + ']';
                 commentDiv.appendChild(timeC);
             }
+            */
 
             commentObj.time = this.timeFormat( comment.content_offset_seconds ); 
 
@@ -219,38 +221,44 @@ export default class VODPlayer {
 
                     commentObj.badges.push( badgeObj );
 
+                    /*
                     let badgeImage = document.createElement('img');
                     badgeImage.className = 'badge ' + b._id;
                     badgeImage.src = imageSrc;
                     commentDiv.appendChild(badgeImage);
+                    */
 
                 }
 
             }
 
             // name
+            /*
             let nameC = document.createElement('span');
             nameC.className = 'name';
             nameC.innerHTML = comment.commenter.display_name + ':';
             nameC.style.color = comment.message.user_color;
             commentDiv.appendChild(nameC);
+            */
 
             commentObj.username = comment.commenter.display_name;
             commentObj.usernameColour = comment.message.user_color;
         
             commentObj.messageFragments = [];
 
-            let bodyC = document.createElement('span');
+            // let bodyC = document.createElement('span');
 
             // make message
             for( let f of comment.message.fragments ){
 
                 if( f.emoticon && this.emotesEnabled ){
 
+                    /*
                     let emoC = document.createElement('img');
                     emoC.className = 'emote twitch';
                     emoC.src = 'https://static-cdn.jtvnw.net/emoticons/v1/' + f.emoticon.emoticon_id + '/1.0';
                     bodyC.appendChild(emoC);
+                    */
 
                     commentObj.messageFragments.push({
                         type: 'emote',
@@ -414,7 +422,7 @@ export default class VODPlayer {
 
             this.commentQueue.push( commentObj );
             
-            commentDiv.appendChild(bodyC);
+            // commentDiv.appendChild(bodyC);
 
             // this.elements.comments.appendChild( commentDiv );
 
@@ -905,14 +913,26 @@ export default class VODPlayer {
         this._chatTop = v;
     }
 
+    get chatTop(){
+        return this._chatTop;
+    }
+
     set chatBottom( v: number ){
         this.elements.comments.style.bottom = v + '%';
         this._chatTop = v;
     }
 
+    get chatBottom(){
+        return this._chatBottom;
+    }
+
     set chatWidth( v: number ){
         this.elements.comments.style.width = v + '%';
         this._chatWidth = v;
+    }
+
+    get chatWidth(){
+        return this._chatWidth;
     }
 
     set chatStroke( enabled : boolean ){
