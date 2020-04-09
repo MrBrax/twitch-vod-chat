@@ -56,6 +56,8 @@ export default class VODPlayer {
     commentQueue: any[];
     _chatStyle: string;
     _chatBackgroundOpacity: number;
+    niconico: boolean;
+    chatlog_version: number;
     
 
     constructor(){
@@ -120,6 +122,8 @@ export default class VODPlayer {
 
         this.interval = null;
 
+        this.niconico = true;
+
     }
 
     /**
@@ -154,6 +158,8 @@ export default class VODPlayer {
 
             // skip already displayed comments
             if( comment.displayed ) continue;
+
+            if( comment.source && comment.source == 'comment' ) continue; // skip vod comments?
 
             if( timeRelative < ( comment.content_offset_seconds / this.timeScale ) ) continue;
 
@@ -615,6 +621,8 @@ export default class VODPlayer {
 
             this.elements.video.src = fileURL;
 
+            this.videoLoaded = true;
+
             document.getElementById('status-text-video').innerHTML = 'Loading...';
 
         }else{
@@ -637,18 +645,46 @@ export default class VODPlayer {
                 // get duration, this changed in the new api. if you know of a better parsing solution, please fix this
                 let rawDuration = this.chatLog.video.duration;
 
-                let durHours = rawDuration.match(/([0-9]+)h/);
-                let durMinutes = rawDuration.match(/([0-9]+)m/);
-                let durSeconds = rawDuration.match(/([0-9]+)s/);
+                if(!rawDuration){
+                    /*
+                    alert("Chat log unsupported, it might be too old.");
+                    console.error("Chat log unsupported, it might be too old.");
+                    return false;
+                    */
 
-                durHours = durHours ? parseInt(durHours[1]) : 0;
-                durMinutes = durMinutes ? parseInt(durMinutes[1]) : 0;
-                durSeconds = durSeconds ? parseInt(durSeconds[1]) : 0;
-                
-                console.log(durHours, durMinutes, durSeconds);
+                    if( this.chatLog.video.length ){
+
+                        this.vodLength = this.chatLog.video.length;
+
+                        this.chatlog_version = 1;
+
+                    }else{
+
+                        alert("Chat log unsupported, it might be too old.");
+                        console.error("Chat log unsupported, it might be too old.");
+                        return false;
+
+                    }
+
+                }else{
+
+                    this.chatlog_version = 2;
+
+                    let durHours = rawDuration.match(/([0-9]+)h/);
+                    let durMinutes = rawDuration.match(/([0-9]+)m/);
+                    let durSeconds = rawDuration.match(/([0-9]+)s/);
+
+                    durHours = durHours ? parseInt(durHours[1]) : 0;
+                    durMinutes = durMinutes ? parseInt(durMinutes[1]) : 0;
+                    durSeconds = durSeconds ? parseInt(durSeconds[1]) : 0;
+                    
+                    console.log(durHours, durMinutes, durSeconds);
 
 
-                this.vodLength = ( durHours * 60 * 60 ) + ( durMinutes * 60 ) + durSeconds;
+                    this.vodLength = ( durHours * 60 * 60 ) + ( durMinutes * 60 ) + durSeconds;
+
+                }
+
                 // this.vodLength = this.chatLog.video.length;
                 console.log('VOD length: ' + this.vodLength);
 
@@ -659,14 +695,24 @@ export default class VODPlayer {
                     (<HTMLInputElement>document.getElementById('optionOffset')).value = ( this.vodLength - this.archiveLength ).toString();
                 }
 
-                this.channelName    = this.chatLog.video.user_name;
-                this.channelId      = this.chatLog.video.user_id;
-                this.videoId        = this.chatLog.video.id;
+                if( this.chatlog_version == 2 ){
+
+                    this.channelName    = this.chatLog.video.user_name;
+                    this.channelId      = this.chatLog.video.user_id;
+                    this.videoId        = this.chatLog.video.id;
+
+                }else{
+
+                    this.channelName    = this.chatLog.video.channel.display_name;
+                    // this.channelId      = this.chatLog.video.user_id;
+                    this.videoId        = this.chatLog.video._id;
+
+                }
 
                 this.fetchBadges();
                 this.fetchEmotes();
 
-                document.getElementById('status-text-comments').innerHTML = 'OK (' + this.channelName + ', ' + this.commentAmount + 'c, ' + this.vodLength + 's)!';
+                document.getElementById('status-text-comments').innerHTML = 'OK (v' + this.chatlog_version + ', ' + this.channelName + ', ' + this.commentAmount + 'c, ' + this.vodLength + 's)!';
                 
                 document.getElementById('option-group-chat').classList.add('ok');
 
