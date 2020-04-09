@@ -621,8 +621,6 @@ export default class VODPlayer {
 
             this.elements.video.src = fileURL;
 
-            this.videoLoaded = true;
-
             document.getElementById('status-text-video').innerHTML = 'Loading...';
 
         }else{
@@ -704,7 +702,7 @@ export default class VODPlayer {
                 }else{
 
                     this.channelName    = this.chatLog.video.channel.display_name;
-                    // this.channelId      = this.chatLog.video.user_id;
+                    this.channelId      = this.chatLog.video.channel._id;
                     this.videoId        = this.chatLog.video._id;
 
                 }
@@ -714,7 +712,7 @@ export default class VODPlayer {
 
                 document.getElementById('status-text-comments').innerHTML = 'OK (v' + this.chatlog_version + ', ' + this.channelName + ', ' + this.commentAmount + 'c, ' + this.vodLength + 's)!';
                 
-                document.getElementById('option-group-chat').classList.add('ok');
+                // document.getElementById('option-group-chat').classList.add('ok');
 
                 this.chatLoaded = true;
                 
@@ -925,8 +923,9 @@ export default class VODPlayer {
 
         // on ready
         this.elements.video.addEventListener('canplay', ( ev : HTMLInputEvent ) => {
+            this.videoLoaded = true;
             document.getElementById('status-text-video').innerHTML = 'Loaded (' + this.elements.video.duration + 's)';
-            document.getElementById('option-group-video').classList.add('ok');
+            // document.getElementById('option-group-video').classList.add('ok');
         });
 
         // space to play

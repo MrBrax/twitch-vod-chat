@@ -26,7 +26,7 @@
 
 				<div class="option-row">
 					
-					<div class="option-group" id="option-group-video">
+					<div v-bind:class="{ 'option-group': true, 'ok': $root.vp.videoLoaded }" id="option-group-video">
 						<div class="option-title">Video</div>
 						<div class="option-content">
 							<input type="file" id="inputVideo" accept="video/*" @change="loadVideo" />
@@ -36,7 +36,7 @@
 						</div>
 					</div>
 
-					<div class="option-group" id="option-group-chat">
+					<div v-bind:class="{ 'option-group': true, 'ok': $root.vp.chatLoaded }" id="option-group-chat">
 						<div class="option-title">Chat</div>
 						<div class="option-content">
 							<input type="file" id="inputChat" accept="application/json" @change="loadChat" />
