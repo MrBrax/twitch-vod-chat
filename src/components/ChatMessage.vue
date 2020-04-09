@@ -1,7 +1,7 @@
 <template>
     <div class="comment">
         <span class="time" v-if="$root.vp.timestampsEnabled">{{ message.time }}</span>
-        <span class="badges">
+        <span class="badges" v-if="$root.vp.badgesEnabled">
             <ChatBadge v-for="(badge, id) in message.badges" v-bind:key="id" v-bind:badge="badge"></ChatBadge>
         </span>
         <span class="name" v-bind:style="{ color: message.usernameColour }">{{ message.username }}:</span>

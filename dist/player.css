@@ -72,8 +72,10 @@ body {
     text-align: left; }
   #comments.text-right {
     text-align: right; }
-  #comments.has-fill {
+  #comments.has-fill40 {
     background: rgba(0, 0, 0, 0.4); }
+  #comments.has-fill80 {
+    background: rgba(0, 0, 0, 0.8); }
   #comments .comment {
     min-height: 20px;
     /* animation: fade 0.2s; */ }
@@ -89,6 +91,8 @@ body {
     color: #ccc; }
   #comments .emote {
     max-height: 32px; }
+    #comments .emote.is-small {
+      max-height: 18px; }
   #comments img {
     vertical-align: middle; }
 
@@ -133,19 +137,25 @@ body {
 
 .option-group {
   margin: 1px;
-  padding: 5px;
   border: 1px solid #666;
   background: #222;
   color: #ccc; }
-
-.option-group.ok {
-  background: #3B5134;
-  border-color: #5D963A; }
-
-.option-group h2 {
-  font-size: 16px;
-  margin: 0;
-  padding: 0 0 1px 0; }
+  .option-group.ok {
+    background: #3B5134;
+    border-color: #5D963A; }
+  .option-group h2 {
+    font-size: 16px;
+    margin: 0;
+    padding: 0 0 1px 0; }
+  .option-group .option-title {
+    padding: 2px 4px;
+    background: #333;
+    font-weight: 700;
+    font-size: 90%;
+    text-shadow: 0 1px 0 #000;
+    border-bottom: 1px solid #555; }
+  .option-group .option-content {
+    padding: 4px; }
 
 #timeline {
   font-size: 14px;
@@ -158,7 +168,9 @@ body {
 .help-text {
   color: #aaa;
   font-weight: 300;
-  font-size: 90%; }
+  font-size: 90%;
+  margin: 0 0 3px 0;
+  padding: 0; }
 
 .button {
   background: #555;
@@ -187,7 +199,7 @@ body {
     flex-grow: 1; }
 
 .input-range {
-  height: 16px;
+  /* height: 18px; */
   vertical-align: -2px; }
 
 input {
@@ -200,6 +212,9 @@ input {
     border-color: #999;
     color: #fff; }
 
+/*
 p {
-  margin: 3px 0;
-  padding: 0; }
+	margin: 3px 0;
+	padding: 0;
+}
+*/

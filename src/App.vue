@@ -27,27 +27,33 @@
 				<div class="option-row">
 					
 					<div class="option-group" id="option-group-video">
-						<h2>Video</h2>
-						<input type="file" id="inputVideo" accept="video/*" @change="loadVideo" />
-						<p class="help-text">
-							These files will not be uploaded to anywhere, they're played on your device locally.
-						</p>
+						<div class="option-title">Video</div>
+						<div class="option-content">
+							<input type="file" id="inputVideo" accept="video/*" @change="loadVideo" />
+							<p class="help-text">
+								These files will not be uploaded to anywhere, they're played on your device locally.
+							</p>
+						</div>
 					</div>
 
 					<div class="option-group" id="option-group-chat">
-						<h2>Chat</h2>
-						<input type="file" id="inputChat" accept="application/json" @change="loadChat" />
-						<p class="help-text">
-							Chat logs may take a while to parse, don't worry.
-						</p>
+						<div class="option-title">Chat</div>
+						<div class="option-content">
+							<input type="file" id="inputChat" accept="application/json" @change="loadChat" />
+							<p class="help-text">
+								Chat logs may take a while to parse, don't worry.
+							</p>
+						</div>
 					</div>
 
 					<div class="option-group">
-						<strong>Video:</strong> <span id="status-text-video">Waiting</span><br>
-						<strong>Comments:</strong> <span id="status-text-comments">Waiting</span><br>
-						<strong>FFZ:</strong> <span id="status-text-ffz">Waiting</span><br>
-						<strong>BTTV Channel:</strong> <span id="status-text-bttv_channel">Waiting</span><br>
-						<strong>BTTV Global:</strong> <span id="status-text-bttv_global">Waiting</span>
+						<div class="option-content">
+							<strong>Video:</strong> <span id="status-text-video">Waiting</span><br>
+							<strong>Comments:</strong> <span id="status-text-comments">Waiting</span><br>
+							<strong>FFZ:</strong> <span id="status-text-ffz">Waiting</span><br>
+							<strong>BTTV Channel:</strong> <span id="status-text-bttv_channel">Waiting</span><br>
+							<strong>BTTV Global:</strong> <span id="status-text-bttv_global">Waiting</span>
+						</div>
 					</div>
 
 				</div>
@@ -55,61 +61,77 @@
 				<div class="option-row">
 
 					<div class="option-group">
-						<h2>Chat offset in seconds</h2>
-						<p class="help-text">
-							Offset from the video, if recording started too late.
-							It will be set automatically based on how long the chat dump is
-							and the video length, remember to set it to 0 if you want it that way.
-						</p>
-						<input id="optionOffset" value="0">
-					</div>
-
-					<div class="option-group">
-						<h2>Chat timescale</h2>
-						<p class="help-text">
-							1 is standard, 2 is twice as fast etc.
-							Slow the captured video down with this amount to reduce live recording time
-						</p>
-						<input id="optionTimescale" value="1">
-					</div>
-
-					<div class="option-group">
-						<h2>Update frequency in ms</h2>
-						<p class="help-text">
-							The lower the smoother. 16.67 - 60fps, 33.33 - 30fps.
-							Missed ticks shouldn't matter, as the parser is dependent on system time.
-						</p>
-						<input id="optionTickDelay" value="50">
-					</div>
-
-					<div class="option-group">
-						<h2>Chat location</h2>
-						<div class="button-group">
-							<button class="button is-small" @click="alignChat('left')">Left side</button>
-							<button class="button is-small" @click="alignChat('right')">Right side</button>
+						<div class="option-title">Chat offset in seconds</div>
+						<div class="option-content">
+							<p class="help-text">
+								Offset from the video, if recording started too late.
+								It will be set automatically based on how long the chat dump is
+								and the video length, remember to set it to 0 if you want it that way.
+							</p>
+							<input id="optionOffset" value="0">
 						</div>
-						<div class="button-group">
-							<button class="button is-small" @click="alignText('left')">Left text</button>
-							<button class="button is-small" @click="alignText('right')">Right text</button>
-						</div>
-						<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.chatTop"> Top</label>
-						<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.chatBottom"> Bottom</label>
-						<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.chatWidth"> Width</label>
 					</div>
 
 					<div class="option-group">
-						<h2>Chat style</h2>
-						<select id="optionChatStyle">
-							<option value="has-gradient">Gradient</option>
-							<option value="has-fill">Fill</option>
-							<option value="">None</option>
-						</select><br>
+						<div class="option-title">Chat timescale</div>
+						<div class="option-content">
+							<p class="help-text">
+								1 is standard, 2 is twice as fast etc.
+								Slow the captured video down with this amount to reduce live recording time
+							</p>
+							<input id="optionTimescale" value="1">
+						</div>
+					</div>
 
-						<label><input type="checkbox" checked="checked" v-model="$root.vp.chatStroke"> Stroke</label><br>
-						<label><input type="checkbox" checked="checked" v-model="$root.vp.emotesEnabled"> Emotes</label><br>
-						<label><input type="checkbox" checked="checked" v-model="$root.vp.timestampsEnabled"> Timestamps</label><br>
-						<label><input type="checkbox" checked="checked" v-model="$root.vp.badgesEnabled"> Badges</label>
+					<div class="option-group">
+						<div class="option-title">Update frequency in ms</div>
+						<div class="option-content">
+							<p class="help-text">
+								The lower the smoother. 16.67 - 60fps, 33.33 - 30fps.
+								Missed ticks shouldn't matter, as the parser is dependent on system time.
+							</p>
+							<input id="optionTickDelay" value="50">
+						</div>
+					</div>
 
+					<div class="option-group">
+						<div class="option-title">Chat location</div>
+						<div class="option-content">
+							<div class="button-group">
+								<button class="button is-small" @click="alignChat('left')">Left side</button>
+								<button class="button is-small" @click="alignChat('right')">Right side</button>
+							</div>
+							<div class="button-group">
+								<button class="button is-small" @click="alignText('left')">Left text</button>
+								<button class="button is-small" @click="alignText('right')">Right text</button>
+							</div>
+							<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.chatTop"> Top</label>
+							<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.chatBottom" style="direction: ltr"> Bottom</label>
+							<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.chatWidth"> Width</label>
+						</div>
+					</div>
+
+					<div class="option-group">
+						<div class="option-title">Chat style</div>
+						<div class="option-content">
+							<select v-model="$root.vp.chatStyle">
+								<option value="has-gradient">Gradient</option>
+								<option value="has-fill40">Fill 40%</option>
+								<option value="has-fill80">Fill 80%</option>
+								<option value="">None</option>
+							</select>
+							
+							<!--
+							<label><input class="input-range" type="range" min="0" max="100" value="70" v-model="$root.vp.chatBackgroundOpacity" style="width: 120px"> Opacity</label>
+							-->
+							<br>
+
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.chatStroke"> Stroke</label><br>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.emotesEnabled"> Emotes</label><br>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.timestampsEnabled"> Timestamps</label><br>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.badgesEnabled"> Badges</label><br>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.smallEmotes"> Small emotes</label>
+						</div>
 					</div>
 
 				</div>

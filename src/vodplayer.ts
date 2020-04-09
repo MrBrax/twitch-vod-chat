@@ -24,8 +24,8 @@ export default class VODPlayer {
     commentAmount: number;
     tickDelay: number;
     timeScale: number;
-    vodLength: any;
-    archiveLength: any;
+    vodLength: number;
+    archiveLength: number;
     channelName: string;
     
     noVideo: boolean;
@@ -34,10 +34,10 @@ export default class VODPlayer {
     emotesEnabled: boolean;
     timestampsEnabled: boolean;
     badgesEnabled: boolean;
+    smallEmotes: boolean;
     
     // chatStroke: boolean;
 
-    twitchBadges: {};
     twitchClientId: string;
     channelId: any;
     interval: any;
@@ -54,6 +54,9 @@ export default class VODPlayer {
     _chatBottom: number;
     
     commentQueue: any[];
+    _chatStyle: string;
+    _chatBackgroundOpacity: number;
+    
 
     constructor(){
 
@@ -104,6 +107,7 @@ export default class VODPlayer {
         this.emotesEnabled      = true;
         this.timestampsEnabled  = false;
         this.badgesEnabled      = true;
+        this.smallEmotes        = false;
 
         this.noVideo        = false;
 
@@ -111,8 +115,6 @@ export default class VODPlayer {
 
         this._chatTop       = 0;
         this._chatBottom    = 100;
-
-        this.twitchBadges   = {};
 
         this.twitchClientId = '';
 
@@ -205,21 +207,23 @@ export default class VODPlayer {
 
                     let imageSrc = null;
 
+                    // global badge
                     if( this.badges.global[ badgeId ] && this.badges.global[ badgeId ].versions[ badgeVersion ] )
                         imageSrc = this.badges.global[ badgeId ].versions[ badgeVersion ].image_url_1x;
                     
+                    // channel badge
                     if( this.badges.channel[ badgeId ] && this.badges.channel[ badgeId ].versions[ badgeVersion ] )
                         imageSrc = this.badges.channel[ badgeId ].versions[ badgeVersion ].image_url_1x;
                     
                     if(!imageSrc){
-                        console.error('no badge', badgeId, badgeVersion, this.twitchBadges);
+                        console.error('no badge', badgeId, badgeVersion);
                         continue;
                     }
 
                     badgeObj.id = b._id;
                     badgeObj.url = imageSrc;
 
-                    commentObj.badges.push( badgeObj );
+                    commentObj.badges.unshift( badgeObj ); // TODO: insert in what order?
 
                     /*
                     let badgeImage = document.createElement('img');
@@ -362,6 +366,7 @@ export default class VODPlayer {
                         }
                         */
 
+                        // TODO: optimize this
                         if(!found_emote){
                             commentObj.messageFragments.push({
                                 type: 'text',
@@ -451,11 +456,13 @@ export default class VODPlayer {
 
         // remove old comments
         
+        /*
         if( this.elements.comments.children.length > 100 ){
             for( let i = this.elements.comments.children.length; i > 100; i-- ){
                 this.elements.comments.removeChild( this.elements.comments.firstChild );
             }
         }
+        */
 
         if( this.commentQueue.length > 100 ){
             for( let i = this.commentQueue.length; i > 100; i-- ){
@@ -524,6 +531,9 @@ export default class VODPlayer {
 
     }
 
+    /**
+     * Reset chat
+     */
     reset(){
 
         this.elements.comments.innerHTML = '';
@@ -539,7 +549,10 @@ export default class VODPlayer {
         }
 
     }
-
+    
+    /**
+     * Update timing settings
+     */
     apply(){
 
         console.log('Applying options');
@@ -561,6 +574,9 @@ export default class VODPlayer {
 
     }
 
+    /**
+     * Request fullscreen in modern browsers
+     */
     fullscreen(){
 
         let element = this.elements.player;
@@ -577,6 +593,11 @@ export default class VODPlayer {
 
     }
 
+    /**
+     * Load chat & video, stupid solution
+     * @param ev Event
+     * @param f Type
+     */
     load( ev : HTMLInputEvent , f: string ){
 
         let URL = window.URL || window.webkitURL;
@@ -635,7 +656,7 @@ export default class VODPlayer {
                 console.log('Archive length: ' + this.archiveLength );
 
                 if( this.archiveLength > 0 ){
-                    (<HTMLInputElement>document.getElementById('optionOffset')).value = ( parseInt( this.vodLength ) - parseInt( this.archiveLength ) ).toString();
+                    (<HTMLInputElement>document.getElementById('optionOffset')).value = ( this.vodLength - this.archiveLength ).toString();
                 }
 
                 this.channelName    = this.chatLog.video.user_name;
@@ -712,14 +733,18 @@ export default class VODPlayer {
         console.log("Add event listeners");
 
         this.embedPlayer.addEventListener(Twitch.Player.READY, () => {
+            
             console.log("embed player ready");
+            
             this.embedPlayer.seek(0);
             this.embedPlayer.pause();
             this.embedPlayer.setMuted(false);
-            //setTimeout(() => {
-            // this.embedPlayer.seek(0);
-            // this.embedPlayer.pause();
-            //}, 500);
+           
+            setTimeout(() => {
+                this.embedPlayer.seek(0);
+                this.embedPlayer.pause();
+            }, 500);
+
         });
         
         /*
@@ -763,22 +788,6 @@ export default class VODPlayer {
             return false;
         }
 
-        /*
-        fetch( 'https://api.twitch.tv/kraken/chat/' + this.channelId + '/badges', {
-            // mode: 'no-cors',
-            headers: {
-                'Accept': 'application/vnd.twitchtv.v5+json',
-                'Client-ID': this.twitchClientId
-            }
-        }).then( function(response){
-            console.log('badges response', response);
-            return response.json();
-        }).then( (json2) => {
-            this.twitchBadges = json2;
-            console.log('twitch badges', this.twitchBadges);
-        });
-        */  
-
         // global badges
         fetch( 'https://badges.twitch.tv/v1/badges/global/display').then( function(response){
             return response.json();
@@ -805,6 +814,9 @@ export default class VODPlayer {
 
     }
 
+    /**
+     * Fetch emotes from multiple sources
+     */
     fetchEmotes(){
 
         if(!this.channelName){
@@ -919,7 +931,7 @@ export default class VODPlayer {
 
     set chatBottom( v: number ){
         this.elements.comments.style.bottom = v + '%';
-        this._chatTop = v;
+        this._chatBottom = v;
     }
 
     get chatBottom(){
@@ -938,6 +950,29 @@ export default class VODPlayer {
     set chatStroke( enabled : boolean ){
         this.elements.comments.classList.toggle('has-stroke', enabled);
     }
+
+    set chatStyle( s : string ){
+        this.elements.comments.classList.remove('has-gradient', 'has-fill40', 'has-fill80');
+        if( s ) this.elements.comments.classList.add( s );
+        this._chatStyle = s;
+    }
+
+    get chatStyle(){
+        return this._chatStyle;
+    }
+
+    /*
+    set chatBackgroundOpacity( s : number ){
+        this.elements.comments.classList.remove('has-gradient', 'has-fill');
+        if( s ) this.elements.comments.classList.add( s );
+        
+        this._chatBackgroundOpacity = s;
+    }
+
+    get chatBackgroundOpacity(){
+        return this._chatBackgroundOpacity;
+    }
+    */
 
 }
 
@@ -964,11 +999,13 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(vodplayer);
 
     // chat style
+    /*
     document.getElementById('optionChatStyle').addEventListener('change', function( ev : HTMLInputEvent ){
         console.log('Set chat style');
         vodplayer.elements.comments.classList.remove('has-gradient', 'has-fill');
         if( ev.target.value ) vodplayer.elements.comments.classList.add( ev.target.value );
     });
+    */
 
     /*
     document.getElementById('optionChatStroke').addEventListener('change', function( ev : HTMLInputEvent ){

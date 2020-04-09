@@ -13,7 +13,8 @@ export default {
             return {
                 'emote': true,
                 [this.emote.network]: true,
-                [this.emote.class]: true
+                [this.emote.class]: true,
+                'is-small': this.$root.vp.smallEmotes
             }
         }
     }
