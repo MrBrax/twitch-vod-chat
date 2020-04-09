@@ -27,6 +27,11 @@ body {
   bottom: 0%;
   pointer-events: none;
   /*
+	span {
+		padding: 0 1px;
+	}
+	*/
+  /*
 	#comments .badge {
 		display: inline-block;
 		font-weight: 700;
@@ -74,8 +79,6 @@ body {
     /* animation: fade 0.2s; */ }
   #comments.has-stroke .comment {
     text-shadow: -1px -1px 0 #111, 1px -1px 0 #111, -1px 1px 0 #111, 1px 1px 0 #111, 1px 1px 3px rgba(0, 0, 0, 0.7); }
-  #comments span {
-    padding: 0 1px; }
   #comments .time {
     color: #aaa; }
   #comments .badge {

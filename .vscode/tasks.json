@@ -14,7 +14,7 @@
         {
             "label": "Sass Compile",
             "type": "shell",
-            "command": "node-sass player.scss player.css",
+            "command": "node-sass ./src/player.scss ./dist/player.css",
             "group": "build",
             "problemMatcher": [
                 "$node-sass"

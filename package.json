@@ -2,12 +2,15 @@
   "name": "twitch-vod-chat",
   "version": "1.0.0",
   "description": "http://vod.dongers.net/player.html",
-  "main": "vodplayer.js",
+  "main": "src/vodplayer.js",
+  "private": true,
   "directories": {
     "example": "examples"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "webpack --watch",
+    "start": "webpack-dev-server --open --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js"
   },
   "repository": {
     "type": "git",
@@ -19,7 +22,19 @@
     "url": "https://github.com/MrBrax/twitch-vod-chat/issues"
   },
   "homepage": "https://github.com/MrBrax/twitch-vod-chat#readme",
-  "dependencies": {
-    "typescript": "^3.8.3"
+  "dependencies": {},
+  "devDependencies": {
+    "babel-loader": "^8.1.0",
+    "css-loader": "^3.5.1",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.8.3",
+    "vue": "^2.6.11",
+    "vue-loader": "^15.9.1",
+    "vue-style-loader": "^4.1.2",
+    "vue-template-compiler": "^2.6.11",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3",
+    "webpack-merge": "^4.2.2"
   }
 }

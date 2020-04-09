@@ -2,49 +2,62 @@
 
 // import { Twitch } from 'twitch-embed';
 
+import Vue from 'vue';
+import App from './App.vue'
+
 declare const Twitch: any;
 
 interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget;
 }
 
-class VODPlayer {
+export default class VODPlayer {
     
     chatLog: any;
     
     emotes: { ffz: any; bttv_channel: any; bttv_global: any; };
     badges: { global: any; channel: any; };
-    timeStart: any;
+    elements: { video: any; comments: any; timeline: any; osd: any; player: any };
+
+    timeStart: number;
     chatOffset: number;
-    commentAmount: any;
+    commentAmount: number;
     tickDelay: number;
     timeScale: number;
     vodLength: any;
     archiveLength: any;
-    channelName: any;
+    channelName: string;
+    
+    noVideo: boolean;
+    playing: boolean;
+
     emotesEnabled: boolean;
     timestampsEnabled: boolean;
     badgesEnabled: boolean;
-    noVideo: boolean;
-    playing: boolean;
-    _chatTop: number;
-    _chatBottom: number;
+    
+    // chatStroke: boolean;
+
     twitchBadges: {};
     twitchClientId: string;
     channelId: any;
     interval: any;
     videoId: any;
-    
-    elements: { video: any; comments: any; timeline: any; osd: any; player: any };
+        
     embedPlayer: any;
     embedPlayerPog: any;
+
     videoLoaded: boolean;
     chatLoaded: boolean;
+    
     _chatWidth: number;
+    _chatTop: number;
+    _chatBottom: number;
+    
+    commentQueue: any[];
 
     constructor(){
 
-        this.chatLog        = null;
+        this.chatLog = null;
 
         this.emotes = {
             ffz: null,
@@ -61,13 +74,17 @@ class VODPlayer {
         // this.bttv_channel   = null;
         // this.bttv_global    = null;
 
-        this.timeStart      = null;
-        this.chatOffset     = 0;
+        this.timeStart = null;
+        this.chatOffset = 0;
 
         this.videoLoaded = false;
         this.chatLoaded = false;
 
         this.commentAmount  = null;
+
+        this.commentQueue = [
+            { time: '00:00:00', username: 'braxen', usernameColour: '#ff0000', messageFragments: [ { type: 'text', data: 'welcome to my vod player' } ] },
+        ];
 
         this.elements       = {
             video: null,
@@ -77,7 +94,7 @@ class VODPlayer {
             player: null,
         };
 
-        this.tickDelay      = 300;
+        this.tickDelay      = 50;
         this.timeScale      = 1;
 
         this.vodLength      = null;
@@ -85,7 +102,7 @@ class VODPlayer {
         this.channelName    = null;
 
         this.emotesEnabled      = true;
-        this.timestampsEnabled  = true;
+        this.timestampsEnabled  = false;
         this.badgesEnabled      = true;
 
         this.noVideo        = false;
@@ -103,6 +120,20 @@ class VODPlayer {
 
     }
 
+    /**
+     * helper function
+     * @param target 
+     * @param search 
+     * @param replacement 
+     */
+    replaceAll( target : string, search : string, replacement : string ) {
+        search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex
+        return target.replace(new RegExp(search, 'g'), replacement);
+    }
+
+    /**
+     * Runs in an interval to add messages to chat
+     */
     tick(){
 
         let timeNow = Date.now();
@@ -119,6 +150,7 @@ class VODPlayer {
 
             let comment = this.chatLog.comments[i];
 
+            // skip already displayed comments
             if( comment.displayed ) continue;
 
             if( timeRelative < ( comment.content_offset_seconds / this.timeScale ) ) continue;
@@ -131,8 +163,11 @@ class VODPlayer {
                 continue;
             }
 
+            // main comment element
             let commentDiv = document.createElement('div');
             commentDiv.className = 'comment';
+
+            let commentObj : any = {};
 
             // timestamp
             if( this.timestampsEnabled ){
@@ -144,10 +179,17 @@ class VODPlayer {
                 commentDiv.appendChild(timeC);
             }
 
+            commentObj.time = this.timeFormat( comment.content_offset_seconds ); 
+
+            commentObj.badges = [];
+
             // badges
-            if( this.badgesEnabled && comment.message.user_badges && this.badges.global && this.badges.channel){
+            if( comment.message.user_badges && this.badges.global && this.badges.channel){
 
                 for( let b of comment.message.user_badges ){
+
+                    let badgeObj : any = {};
+
                     // if( b._id == 'sub-gifter' ) continue;
                     /*
                     let badgeC = document.createElement('span');
@@ -172,6 +214,11 @@ class VODPlayer {
                         continue;
                     }
 
+                    badgeObj.id = b._id;
+                    badgeObj.url = imageSrc;
+
+                    commentObj.badges.push( badgeObj );
+
                     let badgeImage = document.createElement('img');
                     badgeImage.className = 'badge ' + b._id;
                     badgeImage.src = imageSrc;
@@ -187,7 +234,11 @@ class VODPlayer {
             nameC.innerHTML = comment.commenter.display_name + ':';
             nameC.style.color = comment.message.user_color;
             commentDiv.appendChild(nameC);
+
+            commentObj.username = comment.commenter.display_name;
+            commentObj.usernameColour = comment.message.user_color;
         
+            commentObj.messageFragments = [];
 
             let bodyC = document.createElement('span');
 
@@ -201,31 +252,153 @@ class VODPlayer {
                     emoC.src = 'https://static-cdn.jtvnw.net/emoticons/v1/' + f.emoticon.emoticon_id + '/1.0';
                     bodyC.appendChild(emoC);
 
+                    commentObj.messageFragments.push({
+                        type: 'emote',
+                        data: {
+                            network: 'twitch',
+                            name: f.emoticon.text,
+                            url: 'https://static-cdn.jtvnw.net/emoticons/v1/' + f.emoticon.emoticon_id + '/1.0'
+                        }
+                    });
+
                 }else{
 
-                    let fragC = document.createElement('span');
+                    let fragWords = f.text.split(' ');
 
-                    let finalText = f.text;
+                    let paragraph = "";
 
-                    if( this.emotesEnabled ){
+                    let emotes = 0;
+
+                    for( let word of fragWords ){
+
+                        let found_emote = false;
 
                         // ffz
                         for( let fSet in this.emotes.ffz.sets ){
                             for( let fEmo of this.emotes.ffz.sets[fSet].emoticons ){
-                                finalText = finalText.replaceAll(fEmo.name, '<img class="emote ffz" src="https:' + fEmo.urls[1] + '" />');
+                                if( fEmo.name == word ){
+                                    
+                                    commentObj.messageFragments.push({
+                                        type: 'emote',
+                                        data: {
+                                            network: 'ffz',
+                                            name: word,
+                                            url: fEmo.urls[1]
+                                        }
+                                    });
+
+                                    emotes++;
+
+                                    found_emote = true;
+                                    break;
+
+                                }
                             }
                         }
 
                         // bttv_channel
                         if( this.emotes.bttv_channel && this.emotes.bttv_channel.emotes ){
                             for( let fEmo of this.emotes.bttv_channel.emotes ){
-                                finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_channel bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+                                if( fEmo.code == word ){
+
+                                    commentObj.messageFragments.push({
+                                        type: 'emote',
+                                        data: {
+                                            network: 'bttv_channel',
+                                            class: 'bttv-emo-' + fEmo.id,
+                                            name: word,
+                                            url: 'https://cdn.betterttv.net/emote/' + fEmo.id + '/2x'
+                                        }
+                                    });
+
+                                    emotes++;
+
+                                    found_emote = true;
+                                    break;
+                                }
+                                // finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_channel bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
                             }
                         }
 
                         // bttv_global
                         for( let fEmo of this.emotes.bttv_global.emotes ){
-                            finalText = finalText.replaceAll(fEmo.code, '<img class="emote bttv_global bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+                            if( fEmo.code == word ){
+
+                                commentObj.messageFragments.push({
+                                    type: 'emote',
+                                    data: {
+                                        network: 'bttv_global',
+                                        class: 'bttv-emo-' + fEmo.id,
+                                        name: word,
+                                        url: 'https://cdn.betterttv.net/emote/' + fEmo.id + '/2x'
+                                    }
+                                });
+
+                                emotes++;
+
+                                found_emote = true;
+                                break;
+                            }
+                            // finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_global bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+                        }
+
+                        /*
+                        if(!found_emote){
+                            paragraph += word + " ";
+                        }else{
+                            commentObj.messageFragments.push({
+                                type: 'text',
+                                data: paragraph
+                            });
+                            paragraph = "";
+                        }
+                        */
+
+                        if(!found_emote){
+                            commentObj.messageFragments.push({
+                                type: 'text',
+                                data: word
+                            });
+                        }
+                        
+
+                    }
+
+                    /*
+                    if( emotes == 0 ){
+                        commentObj.messageFragments.push({
+                            type: 'text',
+                            data: f.text
+                        });
+                    }
+                    */
+
+                    /*
+                    let fragC = document.createElement('span');
+
+                    let finalText : string = f.text;
+
+                    commentObj.messageFragments.push({ type: 'text', data: f.text });
+
+                    if( this.emotesEnabled ){
+
+                        // ffz
+                        for( let fSet in this.emotes.ffz.sets ){
+                            for( let fEmo of this.emotes.ffz.sets[fSet].emoticons ){
+                                finalText = this.replaceAll(finalText, fEmo.name, '<img class="emote ffz" src="https:' + fEmo.urls[1] + '" />');
+                            }
+                        }
+
+                        // bttv_channel
+                        if( this.emotes.bttv_channel && this.emotes.bttv_channel.emotes ){
+                            for( let fEmo of this.emotes.bttv_channel.emotes ){
+                                finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_channel bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+                            }
+                        }
+
+                        // bttv_global
+                        for( let fEmo of this.emotes.bttv_global.emotes ){
+                            finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_global bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
                         }
 
                     }
@@ -233,14 +406,17 @@ class VODPlayer {
                     fragC.innerHTML = finalText;
 
                     bodyC.appendChild(fragC);
+                    */
 
                 }
 
             }
+
+            this.commentQueue.push( commentObj );
             
             commentDiv.appendChild(bodyC);
 
-            this.elements.comments.appendChild( commentDiv );
+            // this.elements.comments.appendChild( commentDiv );
 
             comment.displayed = true;
 
@@ -266,12 +442,18 @@ class VODPlayer {
         this.elements.comments.scrollTop = this.elements.comments.scrollHeight;
 
         // remove old comments
+        
         if( this.elements.comments.children.length > 100 ){
             for( let i = this.elements.comments.children.length; i > 100; i-- ){
                 this.elements.comments.removeChild( this.elements.comments.firstChild );
             }
         }
 
+        if( this.commentQueue.length > 100 ){
+            for( let i = this.commentQueue.length; i > 100; i-- ){
+                this.commentQueue.splice(0, 1);
+            }
+        }
         
 
     }
@@ -337,6 +519,8 @@ class VODPlayer {
     reset(){
 
         this.elements.comments.innerHTML = '';
+
+        this.commentQueue = [];
 
         for( let i = 0; i < this.commentAmount; i++ ){
 
@@ -731,4 +915,81 @@ class VODPlayer {
         this._chatWidth = v;
     }
 
+    set chatStroke( enabled : boolean ){
+        this.elements.comments.classList.toggle('has-stroke', enabled);
+    }
+
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    
+    const vodplayer = new VODPlayer();
+
+    const app = new Vue({
+        render: h => h(App),
+        data: {
+            vp: vodplayer
+        }
+    }).$mount('#app');
+
+
+    vodplayer.elements.player 	= document.getElementById('player');
+    vodplayer.elements.video 	= document.getElementById('video');
+    vodplayer.elements.comments = document.getElementById('comments');
+    vodplayer.elements.osd 		= document.getElementById('osd');
+    vodplayer.elements.timeline = document.getElementById('timeline');
+
+    vodplayer.hooks();
+
+    console.log(vodplayer);
+
+    // chat style
+    document.getElementById('optionChatStyle').addEventListener('change', function( ev : HTMLInputEvent ){
+        console.log('Set chat style');
+        vodplayer.elements.comments.classList.remove('has-gradient', 'has-fill');
+        if( ev.target.value ) vodplayer.elements.comments.classList.add( ev.target.value );
+    });
+
+    /*
+    document.getElementById('optionChatStroke').addEventListener('change', function( ev : HTMLInputEvent ){
+        console.log('Set chat stroke');
+        // vodplayer.elements.comments.classList.toggle('has-stroke', ev.target.checked);
+        vodplayer.chatStroke = ev.target.checked;
+    });
+
+    document.getElementById('optionChatEmotes').addEventListener('change', function( ev : HTMLInputEvent ){
+        console.log('Set chat emotes');
+        vodplayer.emotesEnabled = ev.target.checked;
+    });
+
+    document.getElementById('optionChatTimestamps').addEventListener('change', function( ev : HTMLInputEvent ){
+        console.log('Set chat timestamps');
+        vodplayer.timestampsEnabled = ev.target.checked;
+    });
+
+    document.getElementById('optionChatBadges').addEventListener('change', function( ev : HTMLInputEvent ){
+        console.log('Set chat badges');
+        vodplayer.badgesEnabled = ev.target.checked;
+    });
+
+    document.getElementById('optionChatTop').addEventListener('change', function( ev : HTMLInputEvent ){
+        console.log('Set chat top');
+        vodplayer.chatTop = parseInt(ev.target.value);
+    });
+
+    document.getElementById('optionChatBottom').addEventListener('change', function( ev : HTMLInputEvent ){
+        console.log('Set chat bottom');
+        vodplayer.chatBottom = parseInt(ev.target.value);
+    });
+
+    document.getElementById('optionChatWidth').addEventListener('change', function( ev : HTMLInputEvent ){
+        console.log('Set chat width');
+        vodplayer.chatWidth = parseInt(ev.target.value);
+    });
+    */
+
+    // vodplayer.reset();
+
+});
+
+// window.VODPlayer = VODPlayer;
