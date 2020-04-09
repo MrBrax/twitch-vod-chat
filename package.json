@@ -1,0 +1,25 @@
+{
+  "name": "twitch-vod-chat",
+  "version": "1.0.0",
+  "description": "http://vod.dongers.net/player.html",
+  "main": "vodplayer.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrBrax/twitch-vod-chat.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MrBrax/twitch-vod-chat/issues"
+  },
+  "homepage": "https://github.com/MrBrax/twitch-vod-chat#readme",
+  "dependencies": {
+    "typescript": "^3.8.3"
+  }
+}
