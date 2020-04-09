@@ -2,21 +2,31 @@
 
 http://vod.dongers.net/player.html
 
+This link might not be up to date at all times, download the files in the dist folder to be sure.
+
 Some other stuff exists on root as well.
 
 # Setting up
 
-Download a vod chat:
+## With downloaded VOD (recommended)
 
-Needs https://github.com/PetterKraabol/Twitch-Chat-Downloader
+Install [youtube-dl](https://youtube-dl.org)
+
+`youtube-dl https://www.twitch.tv/videos/<ID>`
+
+Install [twitch-chat-downloader](https://github.com/PetterKraabol/Twitch-Chat-Downloader)
 
 `pip install tcd`
 
 `tcd --video <id> --format json`
 
-Download the VOD file with youtube-dl
+## With twitch embed (experimental, might buffer)
 
-Open the player.html page, load the video file (optional) and chat dump (can take a while).
+Just download chat, but don't input a video at all.
+
+## Playing back
+
+Open the player.html page, load the video file (for better stability) and chat dump (can take a while).
 
 Set settings as wanted, then press Start. Pressing apply while playing will apply modified settings.
 
