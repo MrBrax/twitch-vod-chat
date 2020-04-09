@@ -11,6 +11,8 @@ interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget;
 }
 
+let chatLog : any = {};
+
 export default class VODPlayer {
     
     chatLog: any;
@@ -58,6 +60,8 @@ export default class VODPlayer {
     _chatBackgroundOpacity: number;
     niconico: boolean;
     chatlog_version: number;
+    showVODComments: any;
+    commentLimit: number;
     
 
     constructor(){
@@ -101,6 +105,7 @@ export default class VODPlayer {
 
         this.tickDelay      = 50;
         this.timeScale      = 1;
+        this.commentLimit   = 50;
 
         this.vodLength      = null;
         this.archiveLength  = null;
@@ -110,6 +115,7 @@ export default class VODPlayer {
         this.timestampsEnabled  = false;
         this.badgesEnabled      = true;
         this.smallEmotes        = false;
+        this.showVODComments    = false;
 
         this.noVideo        = false;
 
@@ -117,6 +123,7 @@ export default class VODPlayer {
 
         this._chatTop       = 0;
         this._chatBottom    = 100;
+        this._chatStyle     = 'has-gradient';
 
         this.twitchClientId = '';
 
@@ -154,12 +161,12 @@ export default class VODPlayer {
 
         for( let i = 0; i < this.commentAmount; i++ ){
 
-            let comment = this.chatLog.comments[i];
+            let comment = chatLog.comments[i];
 
             // skip already displayed comments
             if( comment.displayed ) continue;
 
-            if( comment.source && comment.source == 'comment' ) continue; // skip vod comments?
+            if( this.showVODComments && comment.source && comment.source == 'comment' ) continue; // skip vod comments?
 
             if( timeRelative < ( comment.content_offset_seconds / this.timeScale ) ) continue;
 
@@ -261,6 +268,7 @@ export default class VODPlayer {
             // make message
             for( let f of comment.message.fragments ){
 
+                // official twitch emote
                 if( f.emoticon && this.emotesEnabled ){
 
                     /*
@@ -431,7 +439,11 @@ export default class VODPlayer {
 
             }
 
+            
+
             this.commentQueue.push( commentObj );
+
+            // console.debug("Add comment", commentObj, this.commentQueue.length);
             
             // commentDiv.appendChild(bodyC);
 
@@ -470,12 +482,18 @@ export default class VODPlayer {
         }
         */
 
-        if( this.commentQueue.length > 100 ){
-            for( let i = this.commentQueue.length; i > 100; i-- ){
+        
+        if( this.commentQueue.length >= this.commentLimit ){
+            
+            for( let i = this.commentQueue.length; i > this.commentLimit; i-- ){
                 this.commentQueue.splice(0, 1);
             }
+            
+            // this.commentQueue.splice(0, this.commentLimit - this.commentQueue.length );
+            // console.debug( 'Comments overflowing, delete', this.commentQueue.length, this.commentQueue.length - this.commentLimit );
         }
-        
+
+        // window.requestAnimationFrame(this.tick.bind(this));
 
     }
 
@@ -486,9 +504,9 @@ export default class VODPlayer {
             return false;
         }
 
-        console.log('Started playback');
+        console.debug('Started playback');
 
-        if(!this.chatLog){
+        if(!chatLog){
             alert('No chat log added');
             return false;
         }
@@ -497,14 +515,14 @@ export default class VODPlayer {
 
         if( this.videoLoaded ){
 
-            console.log("Video loaded, playing");
+            console.debug("Video loaded, playing");
 
             this.elements.video.play();
             this.noVideo = false;
 
         }else if( this.embedPlayer ){
 
-            console.log("Embed loaded, playing");
+            console.debug("Embed loaded, playing");
 
             this.embedPlayer.seek( 0 );
             this.embedPlayer.setMuted(false);
@@ -513,14 +531,14 @@ export default class VODPlayer {
 
         }else {
 
-            console.log("No video loaded");
+            console.debug("No video loaded");
 
             this.elements.osd.style.display = 'block';
             this.noVideo = true;
 
         }
 
-        console.log('Offset: ' + (<HTMLInputElement>document.getElementById('optionOffset')).value );
+        console.debug('Offset: ' + (<HTMLInputElement>document.getElementById('optionOffset')).value );
 
         this.apply();
 
@@ -528,6 +546,7 @@ export default class VODPlayer {
         this.timeStart += this.chatOffset;
 
         this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
+        // window.requestAnimationFrame(this.tick.bind(this));
 
         (<HTMLInputElement>document.getElementById('buttonStart')).disabled = true;
         (<HTMLInputElement>document.getElementById('inputVideo')).disabled = true;
@@ -548,7 +567,7 @@ export default class VODPlayer {
 
         for( let i = 0; i < this.commentAmount; i++ ){
 
-            let comment = this.chatLog.comments[i];
+            let comment = chatLog.comments[i];
 
             comment.displayed = null;
 
@@ -561,7 +580,7 @@ export default class VODPlayer {
      */
     apply(){
 
-        console.log('Applying options');
+        console.debug('Applying options');
 
         // timescale 
         this.timeScale = parseInt( (<HTMLInputElement>document.getElementById('optionTimescale')).value );
@@ -573,7 +592,9 @@ export default class VODPlayer {
 
         this.chatOffset = parseInt( (<HTMLInputElement>document.getElementById('optionOffset')).value ) * 1000;
 
+        
         if( this.interval ){
+            console.debug('clear interval');
             clearInterval( this.interval );
             this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
         }
@@ -608,7 +629,7 @@ export default class VODPlayer {
 
         let URL = window.URL || window.webkitURL;
 
-        console.log('Load file: ' + f);
+        console.debug('Load file: ' + f);
 
         ev.preventDefault();
 
@@ -633,15 +654,17 @@ export default class VODPlayer {
 
             }).then( (json) => {
 
-                console.log('Returned JSON for chat');
+                console.debug('Returned JSON for chat');
 
-                this.chatLog = json;
+                chatLog = json;
 
-                this.commentAmount = Object.keys( this.chatLog.comments ).length;
-                console.log('Amount: ' + this.commentAmount);
+                console.debug('Saved');
+
+                this.commentAmount = Object.values( chatLog.comments ).length; // speed?
+                console.debug('Amount: ' + this.commentAmount);
 
                 // get duration, this changed in the new api. if you know of a better parsing solution, please fix this
-                let rawDuration = this.chatLog.video.duration;
+                let rawDuration = chatLog.video.duration;
 
                 if(!rawDuration){
                     /*
@@ -650,9 +673,9 @@ export default class VODPlayer {
                     return false;
                     */
 
-                    if( this.chatLog.video.length ){
+                    if( chatLog.video.length ){
 
-                        this.vodLength = this.chatLog.video.length;
+                        this.vodLength = chatLog.video.length;
 
                         this.chatlog_version = 1;
 
@@ -676,7 +699,7 @@ export default class VODPlayer {
                     durMinutes = durMinutes ? parseInt(durMinutes[1]) : 0;
                     durSeconds = durSeconds ? parseInt(durSeconds[1]) : 0;
                     
-                    console.log(durHours, durMinutes, durSeconds);
+                    console.debug(durHours, durMinutes, durSeconds);
 
 
                     this.vodLength = ( durHours * 60 * 60 ) + ( durMinutes * 60 ) + durSeconds;
@@ -684,10 +707,10 @@ export default class VODPlayer {
                 }
 
                 // this.vodLength = this.chatLog.video.length;
-                console.log('VOD length: ' + this.vodLength);
+                console.debug('VOD length: ' + this.vodLength);
 
                 this.archiveLength = this.elements.video.duration;
-                console.log('Archive length: ' + this.archiveLength );
+                console.debug('Archive length: ' + this.archiveLength );
 
                 if( this.archiveLength > 0 ){
                     (<HTMLInputElement>document.getElementById('optionOffset')).value = ( this.vodLength - this.archiveLength ).toString();
@@ -695,15 +718,15 @@ export default class VODPlayer {
 
                 if( this.chatlog_version == 2 ){
 
-                    this.channelName    = this.chatLog.video.user_name;
-                    this.channelId      = this.chatLog.video.user_id;
-                    this.videoId        = this.chatLog.video.id;
+                    this.channelName    = chatLog.video.user_name;
+                    this.channelId      = chatLog.video.user_id;
+                    this.videoId        = chatLog.video.id;
 
                 }else{
 
-                    this.channelName    = this.chatLog.video.channel.display_name;
-                    this.channelId      = this.chatLog.video.channel._id;
-                    this.videoId        = this.chatLog.video._id;
+                    this.channelName    = chatLog.video.channel.display_name;
+                    this.channelId      = chatLog.video.channel._id;
+                    this.videoId        = chatLog.video._id;
 
                 }
 
@@ -908,7 +931,7 @@ export default class VODPlayer {
         // seeking on video player
         this.elements.video.addEventListener('seeked', ( ev : HTMLInputEvent ) => {
 
-            if( this.chatLog ){
+            if( chatLog ){
 
                 this.reset();
 

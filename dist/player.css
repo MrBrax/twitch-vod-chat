@@ -45,6 +45,29 @@ body {
 	#comments .badge.premium {
 		background: #427EBC;
 	}
+	*/
+  /*
+	&.niconico {
+
+		width: 1280px;
+		height: 720px;
+
+		// position: relative;
+
+		overflow: hidden;
+
+		.comment {
+
+			font-size: 1.5em;
+
+			position: absolute;
+
+			.name { display: none; }
+			.badges { display: none; }
+
+		}
+
+	}
 	*/ }
   #comments.left {
     top: 0px;
@@ -95,17 +118,6 @@ body {
       max-height: 18px; }
   #comments img {
     vertical-align: middle; }
-  #comments.niconico {
-    width: 1280px;
-    height: 720px;
-    overflow: hidden; }
-    #comments.niconico .comment {
-      font-size: 1.5em;
-      position: absolute; }
-      #comments.niconico .comment .name {
-        display: none; }
-      #comments.niconico .comment .badges {
-        display: none; }
 
 #player {
   width: 1280px;
@@ -210,7 +222,7 @@ body {
     flex-grow: 1; }
 
 .input-range {
-  /* height: 18px; */
+  height: 18px;
   vertical-align: -2px; }
 
 input {

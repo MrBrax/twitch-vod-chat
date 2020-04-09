@@ -126,11 +126,12 @@
 							-->
 							<br>
 
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.chatStroke"> Stroke</label><br>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.chatStroke"> Stroke + shadow</label><br>
 							<label><input type="checkbox" checked="checked" v-model="$root.vp.emotesEnabled"> Emotes</label><br>
 							<label><input type="checkbox" checked="checked" v-model="$root.vp.timestampsEnabled"> Timestamps</label><br>
 							<label><input type="checkbox" checked="checked" v-model="$root.vp.badgesEnabled"> Badges</label><br>
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.smallEmotes"> Small emotes</label>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.smallEmotes"> Small emotes</label><br>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.showVODComments"> VOD comments</label>
 						</div>
 					</div>
 
