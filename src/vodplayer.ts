@@ -38,13 +38,16 @@ export default class VODPlayer {
     timestampsEnabled: boolean;
     badgesEnabled: boolean;
     smallEmotes: boolean;
+    showVODComments: boolean;
     
     // chatStroke: boolean;
 
     twitchClientId: string;
+
     channelId: any;
-    interval: any;
     videoId: any;
+
+    interval: any;
         
     embedPlayer: any;
     embedPlayerPog: any;
@@ -55,15 +58,18 @@ export default class VODPlayer {
     _chatWidth: number;
     _chatTop: number;
     _chatBottom: number;
-    
-    commentQueue: any[];
     _chatStyle: string;
     _chatBackgroundOpacity: number;
-    niconico: boolean;
-    chatlog_version: number;
-    showVODComments: any;
+    
+    commentQueue: any[];
     commentLimit: number;
     
+    niconico: boolean;
+
+    chatlog_version: number;
+
+    fetchChatRunning: boolean;
+    onlineOnly: boolean;
 
     constructor(){
 
@@ -160,21 +166,36 @@ export default class VODPlayer {
             return;
         }
 
-        for( let i = 0; i < this.commentAmount; i++ ){
+        // for( let i = 0; i < this.commentAmount; i++ ){
+        for( let i = 0; i < chatLog.comments.length; i++ ){
 
             let comment = chatLog.comments[i];
 
+            if( !comment.content_offset_seconds ){
+                console.error("Malformed comment", comment);
+                return;
+            }
+
             // skip already displayed comments
-            if( comment.displayed ) continue;
+            if( comment.displayed ){
+                //console.debug('skip comment, already displayed', i);
+                continue;
+            }
 
-            if( this.showVODComments && comment.source && comment.source == 'comment' ) continue; // skip vod comments?
+            if( this.showVODComments && comment.source && comment.source == 'comment' ){
+                //console.debug('skip comment, vod comment', i);
+                continue; // skip vod comments?
+            }
 
-            if( timeRelative < ( comment.content_offset_seconds / this.timeScale ) ) continue;
+            if( timeRelative < ( comment.content_offset_seconds / this.timeScale ) ){
+                //console.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
+                continue;
+            }
 
             // if skipped or something
             let commentAge = timeRelative - ( comment.content_offset_seconds / this.timeScale )
             if( commentAge > 60 ){
-                // console.log('comment too old', commentAge);
+                //console.debug('skip comment, too old', i);
                 comment.displayed = true;
                 continue;
             }
@@ -457,6 +478,8 @@ export default class VODPlayer {
 
             }
 
+            // console.debug('display comment', i);
+
             // console.debug("Add comment", commentObj, this.commentQueue.length);
             
             // commentDiv.appendChild(bodyC);
@@ -583,7 +606,7 @@ export default class VODPlayer {
 
         console.debug('Started playback');
 
-        if(!chatLog){
+        if( !chatLog && !this.videoId && !this.onlineOnly ){
             alert('No chat log added');
             return false;
         }
@@ -624,6 +647,10 @@ export default class VODPlayer {
         console.debug('Offset: ' + (<HTMLInputElement>document.getElementById('optionOffset')).value );
 
         this.apply();
+
+        if( this.onlineOnly ){
+            this.fetchChat();
+        }
 
         // offset
         this.timeStart += this.chatOffset;
@@ -681,6 +708,22 @@ export default class VODPlayer {
             clearInterval( this.interval );
             this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
         }
+
+    }
+
+    parseDuration( input: string ){
+
+        if( !input ) return null;
+
+        let matchHours = input.match(/([0-9]+)h/);
+        let matchMinutes = input.match(/([0-9]+)m/);
+        let matchSeconds = input.match(/([0-9]+)s/);
+
+        let durHours = matchHours ? parseInt(matchHours[1]) : 0;
+        let durMinutes = matchMinutes ? parseInt(matchMinutes[1]) : 0;
+        let durSeconds = matchSeconds ? parseInt(matchSeconds[1]) : 0;
+
+        return ( durHours * 60 * 60 ) + ( durMinutes * 60 ) + durSeconds;
 
     }
 
@@ -833,6 +876,35 @@ export default class VODPlayer {
             });
 
         }
+
+    }
+
+    loadOnline( videoId: number ){
+
+        console.log('load online', this);
+
+        this.onlineOnly = true;
+
+        this.videoId = videoId;
+
+        this.fetchVideoInfo().then( (json) => {
+
+            let data = json.data[0];
+
+            console.log( 'loadOnline', data );
+
+            console.log( 'duration', data.duration );
+
+            this.vodLength = this.parseDuration( data.duration );
+            this.channelName = data.user_name;
+            this.channelId = data.user_id;
+
+            this.fetchBadges();
+            this.fetchEmotes();
+
+            this.setupEmbedPlayer();
+
+        });
 
     }
 
@@ -1009,28 +1081,41 @@ export default class VODPlayer {
 
     }
 
-    /*
+    
     async fetchChat(){
+
+        chatLog.comments = [];
 
         let fragment = await this.fetchChatFragment(0);
 
         let cursor = fragment._next;
 
-        console.log( fragment );
+        console.log( 'first fragment', fragment );
+
+        this.fetchChatRunning = true;
 
         // for( let i = 0; i < 5; i++ ){
-        while( cursor ){
+        while( cursor && this.fetchChatRunning ){
+            
             let f = await this.fetchChatFragment(null, cursor);
+            
             cursor = f._next;
-            console.log(i, f);
+
+            chatLog.comments = chatLog.comments.concat( f.comments );
+            
+            console.log( "Add messages to chat log", chatLog.comments.length );
+
+            // console.log('loop fragment', f);
+            
         }
-        // }
+
+        console.log("Chat fetching stopped");
+        
 
     }
 
     fetchChatFragment( start : any, cursor: any = null ){
 
-        let clientId = '';
 
         let url = 'https://api.twitch.tv/kraken/videos/' + this.videoId + '/comments';
         
@@ -1039,7 +1124,7 @@ export default class VODPlayer {
 
         return fetch(url, {
             headers: {
-                "Client-ID": clientId,
+                "Client-ID": this.twitchClientId,
                 "Accept": "application/vnd.twitchtv.v5+json"
             }
         }).then( (resp) => {
@@ -1052,10 +1137,30 @@ export default class VODPlayer {
             let cursor = json._next;
 
         });
-        *
+        */
 
     }
-    */
+    
+    fetchVideoInfo(){
+
+        return fetch('https://api.twitch.tv/helix/videos?id=' + this.videoId, {
+            headers: {
+                "Client-ID": this.twitchClientId
+            }
+        }).then( (resp) => {
+            return resp.json();
+        });
+        /*.then( (json) => {
+
+            console.log( 'fetchVideoInfo', this.videoId, json.data[0] );
+
+            return json;
+
+        });
+        */
+
+    }
+    
 
     hooks(){
 

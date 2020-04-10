@@ -29,10 +29,10 @@
 					<div v-bind:class="{ 'option-group': true, 'ok': $root.vp.videoLoaded }" id="option-group-video">
 						<div class="option-title">Video</div>
 						<div class="option-content">
-							<input type="file" id="inputVideo" accept="video/*" @change="loadVideo" />
-							<p class="help-text">
-								These files will not be uploaded to anywhere, they're played on your device locally.
-							</p>
+							<input type="file" id="inputVideo" accept="video/*" @change="loadVideo" /> or<br>
+							<input type="text" placeholder="Client ID" v-model="$root.vp.twitchClientId" />
+							<input type="text" placeholder="VOD ID" ref="videoIdInput" style="width: 100px" />
+							<button class="button" @click="loadOnline">load online</button>
 						</div>
 					</div>
 
@@ -168,6 +168,9 @@ export default {
 			this.$root.vp.load(event, 'chat');
 			event.preventDefault();
 			return false;
+		},
+		loadOnline(){
+			this.$root.vp.loadOnline( this.$refs.videoIdInput.value );
 		},
 		alignChat(dir){
 			this.$root.vp.alignChat(dir);
