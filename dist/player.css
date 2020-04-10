@@ -45,29 +45,6 @@ body {
 	#comments .badge.premium {
 		background: #427EBC;
 	}
-	*/
-  /*
-	&.niconico {
-
-		width: 1280px;
-		height: 720px;
-
-		// position: relative;
-
-		overflow: hidden;
-
-		.comment {
-
-			font-size: 1.5em;
-
-			position: absolute;
-
-			.name { display: none; }
-			.badges { display: none; }
-
-		}
-
-	}
 	*/ }
   #comments.left {
     top: 0px;
@@ -118,6 +95,26 @@ body {
       max-height: 18px; }
   #comments img {
     vertical-align: middle; }
+  #comments.niconico {
+    width: 1280px;
+    height: 720px;
+    display: block;
+    overflow: hidden; }
+    #comments.niconico .comment {
+      display: block;
+      width: 800px;
+      overflow: hidden;
+      font-size: 2em;
+      position: absolute; }
+      #comments.niconico .comment .body {
+        display: inline-block; }
+      #comments.niconico .comment .text {
+        display: inline-block;
+        margin-right: 5px; }
+      #comments.niconico .comment .name {
+        display: none; }
+      #comments.niconico .comment .badges {
+        display: none; }
 
 #player {
   width: 1280px;

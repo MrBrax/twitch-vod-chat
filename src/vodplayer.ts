@@ -11,6 +11,7 @@ interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget;
 }
 
+// decouple for vue performance
 let chatLog : any = {};
 
 export default class VODPlayer {
@@ -129,7 +130,7 @@ export default class VODPlayer {
 
         this.interval = null;
 
-        this.niconico = true;
+        this.niconico = false;
 
     }
 
@@ -178,22 +179,13 @@ export default class VODPlayer {
                 continue;
             }
 
-            // main comment element
-            // let commentDiv = document.createElement('div');
-            // commentDiv.className = 'comment';
+            
 
             let commentObj : any = {};
 
             // timestamp
             /*
-            if( this.timestampsEnabled ){
-                // calc time
-                let commentTime = this.timeFormat( comment.content_offset_seconds );
-                let timeC = document.createElement('span');
-                timeC.className = 'time';
-                timeC.innerHTML = '[' + commentTime + ']';
-                commentDiv.appendChild(timeC);
-            }
+            
             */
 
             commentObj.time = this.timeFormat( comment.content_offset_seconds ); 
@@ -209,10 +201,7 @@ export default class VODPlayer {
 
                     // if( b._id == 'sub-gifter' ) continue;
                     /*
-                    let badgeC = document.createElement('span');
-                    badgeC.className = 'badge ' + b._id;
-                    badgeC.innerHTML = b._id.substr(0, 1).toUpperCase();
-                    commentDiv.appendChild(badgeC);
+                    
                     */
                     
                     let badgeId = b._id;
@@ -439,9 +428,34 @@ export default class VODPlayer {
 
             }
 
-            
+            if( this.niconico ){
 
-            this.commentQueue.push( commentObj );
+                let c = this.createLegacyCommentElement( commentObj );
+                this.elements.comments.appendChild( c );
+
+                c.style.top = ( Math.random() * 720 ).toString();
+                c.style.left = (1280).toString();
+                let x = 1280;
+                let s = ( Math.random() * 5 ) + 3;
+
+                c.style.fontSize = ( ( Math.random() * 2.5 ) + 1 ).toString() + "em";
+
+                let ani = () => {
+                    x -= s;
+                    c.style.left = x.toString();
+                    if( x < -500 ){
+                        c.parentElement.removeChild(c);
+                        return;
+                    }
+                    window.requestAnimationFrame(ani);
+                }
+                window.requestAnimationFrame(ani);
+
+            }else{
+
+                this.commentQueue.push( commentObj );
+
+            }
 
             // console.debug("Add comment", commentObj, this.commentQueue.length);
             
@@ -470,7 +484,9 @@ export default class VODPlayer {
         }
 
         // scroll
-        this.elements.comments.scrollTop = this.elements.comments.scrollHeight;
+        if(!this.niconico){
+            this.elements.comments.scrollTop = this.elements.comments.scrollHeight;
+        }
 
         // remove old comments
         
@@ -497,6 +513,67 @@ export default class VODPlayer {
 
     }
 
+    createLegacyCommentElement( comment : any ){
+
+        // main comment element
+        let commentDiv = document.createElement('div');
+        commentDiv.className = 'comment';
+
+        if( this.timestampsEnabled ){
+            // calc time
+            let commentTime = this.timeFormat( comment.content_offset_seconds );
+            let timeC = document.createElement('span');
+            timeC.className = 'time';
+            timeC.innerHTML = '[' + commentTime + ']';
+            commentDiv.appendChild(timeC);
+        }
+
+        /*
+        let badgeC = document.createElement('span');
+        badgeC.className = 'badge ' + b._id;
+        badgeC.innerHTML = b._id.substr(0, 1).toUpperCase();
+        commentDiv.appendChild(badgeC);
+        */
+
+        let badgeC = document.createElement('span');
+        badgeC.className = 'badges';
+        for( let b of comment.badges ){
+            let badgeImage = document.createElement('img');
+            badgeImage.className = 'badge ' + b.id;
+            badgeImage.src = b.url;
+            badgeC.appendChild(badgeImage);
+        }
+        commentDiv.appendChild(badgeC);
+
+        let nameC = document.createElement('span');
+        nameC.className = 'name';
+        nameC.innerHTML = comment.username + ':';
+        nameC.style.color = comment.usernameColour;
+        commentDiv.appendChild(nameC);
+
+        let bodyC = document.createElement('span');
+        bodyC.className = 'body';
+        for( let frag of comment.messageFragments ){
+
+            if( frag.type == 'text' ){
+                let t = document.createElement('span');
+                t.className = 'text';
+                t.innerHTML = frag.data;
+                bodyC.appendChild(t);
+            }else if( frag.type == 'emote'){
+                let t = document.createElement('img');
+                t.className = 'emote';
+                t.src = frag.data.url;
+                bodyC.appendChild(t);
+            }
+
+        }
+        commentDiv.appendChild(bodyC);
+
+        return commentDiv;
+
+    }
+
     play(){
 
         if( this.playing ){
@@ -511,7 +588,13 @@ export default class VODPlayer {
             return false;
         }
 
+        this.commentQueue = [];
+
         this.timeStart = Date.now();
+
+        if( this.niconico ){
+            this.elements.comments.classList.add('niconico');
+        }
 
         if( this.videoLoaded ){
 
@@ -926,6 +1009,54 @@ export default class VODPlayer {
 
     }
 
+    /*
+    async fetchChat(){
+
+        let fragment = await this.fetchChatFragment(0);
+
+        let cursor = fragment._next;
+
+        console.log( fragment );
+
+        // for( let i = 0; i < 5; i++ ){
+        while( cursor ){
+            let f = await this.fetchChatFragment(null, cursor);
+            cursor = f._next;
+            console.log(i, f);
+        }
+        // }
+
+    }
+
+    fetchChatFragment( start : any, cursor: any = null ){
+
+        let clientId = '';
+
+        let url = 'https://api.twitch.tv/kraken/videos/' + this.videoId + '/comments';
+        
+        if(start) url += '?content_offset_seconds=' + start;
+        if(cursor) url += '?cursor=' + cursor;
+
+        return fetch(url, {
+            headers: {
+                "Client-ID": clientId,
+                "Accept": "application/vnd.twitchtv.v5+json"
+            }
+        }).then( (resp) => {
+            return resp.json();
+        });
+        /*.then( (json) => {
+            
+            console.log("chat", json);
+
+            let cursor = json._next;
+
+        });
+        *
+
+    }
+    */
+
     hooks(){
 
         // seeking on video player
@@ -959,6 +1090,11 @@ export default class VODPlayer {
                 return false;
             }
         });
+        
+        console.debug('Added hooks');
+
+        // this.videoId = '586683584'
+        // this.fetchChat();
 
     }
 

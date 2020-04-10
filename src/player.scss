@@ -135,11 +135,13 @@ body {
 		vertical-align: middle;
 	}
 
-	/*
+	
 	&.niconico {
 
 		width: 1280px;
 		height: 720px;
+
+		display: block;
 
 		// position: relative;
 
@@ -147,9 +149,17 @@ body {
 
 		.comment {
 
-			font-size: 1.5em;
+			display: block;
+			width: 800px;
+			overflow: hidden;
+
+			font-size: 2em;
 
 			position: absolute;
+
+			.body { display: inline-block }
+
+			.text { display: inline-block; margin-right: 5px; }
 
 			.name { display: none; }
 			.badges { display: none; }
@@ -157,7 +167,7 @@ body {
 		}
 
 	}
-	*/
+	
 
 }
 
