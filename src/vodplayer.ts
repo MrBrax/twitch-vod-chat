@@ -666,6 +666,24 @@ export default class VODPlayer {
 
     }
 
+    seek( percent : number ){
+
+        if( this.embedPlayer ){
+
+            this.embedPlayer.seek( this.vodLength * percent );
+
+        }else if( this.elements.video.src ){
+
+            this.elements.video.currentTime = this.vodLength * percent;
+
+        }else {
+
+            alert("nothing to seek yet");
+
+        }
+
+    }
+
     /**
      * Reset chat
      */
@@ -942,7 +960,8 @@ export default class VODPlayer {
             width: '100%',
             height: '100%',
             video: this.videoId,
-            autoplay: false
+            autoplay: false,
+            controls: false
         });
 
         console.log("Embed player created", this.embedPlayer);
@@ -1270,6 +1289,18 @@ export default class VODPlayer {
         return this._chatStyle;
     }
 
+    get videoPosition(){
+
+        if( this.embedPlayer ){
+            return this.embedPlayer.getCurrentTime() / this.vodLength;
+        }else if( this.elements.video ){
+            return this.elements.video.currentTime / this.vodLength;
+        }else{
+            return 0;
+        }
+
+    }
+
     /*
     set chatBackgroundOpacity( s : number ){
         this.elements.comments.classList.remove('has-gradient', 'has-fill');
@@ -1301,7 +1332,7 @@ document.addEventListener("DOMContentLoaded", () => {
     vodplayer.elements.video 	= document.getElementById('video');
     vodplayer.elements.comments = document.getElementById('comments');
     vodplayer.elements.osd 		= document.getElementById('osd');
-    vodplayer.elements.timeline = document.getElementById('timeline');
+    vodplayer.elements.timeline = document.getElementById('timeline-text');
 
     vodplayer.hooks();
 

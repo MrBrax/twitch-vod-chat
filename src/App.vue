@@ -18,8 +18,9 @@
 
 			</div>
 
-			<div id="timeline">
-				00:00:00
+			<div id="timeline" ref="timeline" @click="seek">
+				<div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: ( $root.vp.videoPosition * 100 ) + '%' }"></div>
+				<div id="timeline-text">00:00:00</div>
 			</div>
 
 			<div id="controls">
@@ -186,7 +187,27 @@ export default {
 		},
 		fullscreen(){
 			this.$root.vp.fullscreen();
-	  	}
-  	}
+		},
+		seek(ev){
+			let percent = ev.clientX / timeline.clientWidth;
+			this.$root.vp.seek( percent );
+		}
+	},
+	computed: {
+        videoPosition(){
+
+			let vp = this.$root.vp;
+
+			if( vp.embedPlayer ){
+				return vp.embedPlayer.getCurrentTime() / vp.vodLength;
+			}else if( vp.elements.video ){
+				return vp.elements.video.currentTime / vp.vodLength;
+			}else{
+				return 0;
+			}
+            
+        }
+    }
+	
 }
 </script>
