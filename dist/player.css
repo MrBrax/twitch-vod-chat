@@ -46,10 +46,10 @@ body {
 		background: #427EBC;
 	}
 	*/ }
-  #comments.left {
+  #comments.align-left {
     top: 0px;
     left: 0px; }
-    #comments.left.has-gradient {
+    #comments.align-left.has-gradient {
       /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,7db9e8+100&1+0,0+100 */
       background: -moz-linear-gradient(left, rgba(0, 0, 0, 0.7) 0%, rgba(125, 185, 232, 0) 100%);
       /* FF3.6-15 */
@@ -57,10 +57,10 @@ body {
       /* Chrome10-25,Safari5.1-6 */
       background: linear-gradient(to right, rgba(0, 0, 0, 0.7) 0%, rgba(125, 185, 232, 0) 100%);
       /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */ }
-  #comments.right {
+  #comments.align-right {
     top: 0px;
     right: 0px; }
-    #comments.right.has-gradient {
+    #comments.align-right.has-gradient {
       /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,7db9e8+100&1+0,0+100 */
       background: -moz-linear-gradient(right, rgba(0, 0, 0, 0.7) 0%, rgba(125, 185, 232, 0) 100%);
       /* FF3.6-15 */
@@ -120,7 +120,8 @@ body {
   width: 1280px;
   height: 720px;
   position: relative;
-  /* margin: auto; */ }
+  /* margin: auto; */
+  pointer-events: none; }
 
 #player:fullscreen {
   width: 100%;
@@ -192,7 +193,8 @@ body {
   position: absolute;
   top: 0px;
   left: 0px;
-  color: #fff; }
+  color: #fff;
+  padding: 4px; }
 
 #timeline-seekbar {
   position: absolute;
@@ -201,6 +203,18 @@ body {
   width: 50%;
   background: #ad2020;
   height: 24px; }
+
+#timeline-markers {
+  position: relative;
+  width: 1280px;
+  height: 24px;
+  pointer-events: none; }
+
+.timeline-marker {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  border-left: 1px solid #fff; }
 
 .help-text {
   color: #aaa;

@@ -4,7 +4,7 @@
 
 				<video id="video"></video>
 
-				<div id="comments" class="left has-gradient has-stroke">
+				<div id="comments" v-bind:class="commentsClass" v-bind:style="commentsStyle">
 					<!--<div class="comment">
 						<span class="time">[00:00:00]</span>
 						<span class="name">Username:</span>
@@ -20,7 +20,12 @@
 
 			<div id="timeline" ref="timeline" @click="seek">
 				<div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: ( $root.vp.videoPosition * 100 ) + '%' }"></div>
-				<div id="timeline-text">00:00:00</div>
+				<div id="timeline-text">Timeline</div>
+				<div id="timeline-markers">
+					<div class="timeline-marker" v-for="(marker, id) in $root.vp.videoChapters" v-bind:key="id" v-bind:style="{ left: ( ( marker.time / $root.vp.vodLength ) * 100 ) + '%' }">
+						{{ marker.label }}
+					</div>
+				</div>
 			</div>
 
 			<div id="controls">
@@ -31,7 +36,7 @@
 						<div class="option-title">Video</div>
 						<div class="option-content">
 							<input type="file" id="inputVideo" accept="video/*" @change="loadVideo" /> or<br>
-							<input type="text" placeholder="Client ID" v-model="$root.vp.twitchClientId" />
+							<input type="password" placeholder="Client ID" v-model="$root.vp.settings.twitchClientId" />
 							<input type="text" placeholder="VOD ID" ref="videoIdInput" style="width: 100px" />
 							<button class="button" @click="loadOnline">load online</button>
 						</div>
@@ -73,6 +78,7 @@
 						</div>
 					</div>
 
+					<!--
 					<div class="option-group">
 						<div class="option-title">Chat timescale</div>
 						<div class="option-content">
@@ -83,6 +89,7 @@
 							<input id="optionTimescale" value="1">
 						</div>
 					</div>
+					-->
 
 					<div class="option-group">
 						<div class="option-title">Update frequency in ms</div>
@@ -98,6 +105,7 @@
 					<div class="option-group">
 						<div class="option-title">Chat location</div>
 						<div class="option-content">
+							<!--
 							<div class="button-group">
 								<button class="button is-small" @click="alignChat('left')">Left side</button>
 								<button class="button is-small" @click="alignChat('right')">Right side</button>
@@ -105,17 +113,32 @@
 							<div class="button-group">
 								<button class="button is-small" @click="alignText('left')">Left text</button>
 								<button class="button is-small" @click="alignText('right')">Right text</button>
+							</div>-->
+							<div>
+								Chat align:
+								<label><input type="radio" name="comments-align" v-model="$root.vp.settings.chatAlign" value="left"> Left</label>
+								<label><input type="radio" name="comments-align" v-model="$root.vp.settings.chatAlign" value="right"> Right</label>
 							</div>
-							<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.chatTop"> Top</label>
-							<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.chatBottom" style="direction: ltr"> Bottom</label>
-							<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.chatWidth"> Width</label>
+
+							<div>
+								Text align:
+								<label><input type="radio" name="comments-textalign" v-model="$root.vp.settings.chatTextAlign" value="left"> Left</label>
+								<label><input type="radio" name="comments-textalign" v-model="$root.vp.settings.chatTextAlign" value="right"> Right</label>
+							</div>
+
+							<hr>
+
+							<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.settings.chatTop"> Top</label>
+							<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.settings.chatBottom" style="direction: ltr"> Bottom</label>
+							<label><input class="input-range" type="range" min="0" max="100" value="0" v-model="$root.vp.settings.chatWidth"> Width</label>
+						
 						</div>
 					</div>
 
 					<div class="option-group">
 						<div class="option-title">Chat style</div>
 						<div class="option-content">
-							<select v-model="$root.vp.chatStyle">
+							<select v-model="$root.vp.settings.chatStyle">
 								<option value="has-gradient">Gradient</option>
 								<option value="has-fill40">Fill 40%</option>
 								<option value="has-fill80">Fill 80%</option>
@@ -127,12 +150,12 @@
 							-->
 							<br>
 
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.chatStroke"> Stroke + shadow</label><br>
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.emotesEnabled"> Emotes</label><br>
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.timestampsEnabled"> Timestamps</label><br>
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.badgesEnabled"> Badges</label><br>
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.smallEmotes"> Small emotes</label><br>
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.showVODComments"> VOD comments</label>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.chatStroke"> Stroke + shadow</label><br>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.emotesEnabled"> Emotes</label><br>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.timestampsEnabled"> Timestamps</label><br>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.badgesEnabled"> Badges</label><br>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.smallEmotes"> Small emotes</label><br>
+							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.showVODComments"> VOD comments</label>
 						</div>
 					</div>
 
@@ -142,6 +165,8 @@
 					<button class="button color-green" @click="play">Start</button>
 					<button class="button" @click="apply">Apply</button>
 					<button class="button" @click="fullscreen">Fullscreen</button>
+					<button class="button" @click="saveSettings">Save settings</button>
+					<button class="button" @click="resetSettings">Reset settings</button>
 				</div>
 
 			</div>
@@ -191,6 +216,12 @@ export default {
 		seek(ev){
 			let percent = ev.clientX / timeline.clientWidth;
 			this.$root.vp.seek( percent );
+		},
+		saveSettings(){
+			this.$root.vp.saveSettings();
+		},
+		resetSettings(){
+			this.$root.vp.resetSettings();
 		}
 	},
 	computed: {
@@ -206,8 +237,45 @@ export default {
 				return 0;
 			}
             
-        }
+		},
+		commentsStyle(){
+			return {
+				'top': this.$root.vp.settings.chatTop + '%',
+				'bottom': this.$root.vp.settings.chatBottom + '%',
+				'width': this.$root.vp.settings.chatWidth + '%',
+			}
+		},
+		commentsClass(){
+			return {
+				'align-left': this.$root.vp.settings.chatAlign == 'left',
+				'align-right': this.$root.vp.settings.chatAlign == 'right',
+				'text-left': this.$root.vp.settings.chatTextAlign == 'left',
+				'text-right': this.$root.vp.settings.chatTextAlign == 'right',
+				[this.$root.vp.settings.chatStyle]: true,
+				'has-stroke': this.$root.vp.settings.chatStroke
+			}
+		},
+		/*
+		timelineText(){
+			// console.log( "CURRENT TIME", this.$root.vp.videoCurrentTime );
+			
+			let vp = this.$root.vp;
+
+			let seconds = 0;
+
+			if( vp.embedPlayer ){
+            	seconds = vp.embedPlayer.getCurrentTime();
+			}else if( vp.elements.video && vp.elements.video.src ){
+				seconds = vp.elements.video.currentTime;
+			}
+			
+			let date = new Date(null);
+			date.setSeconds( seconds );
+			
+			return date.toISOString().substr(11, 8);
+			
+		}
+		*/
     }
-	
 }
 </script>

@@ -14,7 +14,7 @@ export default {
                 'emote': true,
                 [this.emote.network]: true,
                 [this.emote.class]: true,
-                'is-small': this.$root.vp.smallEmotes
+                'is-small': this.$root.vp.settings.smallEmotes
             }
         }
     }

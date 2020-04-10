@@ -14,6 +14,22 @@ interface HTMLInputEvent extends Event {
 // decouple for vue performance
 let chatLog : any = {};
 
+let defaultSettings = {
+    twitchClientId: '',
+    emotesEnabled: true,
+    timestampsEnabled: false,
+    badgesEnabled: true,
+    smallEmotes: false,
+    showVODComments: false,
+    chatTop: 0,
+    chatBottom: 0,
+    chatWidth: 25,
+    chatStroke: true,
+    chatStyle: 'has-gradient',
+    chatAlign: 'left',
+    chatTextAlign: 'left'
+}
+
 export default class VODPlayer {
     
     chatLog: any;
@@ -22,7 +38,11 @@ export default class VODPlayer {
     badges: { global: any; channel: any; };
     elements: { video: any; comments: any; timeline: any; osd: any; player: any };
 
-    timeStart: number;
+    /**
+     * timestamp of when video started
+     */
+    timeStart: number; 
+
     chatOffset: number;
     commentAmount: number;
     tickDelay: number;
@@ -34,11 +54,13 @@ export default class VODPlayer {
     noVideo: boolean;
     playing: boolean;
 
+    /*
     emotesEnabled: boolean;
     timestampsEnabled: boolean;
     badgesEnabled: boolean;
     smallEmotes: boolean;
     showVODComments: boolean;
+    */
     
     // chatStroke: boolean;
 
@@ -46,6 +68,8 @@ export default class VODPlayer {
 
     channelId: any;
     videoId: any;
+
+    videoChapters: [];
 
     interval: any;
         
@@ -55,11 +79,13 @@ export default class VODPlayer {
     videoLoaded: boolean;
     chatLoaded: boolean;
     
+    /*
     _chatWidth: number;
     _chatTop: number;
     _chatBottom: number;
     _chatStyle: string;
     _chatBackgroundOpacity: number;
+    */
     
     commentQueue: any[];
     commentLimit: number;
@@ -70,6 +96,24 @@ export default class VODPlayer {
 
     fetchChatRunning: boolean;
     onlineOnly: boolean;
+    
+    settings: {
+        twitchClientId: string;
+        emotesEnabled: boolean;
+        timestampsEnabled: boolean;
+        badgesEnabled: boolean;
+        smallEmotes: boolean;
+        showVODComments: boolean;
+        chatTop: number;
+        chatBottom: number;
+        chatWidth: number;
+        chatStroke: boolean;
+        chatStyle: string;
+        chatAlign: string;
+        chatTextAlign: string;
+    };
+
+    // settings: any;
 
     constructor(){
 
@@ -85,6 +129,29 @@ export default class VODPlayer {
             global: null,
             channel: null
         };
+
+        // default settings
+        /*
+        this.settings = {
+            twitchClientId: '',
+            emotesEnabled: true,
+            timestampsEnabled: false,
+            badgesEnabled: true,
+            smallEmotes: false,
+            showVODComments: false,
+            chatTop: 0,
+            chatBottom: 0,
+            chatWidth: 25,
+            chatStroke: true,
+            chatStyle: 'has-gradient',
+            chatAlign: 'left',
+            chatTextAlign: 'left'
+        };
+        */
+
+        this.resetSettings();
+        
+        this.videoChapters = [];
 
         // this.ffz            = null;
         // this.bttv_channel   = null;
@@ -118,19 +185,23 @@ export default class VODPlayer {
         this.archiveLength  = null;
         this.channelName    = null;
 
+        /*
         this.emotesEnabled      = true;
         this.timestampsEnabled  = false;
         this.badgesEnabled      = true;
         this.smallEmotes        = false;
         this.showVODComments    = false;
+        */
 
         this.noVideo        = false;
 
         this.playing        = false;
 
+        /*
         this._chatTop       = 0;
         this._chatBottom    = 100;
         this._chatStyle     = 'has-gradient';
+        */
 
         this.twitchClientId = '';
 
@@ -182,7 +253,7 @@ export default class VODPlayer {
                 continue;
             }
 
-            if( this.showVODComments && comment.source && comment.source == 'comment' ){
+            if( this.settings.showVODComments && comment.source && comment.source == 'comment' ){
                 //console.debug('skip comment, vod comment', i);
                 continue; // skip vod comments?
             }
@@ -279,7 +350,7 @@ export default class VODPlayer {
             for( let f of comment.message.fragments ){
 
                 // official twitch emote
-                if( f.emoticon && this.emotesEnabled ){
+                if( f.emoticon && this.settings.emotesEnabled ){
 
                     /*
                     let emoC = document.createElement('img');
@@ -491,6 +562,7 @@ export default class VODPlayer {
         }
 
         // update timeline
+        
         let timelineText = 'C: ' + this.timeFormat( timeRelative * this.timeScale );
 
         if( this.elements.video.currentTime ){
@@ -498,13 +570,16 @@ export default class VODPlayer {
         }
 
         this.elements.timeline.innerHTML = timelineText;
+        
 
+        /*
         if( this.noVideo ){
             this.elements.osd.innerHTML = 'Sync: ' + this.timeFormat( timeRelative * this.timeScale ) + '<br>Scale: ' + this.timeScale + '<br>Offset: ' + this.chatOffset  + '<br>Tick: ' + this.tickDelay;
             if( !this.elements.osd.classList.contains('running') ){
                 this.elements.osd.classList.add('running');
             }
         }
+        */
 
         // scroll
         if(!this.niconico){
@@ -538,11 +613,13 @@ export default class VODPlayer {
 
     createLegacyCommentElement( comment : any ){
 
+        console.debug("Create legacy comment", comment);
+
         // main comment element
         let commentDiv = document.createElement('div');
         commentDiv.className = 'comment';
 
-        if( this.timestampsEnabled ){
+        if( this.settings.timestampsEnabled ){
             // calc time
             let commentTime = this.timeFormat( comment.content_offset_seconds );
             let timeC = document.createElement('span');
@@ -666,17 +743,46 @@ export default class VODPlayer {
 
     }
 
+    /**
+     * 
+     * @param percent percentage of video to seek to, todo fix this
+     */
     seek( percent : number ){
 
-        if( this.embedPlayer ){
+        if( this.embedPlayer || this.elements.video.src ){
 
-            this.embedPlayer.seek( this.vodLength * percent );
+            let seekedToSeconds = Math.floor(this.vodLength * percent);
 
-        }else if( this.elements.video.src ){
+            console.debug( "Call seek", percent, seekedToSeconds, this.timeFormat( seekedToSeconds ), this.videoCurrentTime );
 
-            this.elements.video.currentTime = this.vodLength * percent;
+            if( this.embedPlayer ) this.embedPlayer.seek( seekedToSeconds );
 
-        }else {
+            if( this.elements.video.src ) this.elements.video.currentTime = seekedToSeconds;
+
+            // console.debug( "Seeked", this.videoCurrentTime );
+
+            // offset chat
+            this.timeStart = ( Date.now() - ( seekedToSeconds * 1000 ) ) + this.chatOffset;
+
+            this.reset();
+
+            // restart chat stream
+            if( this.onlineOnly ){
+                console.debug("Restart chat fetching");
+                this.fetchChatRunning = false;
+                this.fetchChat();
+            }
+
+            if( this.interval ){
+                console.debug("Restart interval");
+                clearInterval( this.interval );
+                this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
+            }
+
+            console.log( "New time start: " + this.timeStart )
+
+
+        }else{
 
             alert("nothing to seek yet");
 
@@ -688,6 +794,8 @@ export default class VODPlayer {
      * Reset chat
      */
     reset(){
+
+        console.debug("Reset chat");
 
         this.elements.comments.innerHTML = '';
 
@@ -711,7 +819,8 @@ export default class VODPlayer {
         console.debug('Applying options');
 
         // timescale 
-        this.timeScale = parseInt( (<HTMLInputElement>document.getElementById('optionTimescale')).value );
+        // this.timeScale = parseInt( (<HTMLInputElement>document.getElementById('optionTimescale')).value );
+        this.timeScale = 1;
         console.log('Timescale: ' + this.timeScale);
 
         // tick delay
@@ -877,6 +986,20 @@ export default class VODPlayer {
                 this.fetchBadges();
                 this.fetchEmotes();
 
+                
+                if( this.settings.twitchClientId ){
+                    /*
+                    this.fetchMarkerInfo().then( (json) => {
+                        console.log("marker info", json);
+                        // let data = json.data[0];
+                        // if(!data) return;
+                        // console.log("Marker info from chat log", data);
+                    });
+                    */
+                    this.fetchMarkerInfo();
+                }
+                
+
                 document.getElementById('status-text-comments').innerHTML = 'OK (v' + this.chatlog_version + ', ' + this.channelName + ', ' + this.commentAmount + 'c, ' + this.vodLength + 's)!';
                 
                 // document.getElementById('option-group-chat').classList.add('ok');
@@ -911,14 +1034,14 @@ export default class VODPlayer {
 
             console.log( 'loadOnline', data );
 
-            console.log( 'duration', data.duration );
-
             this.vodLength = this.parseDuration( data.duration );
             this.channelName = data.user_name;
             this.channelId = data.user_id;
 
             this.fetchBadges();
             this.fetchEmotes();
+
+            this.fetchMarkerInfo();
 
             this.setupEmbedPlayer();
 
@@ -1138,12 +1261,17 @@ export default class VODPlayer {
 
         let url = 'https://api.twitch.tv/kraken/videos/' + this.videoId + '/comments';
         
-        if(start) url += '?content_offset_seconds=' + start;
+        // if(start) url += '?content_offset_seconds=' + start;
+        
         if(cursor) url += '?cursor=' + cursor;
+
+        if( this.videoCurrentTime > 0 ){
+            url += ( cursor ? '&' : '?' ) + 'content_offset_seconds=' + this.videoCurrentTime;
+        }
 
         return fetch(url, {
             headers: {
-                "Client-ID": this.twitchClientId,
+                "Client-ID": this.settings.twitchClientId,
                 "Accept": "application/vnd.twitchtv.v5+json"
             }
         }).then( (resp) => {
@@ -1164,7 +1292,7 @@ export default class VODPlayer {
 
         return fetch('https://api.twitch.tv/helix/videos?id=' + this.videoId, {
             headers: {
-                "Client-ID": this.twitchClientId
+                "Client-ID": this.settings.twitchClientId
             }
         }).then( (resp) => {
             return resp.json();
@@ -1179,11 +1307,40 @@ export default class VODPlayer {
         */
 
     }
+
+    fetchMarkerInfo(){
+        return fetch('https://api.twitch.tv/kraken/videos/' + this.videoId + '/markers?api_version=5&client_id=' + this.settings.twitchClientId, {
+            headers: {
+                "Client-ID": this.settings.twitchClientId
+            }
+        }).then( (resp) => {
+            return resp.json();
+        }).then( (json) => {
+
+            if( json.markers.game_changes ){
+                
+                /*
+                for( let marker of json.markers.game_changes ){
+                    console.log(marker);
+                    this.videoChapters.push(marker);
+                }
+                */
+
+                this.videoChapters = json.markers.game_changes;
+
+            }
+
+            console.log( "markers", json, this.videoChapters );
+
+        });
+    }
     
 
     hooks(){
 
         // seeking on video player
+        /*
+        this.fetchChatRunning
         this.elements.video.addEventListener('seeked', ( ev : HTMLInputEvent ) => {
 
             if( chatLog ){
@@ -1198,6 +1355,7 @@ export default class VODPlayer {
             }
 
         });
+        */
 
         // on ready
         this.elements.video.addEventListener('canplay', ( ev : HTMLInputEvent ) => {
@@ -1216,6 +1374,8 @@ export default class VODPlayer {
         });
         
         console.debug('Added hooks');
+
+        this.loadSettings();
 
         // this.videoId = '586683584'
         // this.fetchChat();
@@ -1248,6 +1408,7 @@ export default class VODPlayer {
         this.elements.comments.classList.add('text-' + dir);
     }
 
+    /*
     set chatTop( v: number ){
         this.elements.comments.style.top = v + '%';
         this._chatTop = v;
@@ -1278,6 +1439,7 @@ export default class VODPlayer {
     set chatStroke( enabled : boolean ){
         this.elements.comments.classList.toggle('has-stroke', enabled);
     }
+    
 
     set chatStyle( s : string ){
         this.elements.comments.classList.remove('has-gradient', 'has-fill40', 'has-fill80');
@@ -1287,6 +1449,28 @@ export default class VODPlayer {
 
     get chatStyle(){
         return this._chatStyle;
+    }
+    */
+
+    saveSettings(){
+        localStorage.setItem('settings', JSON.stringify(this.settings));
+        console.log("Saved settings");
+        alert("Saved settings");
+    }
+
+    loadSettings(){
+        let v = localStorage.getItem('settings');
+        if(v){
+            this.settings = JSON.parse(v);
+            console.log("Loaded settings");
+        }else{
+            console.log("No settings to load");
+        }
+        console.log("Settings", this.settings);
+    }
+
+    resetSettings(){
+        this.settings = { ...defaultSettings };
     }
 
     get videoPosition(){
@@ -1299,6 +1483,16 @@ export default class VODPlayer {
             return 0;
         }
 
+    }
+
+    get videoCurrentTime(){
+        if( this.embedPlayer ){
+            return this.embedPlayer.getCurrentTime();
+        }else if( this.elements.video ){
+            return this.elements.video.currentTime;
+        }else{
+            return 0;
+        }
     }
 
     /*
