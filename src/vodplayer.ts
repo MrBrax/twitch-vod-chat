@@ -113,6 +113,8 @@ export default class VODPlayer {
         chatTextAlign: string;
     };
 
+    lastCommentTime: number;
+
     // settings: any;
 
     constructor(){
@@ -238,6 +240,11 @@ export default class VODPlayer {
         }
 
         // for( let i = 0; i < this.commentAmount; i++ ){
+        
+        if( chatLog.comments.length == 0 ){
+            console.error("No comments to display");
+        }
+        
         for( let i = 0; i < chatLog.comments.length; i++ ){
 
             let comment = chatLog.comments[i];
@@ -249,24 +256,24 @@ export default class VODPlayer {
 
             // skip already displayed comments
             if( comment.displayed ){
-                //console.debug('skip comment, already displayed', i);
+                // console.debug('skip comment, already displayed', i);
                 continue;
             }
 
             if( this.settings.showVODComments && comment.source && comment.source == 'comment' ){
-                //console.debug('skip comment, vod comment', i);
+                // console.debug('skip comment, vod comment', i);
                 continue; // skip vod comments?
             }
 
             if( timeRelative < ( comment.content_offset_seconds / this.timeScale ) ){
-                //console.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
+                // console.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
                 continue;
             }
 
             // if skipped or something
             let commentAge = timeRelative - ( comment.content_offset_seconds / this.timeScale )
             if( commentAge > 60 ){
-                //console.debug('skip comment, too old', i);
+                // console.debug('skip comment, too old', i);
                 comment.displayed = true;
                 continue;
             }
@@ -755,14 +762,16 @@ export default class VODPlayer {
 
             console.debug( "Call seek", percent, seekedToSeconds, this.timeFormat( seekedToSeconds ), this.videoCurrentTime );
 
+            console.debug( "Pre seek", this.videoCurrentTime, this.timeStart );
+
             if( this.embedPlayer ) this.embedPlayer.seek( seekedToSeconds );
 
             if( this.elements.video.src ) this.elements.video.currentTime = seekedToSeconds;
 
-            // console.debug( "Seeked", this.videoCurrentTime );
-
             // offset chat
             this.timeStart = ( Date.now() - ( seekedToSeconds * 1000 ) ) + this.chatOffset;
+
+            console.debug( "Post seek", this.videoCurrentTime, this.timeStart );
 
             this.reset();
 
@@ -996,7 +1005,7 @@ export default class VODPlayer {
                         // console.log("Marker info from chat log", data);
                     });
                     */
-                    this.fetchMarkerInfo();
+                    // this.fetchMarkerInfo();
                 }
                 
 
@@ -1038,10 +1047,14 @@ export default class VODPlayer {
             this.channelName = data.user_name;
             this.channelId = data.user_id;
 
+            console.log("LoadOnline length", this.vodLength);
+            console.log("LoadOnline channel name", this.channelName);
+            console.log("LoadOnline channel id", this.channelId);
+
             this.fetchBadges();
             this.fetchEmotes();
 
-            this.fetchMarkerInfo();
+            // this.fetchMarkerInfo();
 
             this.setupEmbedPlayer();
 
@@ -1230,9 +1243,15 @@ export default class VODPlayer {
 
         let fragment = await this.fetchChatFragment(0);
 
+        if( !fragment.comments ){
+            console.error("could not fetch comments");
+            return false;
+        }
+
         let cursor = fragment._next;
 
         console.log( 'first fragment', fragment );
+        chatLog.comments = chatLog.comments.concat( fragment.comments );
 
         this.fetchChatRunning = true;
 
@@ -1245,7 +1264,21 @@ export default class VODPlayer {
 
             chatLog.comments = chatLog.comments.concat( f.comments );
             
-            console.log( "Add messages to chat log", chatLog.comments.length );
+            console.log( "Add messages to chat log", chatLog.comments.length, f.comments.length );
+
+            console.log("Message info", f.comments[0].content_offset_seconds, f.comments[0].commenter.display_name);
+
+            // TODO: don't spam server, throttle with this somehow
+            this.lastCommentTime = f.comments[ f.length - 1 ].content_offset_seconds;
+
+
+            // debug stop
+            /*
+            if( chatLog.comments.length > 500 ){
+                console.info("stop downloading comments due to spam test")
+                break;
+            }
+            */
 
             // console.log('loop fragment', f);
             
@@ -1475,24 +1508,35 @@ export default class VODPlayer {
 
     get videoPosition(){
 
+        /*
         if( this.embedPlayer ){
             return this.embedPlayer.getCurrentTime() / this.vodLength;
-        }else if( this.elements.video ){
+        }else if( this.elements.video && this.elements.video.src ){
             return this.elements.video.currentTime / this.vodLength;
         }else{
             return 0;
         }
 
+        */
+
+        return ( ( Date.now() - this.timeStart ) / 1000 ) / this.vodLength;
+
     }
 
     get videoCurrentTime(){
+
+        /*
         if( this.embedPlayer ){
             return this.embedPlayer.getCurrentTime();
-        }else if( this.elements.video ){
+        }else if( this.elements.video && this.elements.video.src ){
             return this.elements.video.currentTime;
         }else{
             return 0;
         }
+        */
+
+        return ( ( Date.now() - this.timeStart ) / 1000 );
+
     }
 
     /*
