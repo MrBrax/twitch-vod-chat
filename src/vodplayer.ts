@@ -1262,6 +1262,11 @@ export default class VODPlayer {
             
             cursor = f._next;
 
+            if( !f.comments ){
+                console.error("no comments with cursor");
+                continue;
+            }
+
             chatLog.comments = chatLog.comments.concat( f.comments );
             
             console.log( "Add messages to chat log", chatLog.comments.length, f.comments.length );
@@ -1269,7 +1274,11 @@ export default class VODPlayer {
             console.log("Message info", f.comments[0].content_offset_seconds, f.comments[0].commenter.display_name);
 
             // TODO: don't spam server, throttle with this somehow
-            this.lastCommentTime = f.comments[ f.length - 1 ].content_offset_seconds;
+            if( f.comments[ f.comments.length - 1 ] ){
+                this.lastCommentTime = f.comments[ f.comments.length - 1 ].content_offset_seconds;
+            }else{
+                console.error("no comment available");
+            }
 
 
             // debug stop
