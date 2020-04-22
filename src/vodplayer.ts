@@ -397,7 +397,7 @@ export default class VODPlayer {
                                         data: {
                                             network: 'ffz',
                                             name: word,
-                                            url: fEmo.urls[1]
+                                            url: 'https:' + fEmo.urls[1] // TODO: check that this https url is standardised
                                         }
                                     });
 
