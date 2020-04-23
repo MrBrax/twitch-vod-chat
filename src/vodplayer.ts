@@ -282,6 +282,8 @@ export default class VODPlayer {
 
             let commentObj : any = {};
 
+            commentObj.gid = i;
+
             // timestamp
             /*
             

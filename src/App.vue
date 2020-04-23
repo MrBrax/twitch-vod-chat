@@ -11,7 +11,7 @@
 						<span class="body">Body text</span>
 					</div>
 					-->
-					<ChatMessage v-for="(message, id) in $root.vp.commentQueue" v-bind:message="message" v-bind:key="id"></ChatMessage>
+					<ChatMessage v-for="message in $root.vp.commentQueue" v-bind:message="message" v-bind:key="message.gid"></ChatMessage>
 				</div>
 
 				<div id="osd">SYNC NOT STARTED</div>
