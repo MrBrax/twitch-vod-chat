@@ -413,8 +413,9 @@ export default class VODPlayer {
                         }
 
                         // bttv_channel
-                        if( this.emotes.bttv_channel && this.emotes.bttv_channel.emotes ){
-                            for( let fEmo of this.emotes.bttv_channel.emotes ){
+                        if( this.emotes.bttv_channel && this.emotes.bttv_channel.sharedEmotes && !found_emote ){
+                            
+                            for( let fEmo of this.emotes.bttv_channel.sharedEmotes ){
                                 if( fEmo.code == word ){
 
                                     commentObj.messageFragments.push({
@@ -434,28 +435,56 @@ export default class VODPlayer {
                                 }
                                 // finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_channel bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
                             }
+
+                        }
+
+                        if( this.emotes.bttv_channel && this.emotes.bttv_channel.channelEmotes && !found_emote ){
+
+                            for( let fEmo of this.emotes.bttv_channel.channelEmotes ){
+                                if( fEmo.code == word ){
+
+                                    commentObj.messageFragments.push({
+                                        type: 'emote',
+                                        data: {
+                                            network: 'bttv_channel',
+                                            class: 'bttv-emo-' + fEmo.id,
+                                            name: word,
+                                            url: 'https://cdn.betterttv.net/emote/' + fEmo.id + '/2x'
+                                        }
+                                    });
+
+                                    emotes++;
+
+                                    found_emote = true;
+                                    break;
+                                }
+                                // finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_channel bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+                            }
+
                         }
 
                         // bttv_global
-                        for( let fEmo of this.emotes.bttv_global.emotes ){
-                            if( fEmo.code == word ){
+                        if(  this.emotes.bttv_global && !found_emote ){
+                            for( let fEmo of this.emotes.bttv_global ){
+                                if( fEmo.code == word ){
 
-                                commentObj.messageFragments.push({
-                                    type: 'emote',
-                                    data: {
-                                        network: 'bttv_global',
-                                        class: 'bttv-emo-' + fEmo.id,
-                                        name: word,
-                                        url: 'https://cdn.betterttv.net/emote/' + fEmo.id + '/2x'
-                                    }
-                                });
+                                    commentObj.messageFragments.push({
+                                        type: 'emote',
+                                        data: {
+                                            network: 'bttv_global',
+                                            class: 'bttv-emo-' + fEmo.id,
+                                            name: word,
+                                            url: 'https://cdn.betterttv.net/emote/' + fEmo.id + '/2x'
+                                        }
+                                    });
 
-                                emotes++;
+                                    emotes++;
 
-                                found_emote = true;
-                                break;
+                                    found_emote = true;
+                                    break;
+                                }
+                                // finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_global bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
                             }
-                            // finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_global bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
                         }
 
                         /*
@@ -1041,6 +1070,12 @@ export default class VODPlayer {
 
         this.fetchVideoInfo().then( (json) => {
 
+            if( !json.data ){
+                alert("VOD loading error, probably deleted");
+                throw 'VOD loading error, probably deleted';
+                return false;
+            }
+
             let data = json.data[0];
 
             console.log( 'loadOnline', data );
@@ -1214,26 +1249,27 @@ export default class VODPlayer {
             document.getElementById('status-text-ffz').innerHTML = 'OK!';
         });
 
-        // bttv_channel
+        // bttv_channel v3
         console.log('Fetching BTTV_Channel');
         document.getElementById('status-text-bttv_channel').innerHTML = 'Fetching...';
-        fetch( 'https://api.betterttv.net/2/channels/' + this.channelName.toLowerCase() ).then( function(response){
+        fetch( 'https://api.betterttv.net/3/cached/users/twitch/' + this.channelId ).then( function(response){
             return response.json();
         }).then( (json2) => {
             this.emotes.bttv_channel = json2;
             console.log('bttv_channel', this.emotes.bttv_channel);
-            document.getElementById('status-text-bttv_channel').innerHTML = 'OK! (' + Object.keys(this.emotes.bttv_channel.emotes).length + ' emotes)';
+            let emoteNum = Object.keys(this.emotes.bttv_channel.channelEmotes).length + Object.keys(this.emotes.bttv_channel.sharedEmotes).length;
+            document.getElementById('status-text-bttv_channel').innerHTML = 'OK! (' + emoteNum + ' emotes)';
         });
 
-        // bttv_global
+        // bttv_global v3
         console.log('Fetching BTTV_Global');
         document.getElementById('status-text-bttv_global').innerHTML = 'Fetching...';
-        fetch( 'https://api.betterttv.net/2/emotes' ).then( function(response){
+        fetch( 'https://api.betterttv.net/3/cached/emotes/global' ).then( function(response){
             return response.json();
         }).then( (json2) => {
             this.emotes.bttv_global = json2;
             console.log('bttv_global', this.emotes.bttv_global);
-            document.getElementById('status-text-bttv_global').innerHTML = 'OK! (' + Object.keys(this.emotes.bttv_global.emotes).length + ' emotes)';
+            document.getElementById('status-text-bttv_global').innerHTML = 'OK! (' + Object.keys(this.emotes.bttv_global).length + ' emotes)';
         });
 
     }
