@@ -1,3 +1,7 @@
+// player dimensions, hardcoded for now
+$width: 1280px;
+$height: 720px;
+
 @keyframes fade {
 	0% { opacity: 0; }
 	100% { opacity: 1; }
@@ -142,8 +146,8 @@ body {
 	
 	&.niconico {
 
-		width: 1280px;
-		height: 720px;
+		width: $width;
+		height: $height;
 
 		display: block;
 
@@ -177,8 +181,8 @@ body {
 
 #player {
 
-	width: 1280px;
-	height: 720px;
+	width: $width;
+	height: $height;
 
 	position: relative;
 
@@ -216,7 +220,7 @@ body {
 }
 
 #controls {
-	width: 1280px;
+	width: $width;
 }
 
 .option-row {
@@ -268,7 +272,7 @@ body {
 	height: 24px;
 	font-size: 14px;
 	font-weight: 700;
-	width: 1280px;
+	width: $width;
 	background: #222;
 	color: #fff;
 	cursor: pointer;
@@ -293,7 +297,7 @@ body {
 
 #timeline-markers {
 	position: relative;
-	width: 1280px;
+	width: $width;
 	height: 24px;
 	pointer-events: none;
 }

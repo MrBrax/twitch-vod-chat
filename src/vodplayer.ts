@@ -1241,9 +1241,16 @@ export default class VODPlayer {
         // ffz
         console.log('Fetching FFZ');
         document.getElementById('status-text-ffz').innerHTML = 'Fetching...';
-        fetch( 'https://api.frankerfacez.com/v1/room/' + this.channelName.toLowerCase() ).then( function(response){
+        fetch( 'https://api.frankerfacez.com/v1/room/id/' + this.channelId ).then( function(response){
             return response.json();
         }).then( (json2) => {
+
+            if( !json2.sets ){
+                console.error("failed to load ffz", json2);
+                document.getElementById('status-text-ffz').innerHTML = 'Failed to load';
+                return;
+            }
+
             this.emotes.ffz = json2;
             console.log('ffz', this.emotes.ffz);
             document.getElementById('status-text-ffz').innerHTML = 'OK!';
@@ -1255,6 +1262,13 @@ export default class VODPlayer {
         fetch( 'https://api.betterttv.net/3/cached/users/twitch/' + this.channelId ).then( function(response){
             return response.json();
         }).then( (json2) => {
+            
+            if( !json2.sharedEmotes ){
+                console.error("failed to load bttv_channel", json2);
+                document.getElementById('status-text-bttv_channel').innerHTML = 'Failed to load';
+                return;
+            }
+
             this.emotes.bttv_channel = json2;
             console.log('bttv_channel', this.emotes.bttv_channel);
             let emoteNum = Object.keys(this.emotes.bttv_channel.channelEmotes).length + Object.keys(this.emotes.bttv_channel.sharedEmotes).length;
@@ -1267,6 +1281,13 @@ export default class VODPlayer {
         fetch( 'https://api.betterttv.net/3/cached/emotes/global' ).then( function(response){
             return response.json();
         }).then( (json2) => {
+
+            if( !json2 || json2.length == 0 ){
+                console.error("failed to load bttv_global", json2);
+                document.getElementById('status-text-bttv_global').innerHTML = 'Failed to load';
+                return;
+            }
+
             this.emotes.bttv_global = json2;
             console.log('bttv_global', this.emotes.bttv_global);
             document.getElementById('status-text-bttv_global').innerHTML = 'OK! (' + Object.keys(this.emotes.bttv_global).length + ' emotes)';
