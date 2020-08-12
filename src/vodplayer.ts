@@ -373,7 +373,7 @@ export default class VODPlayer {
                         data: {
                             network: 'twitch',
                             name: f.emoticon.text,
-                            url: 'https://static-cdn.jtvnw.net/emoticons/v1/' + f.emoticon.emoticon_id + '/1.0'
+                            url: `https://static-cdn.jtvnw.net/emoticons/v1/${f.emoticon.emoticon_id}/1.0`
                         }
                     });
 
@@ -424,7 +424,7 @@ export default class VODPlayer {
                                             network: 'bttv_channel',
                                             class: 'bttv-emo-' + fEmo.id,
                                             name: word,
-                                            url: 'https://cdn.betterttv.net/emote/' + fEmo.id + '/2x'
+                                            url: `https://cdn.betterttv.net/emote/${fEmo.id}/2x`
                                         }
                                     });
 
@@ -449,7 +449,7 @@ export default class VODPlayer {
                                             network: 'bttv_channel',
                                             class: 'bttv-emo-' + fEmo.id,
                                             name: word,
-                                            url: 'https://cdn.betterttv.net/emote/' + fEmo.id + '/2x'
+                                            url: `https://cdn.betterttv.net/emote/${fEmo.id}/2x`
                                         }
                                     });
 
@@ -474,7 +474,7 @@ export default class VODPlayer {
                                             network: 'bttv_global',
                                             class: 'bttv-emo-' + fEmo.id,
                                             name: word,
-                                            url: 'https://cdn.betterttv.net/emote/' + fEmo.id + '/2x'
+                                            url: `https://cdn.betterttv.net/emote/${fEmo.id}/2x`
                                         }
                                     });
 
@@ -662,7 +662,7 @@ export default class VODPlayer {
             let commentTime = this.timeFormat( comment.content_offset_seconds );
             let timeC = document.createElement('span');
             timeC.className = 'time';
-            timeC.innerHTML = '[' + commentTime + ']';
+            timeC.innerHTML = `[${commentTime}]`;
             commentDiv.appendChild(timeC);
         }
 
@@ -819,7 +819,7 @@ export default class VODPlayer {
                 this.interval = setInterval( this.tick.bind(this), this.tickDelay / this.timeScale );
             }
 
-            console.log( "New time start: " + this.timeStart )
+            console.log( `New time start: ${this.timeStart}` )
 
 
         }else{
@@ -861,11 +861,11 @@ export default class VODPlayer {
         // timescale 
         // this.timeScale = parseInt( (<HTMLInputElement>document.getElementById('optionTimescale')).value );
         this.timeScale = 1;
-        console.log('Timescale: ' + this.timeScale);
+        console.log(`Timescale: ${this.timeScale}`);
 
         // tick delay
         this.tickDelay = parseInt( (<HTMLInputElement>document.getElementById('optionTickDelay')).value );
-        console.log('TickDelay: ' + this.tickDelay);
+        console.log(`TickDelay: ${this.tickDelay}`);
 
         this.chatOffset = parseInt( (<HTMLInputElement>document.getElementById('optionOffset')).value ) * 1000;
 
@@ -922,7 +922,7 @@ export default class VODPlayer {
 
         let URL = window.URL || window.webkitURL;
 
-        console.debug('Load file: ' + f);
+        console.debug(`Load file: ${f}`);
 
         ev.preventDefault();
 
@@ -954,7 +954,7 @@ export default class VODPlayer {
                 console.debug('Saved');
 
                 this.commentAmount = Object.values( chatLog.comments ).length; // speed?
-                console.debug('Amount: ' + this.commentAmount);
+                console.debug(`Amount: ${this.commentAmount}`);
 
                 // get duration, this changed in the new api. if you know of a better parsing solution, please fix this
                 let rawDuration = chatLog.video.duration;
@@ -1000,10 +1000,10 @@ export default class VODPlayer {
                 }
 
                 // this.vodLength = this.chatLog.video.length;
-                console.debug('VOD length: ' + this.vodLength);
+                console.debug(`VOD length: ${this.vodLength}`);
 
                 this.archiveLength = this.elements.video.duration;
-                console.debug('Archive length: ' + this.archiveLength );
+                console.debug(`Archive length: ${this.archiveLength}` );
 
                 if( this.archiveLength > 0 ){
                     (<HTMLInputElement>document.getElementById('optionOffset')).value = ( this.vodLength - this.archiveLength ).toString();
@@ -1040,7 +1040,7 @@ export default class VODPlayer {
                 }
                 
 
-                document.getElementById('status-text-comments').innerHTML = 'OK (v' + this.chatlog_version + ', ' + this.channelName + ', ' + this.commentAmount + 'c, ' + this.vodLength + 's)!';
+                document.getElementById('status-text-comments').innerHTML = `OK (v${this.chatlog_version}, ${this.channelName}, ${this.commentAmount}c, ${this.vodLength}s)!`;
                 
                 // document.getElementById('option-group-chat').classList.add('ok');
 
@@ -1203,7 +1203,7 @@ export default class VODPlayer {
         }
 
         // global badges
-        fetch( 'https://badges.twitch.tv/v1/badges/global/display').then( function(response){
+        fetch( 'https://badges.twitch.tv/v1/badges/global/display' ).then( function(response){
             return response.json();
         }).then( (json2) => {
 
@@ -1215,7 +1215,7 @@ export default class VODPlayer {
         });
 
         // global badges
-        fetch( 'https://badges.twitch.tv/v1/badges/channels/' + this.channelId + '/display').then( function(response){
+        fetch( `https://badges.twitch.tv/v1/badges/channels/${this.channelId}/display` ).then( function(response){
             return response.json();
         }).then( (json2) => {
 
@@ -1241,7 +1241,7 @@ export default class VODPlayer {
         // ffz
         console.log('Fetching FFZ');
         document.getElementById('status-text-ffz').innerHTML = 'Fetching...';
-        fetch( 'https://api.frankerfacez.com/v1/room/id/' + this.channelId ).then( function(response){
+        fetch( `https://api.frankerfacez.com/v1/room/id/${this.channelId}` ).then( function(response){
             return response.json();
         }).then( (json2) => {
 
@@ -1259,7 +1259,7 @@ export default class VODPlayer {
         // bttv_channel v3
         console.log('Fetching BTTV_Channel');
         document.getElementById('status-text-bttv_channel').innerHTML = 'Fetching...';
-        fetch( 'https://api.betterttv.net/3/cached/users/twitch/' + this.channelId ).then( function(response){
+        fetch( `https://api.betterttv.net/3/cached/users/twitch/${this.channelId}` ).then( function(response){
             return response.json();
         }).then( (json2) => {
             
@@ -1272,7 +1272,7 @@ export default class VODPlayer {
             this.emotes.bttv_channel = json2;
             console.log('bttv_channel', this.emotes.bttv_channel);
             let emoteNum = Object.keys(this.emotes.bttv_channel.channelEmotes).length + Object.keys(this.emotes.bttv_channel.sharedEmotes).length;
-            document.getElementById('status-text-bttv_channel').innerHTML = 'OK! (' + emoteNum + ' emotes)';
+            document.getElementById('status-text-bttv_channel').innerHTML = `OK! (${emoteNum} emotes)`;
         });
 
         // bttv_global v3
@@ -1290,7 +1290,7 @@ export default class VODPlayer {
 
             this.emotes.bttv_global = json2;
             console.log('bttv_global', this.emotes.bttv_global);
-            document.getElementById('status-text-bttv_global').innerHTML = 'OK! (' + Object.keys(this.emotes.bttv_global).length + ' emotes)';
+            document.getElementById('status-text-bttv_global').innerHTML = `OK! (${Object.keys(this.emotes.bttv_global).length} emotes)`;
         });
 
     }
@@ -1360,7 +1360,7 @@ export default class VODPlayer {
     fetchChatFragment( start : any, cursor: any = null ){
 
 
-        let url = 'https://api.twitch.tv/kraken/videos/' + this.videoId + '/comments';
+        let url = `https://api.twitch.tv/kraken/videos/${this.videoId}/comments`;
         
         // if(start) url += '?content_offset_seconds=' + start;
         
@@ -1391,7 +1391,7 @@ export default class VODPlayer {
     
     fetchVideoInfo(){
 
-        return fetch('https://api.twitch.tv/helix/videos?id=' + this.videoId, {
+        return fetch(`https://api.twitch.tv/helix/videos?id=${this.videoId}`, {
             headers: {
                 "Client-ID": this.settings.twitchClientId
             }
@@ -1410,7 +1410,7 @@ export default class VODPlayer {
     }
 
     fetchMarkerInfo(){
-        return fetch('https://api.twitch.tv/kraken/videos/' + this.videoId + '/markers?api_version=5&client_id=' + this.settings.twitchClientId, {
+        return fetch(`https://api.twitch.tv/kraken/videos/${this.videoId}/markers?api_version=5&client_id=${this.settings.twitchClientId}`, {
             headers: {
                 "Client-ID": this.settings.twitchClientId
             }
@@ -1461,7 +1461,7 @@ export default class VODPlayer {
         // on ready
         this.elements.video.addEventListener('canplay', ( ev : HTMLInputEvent ) => {
             this.videoLoaded = true;
-            document.getElementById('status-text-video').innerHTML = 'Loaded (' + this.elements.video.duration + 's)';
+            document.getElementById('status-text-video').innerHTML = `Loaded (${this.elements.video.duration}s)`;
             // document.getElementById('option-group-video').classList.add('ok');
         });
 
