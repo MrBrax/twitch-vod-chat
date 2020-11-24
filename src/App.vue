@@ -2,7 +2,7 @@
   <div id="app">
     <div id="player">
 
-				<video id="video"></video>
+				<div id="video_container"></div>
 
 				<div id="comments" v-bind:class="commentsClass" v-bind:style="commentsStyle">
 					<!--<div class="comment">
@@ -33,7 +33,7 @@
 
 				<div class="option-row">
 					
-					<div v-bind:class="{ 'option-group': true, 'ok': $root.vp.videoLoaded }" id="option-group-video">
+					<div v-if="!$root.vp.automated" v-bind:class="{ 'option-group': true, 'ok': $root.vp.videoLoaded }" id="option-group-video">
 						<div class="option-title">Video</div>
 						<div class="option-content">
 							<input type="file" id="inputVideo" accept="video/*" @change="loadVideo" /> or<br>
@@ -43,7 +43,7 @@
 						</div>
 					</div>
 
-					<div v-bind:class="{ 'option-group': true, 'ok': $root.vp.chatLoaded }" id="option-group-chat">
+					<div v-if="!$root.vp.automated" v-bind:class="{ 'option-group': true, 'ok': $root.vp.chatLoaded }" id="option-group-chat">
 						<div class="option-title">Chat</div>
 						<div class="option-content">
 							<input type="file" id="inputChat" accept="application/json" @change="loadChat" />
@@ -67,7 +67,7 @@
 
 				<div class="option-row">
 
-					<div class="option-group">
+					<div :v-if="!$root.vp.automated" class="option-group">
 						<div class="option-title">Chat offset in seconds</div>
 						<div class="option-content">
 							<p class="help-text">
@@ -228,15 +228,7 @@ export default {
 	computed: {
         videoPosition(){
 
-			let vp = this.$root.vp;
-
-			if( vp.embedPlayer ){
-				return vp.embedPlayer.getCurrentTime() / vp.vodLength;
-			}else if( vp.elements.video ){
-				return vp.elements.video.currentTime / vp.vodLength;
-			}else{
-				return 0;
-			}
+			return vp.embedPlayer.getCurrentTime() / vp.vodLength;
             
 		},
 		commentsStyle(){

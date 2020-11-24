@@ -24,6 +24,10 @@ Install [twitch-chat-downloader](https://github.com/PetterKraabol/Twitch-Chat-Do
 
 Just download chat, but don't input a video at all.
 
+## Automated
+
+`/#source=youtube&youtube_id=VIDEO_ID&chatfile=CHATFILE.json`
+
 ## Playing back
 
 Open the player.html page, load the video file (for better stability) and chat dump (can take a while).

@@ -133,6 +133,10 @@ body {
   /* background: #3D4470; */
   background: #f0f; }
 
+#video-container {
+  width: 100%;
+  height: 100%; }
+
 #osd {
   display: none;
   position: absolute;

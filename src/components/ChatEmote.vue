@@ -12,7 +12,7 @@ export default {
         classObject(){
             return {
                 'emote': true,
-                [this.emote.network]: true,
+                ['network-' + this.emote.network]: true,
                 [this.emote.class]: true,
                 'is-small': this.$root.vp.settings.smallEmotes
             }
