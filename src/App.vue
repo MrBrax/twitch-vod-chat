@@ -39,7 +39,7 @@
 					<div v-if="!$root.vp.automated" v-bind:class="{ 'option-group': true, 'ok': $root.vp.videoLoaded }" class="option-group">
 						<div class="option-title">Video</div>
 						<div class="option-content">
-							<select v-model="video_source">
+							<select class="fullsize" v-model="video_source">
 								<option value="file">Local video file</option>
 								<option value="file_http">Hosted video file</option>
 								<option value="youtube">YouTube</option>
@@ -67,22 +67,18 @@
 								</div>
 								<p class="help-text">Please proceed through the mature warning before clicking start, if it appears.</p>
 							</div>
-							<!--
-							<input type="file" id="inputVideo" accept="video/*" @change="loadVideo" /> or<br>
-							<input type="password" placeholder="Client ID" v-model="$root.vp.settings.twitchClientId" />
-							<input type="password" placeholder="Secret" v-model="$root.vp.settings.twitchSecret" />
-							<input type="text" placeholder="VOD ID" ref="videoIdInput" style="width: 100px" />
-							<button class="button" @click="loadOnline">load online</button>
-							-->
 							<hr>
 							<button class="button" @click="submitVideo">Submit</button>
+							<p class="help-text">
+								Nothing is uploaded, everything runs in your browser.
+							</p>
 						</div>
 					</div>
 					
 					<div v-if="!$root.vp.automated" v-bind:class="{ 'option-group': true, 'ok': $root.vp.chatLoaded }" class="option-group">
 						<div class="option-title">Chat</div>
 						<div class="option-content">
-							<select v-model="chat_source">
+							<select class="fullsize" v-model="chat_source">
 								<option value="file">Local chat file</option>
 								<option value="file_http">Hosted chat file</option>
 								<option value="twitch">Twitch VOD dump</option>
@@ -145,7 +141,7 @@
 
 				<div class="option-row">
 
-					<div :v-if="!$root.vp.automated" class="option-group">
+					<div v-if="!$root.vp.automated" class="option-group">
 						<div class="option-title">Chat offset in seconds</div>
 						<div class="option-content">
 							<p class="help-text">
@@ -153,22 +149,9 @@
 								It will be set automatically based on how long the chat dump is
 								and the video length, remember to set it to 0 if you want it that way.
 							</p>
-							<input id="optionOffset" value="0">
+							<input name="chatOffset" v-model="$root.vp.chatOffset">
 						</div>
 					</div>
-
-					<!--
-					<div class="option-group">
-						<div class="option-title">Chat timescale</div>
-						<div class="option-content">
-							<p class="help-text">
-								1 is standard, 2 is twice as fast etc.
-								Slow the captured video down with this amount to reduce live recording time
-							</p>
-							<input id="optionTimescale" value="1">
-						</div>
-					</div>
-					-->
 
 					<div class="option-group">
 						<div class="option-title">Update frequency in ms</div>
@@ -177,22 +160,14 @@
 								The lower the smoother. 16.67 - 60fps, 33.33 - 30fps.
 								Missed ticks shouldn't matter, as the parser is dependent on system time.
 							</p>
-							<input id="optionTickDelay" value="50">
+							<input name="tickDelay" v-model="$root.vp.tickDelay">
 						</div>
 					</div>
 
 					<div class="option-group">
 						<div class="option-title">Chat location</div>
 						<div class="option-content">
-							<!--
-							<div class="button-group">
-								<button class="button is-small" @click="alignChat('left')">Left side</button>
-								<button class="button is-small" @click="alignChat('right')">Right side</button>
-							</div>
-							<div class="button-group">
-								<button class="button is-small" @click="alignText('left')">Left text</button>
-								<button class="button is-small" @click="alignText('right')">Right text</button>
-							</div>-->
+
 							<div>
 								Chat align:
 								<label><input type="radio" name="comments-align" v-model="$root.vp.settings.chatAlign" value="left"> Left</label>
@@ -223,29 +198,34 @@
 								<option value="has-fill80">Fill 80%</option>
 								<option value="">None</option>
 							</select>
-							
-							<!--
-							<label><input class="input-range" type="range" min="0" max="100" value="70" v-model="$root.vp.chatBackgroundOpacity" style="width: 120px"> Opacity</label>
-							-->
-							<br>
-
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.chatStroke"> Stroke + shadow</label><br>
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.emotesEnabled"> Emotes</label><br>
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.timestampsEnabled"> Timestamps</label><br>
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.badgesEnabled"> Badges</label><br>
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.smallEmotes"> Small emotes</label><br>
-							<label><input type="checkbox" checked="checked" v-model="$root.vp.settings.showVODComments"> VOD comments</label>
+							<table>
+								<tr>
+									<td><label><input type="checkbox" checked="checked" v-model="$root.vp.settings.chatStroke"> Stroke + shadow</label></td>
+									<td><label><input type="checkbox" checked="checked" v-model="$root.vp.settings.emotesEnabled"> Emotes</label></td>
+								</tr>
+								<tr>
+									<td><label><input type="checkbox" checked="checked" v-model="$root.vp.settings.timestampsEnabled"> Timestamps</label></td>
+									<td><label><input type="checkbox" checked="checked" v-model="$root.vp.settings.badgesEnabled"> Badges</label></td>
+								</tr>
+								<tr>
+									<td><label><input type="checkbox" checked="checked" v-model="$root.vp.settings.smallEmotes"> Small emotes</label></td>
+									<td><label><input type="checkbox" checked="checked" v-model="$root.vp.settings.showVODComments"> VOD comments</label></td>
+								</tr>
+							</table>
+							<label><input type="range" min="10" max="42" v-model="$root.vp.settings.fontSize"> Font size</label>
 						</div>
 					</div>
 
 				</div>
 
 				<div class="option-group">
-					<button class="button color-green" @click="play">Start</button>
-					<button class="button" @click="apply">Apply</button>
-					<button class="button" @click="fullscreen">Fullscreen</button>
-					<button class="button" @click="saveSettings">Save settings</button>
-					<button class="button" @click="resetSettings">Reset settings</button>
+					<div class="option-content">
+						<button class="button color-green is-flashing" @click="play">Play</button>
+						<button class="button" @click="apply">Apply</button>
+						<button class="button" @click="fullscreen">Fullscreen</button>
+						<button class="button" @click="saveSettings">Save settings</button>
+						<button class="button" @click="resetSettings">Reset settings</button>
+					</div>
 				</div>
 
 			</div>
@@ -324,6 +304,7 @@ export default {
 				'top': this.$root.vp.settings.chatTop + '%',
 				'bottom': this.$root.vp.settings.chatBottom + '%',
 				'width': this.$root.vp.settings.chatWidth + '%',
+				'fontSize': this.$root.vp.settings.fontSize + 'px',
 			}
 		},
 		commentsClass(){
@@ -339,27 +320,7 @@ export default {
 		twitchApiRequired(){
 			return this.video_source == 'twitch' || this.chat_source == 'twitch';
 		}
-		/*
-		timelineText(){
-			// console.log( "CURRENT TIME", this.$root.vp.videoCurrentTime );
-			
-			let vp = this.$root.vp;
 
-			let seconds = 0;
-
-			if( vp.embedPlayer ){
-            	seconds = vp.embedPlayer.getCurrentTime();
-			}else if( vp.elements.video && vp.elements.video.src ){
-				seconds = vp.elements.video.currentTime;
-			}
-			
-			let date = new Date(null);
-			date.setSeconds( seconds );
-			
-			return date.toISOString().substr(11, 8);
-			
-		}
-		*/
     }
 }
 </script>

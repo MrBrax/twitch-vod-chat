@@ -4,6 +4,14 @@
   100% {
     opacity: 1; } }
 
+@keyframes flashing {
+  0% {
+    border-color: #000; }
+  50% {
+    border-color: #888; }
+  100% {
+    border-color: #000; } }
+
 * {
   box-sizing: border-box; }
 
@@ -14,6 +22,21 @@ body {
   padding: 0;
   /* background: #0f0; */
   background: #111; }
+
+table {
+  font-family: 'Open Sans', Arial;
+  font-size: 12px;
+  color: #ccc;
+  width: 100%; }
+  table td {
+    border-collapse: collapse;
+    padding: 0;
+    margin: 0; }
+
+hr {
+  height: 1px;
+  border: none;
+  background-color: #444; }
 
 #comments {
   padding: 5px;
@@ -189,6 +212,7 @@ body {
   font-weight: 700;
   width: 1280px;
   background: #222;
+  border-bottom: 1px solid #333;
   color: #fff;
   cursor: pointer; }
 
@@ -204,7 +228,7 @@ body {
   top: 0px;
   left: 0px;
   width: 50%;
-  background: #ad2020;
+  background: linear-gradient(#ad2020, #622);
   height: 24px; }
 
 #timeline-markers {
@@ -239,7 +263,8 @@ body {
   background: #555;
   border: 1px solid #666;
   color: #ccc;
-  padding: 4px 15px; }
+  padding: 4px 15px;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4); }
   .button:not(:disabled):hover {
     background: #666;
     border-color: #999;
@@ -253,6 +278,8 @@ body {
     padding: 2px 8px; }
   .button.color-green {
     background: #2a974f; }
+  .button.is-flashing {
+    animation: 1s infinite flashing ease-in-out; }
 
 .button-group {
   display: flex;
@@ -265,13 +292,18 @@ body {
   height: 18px;
   vertical-align: -2px; }
 
-input {
+input, select {
   background: #555;
   border: 1px solid #717171;
   color: #ccc;
   padding: 3px 6px;
   margin: 1px 0; }
-  input:focus {
+  input[type="range"], select[type="range"] {
+    height: 16px;
+    vertical-align: middle; }
+  input.fullsize, select.fullsize {
+    width: 100%; }
+  input:focus, select:focus {
     border-color: #999;
     color: #fff; }
 
