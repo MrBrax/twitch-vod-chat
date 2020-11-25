@@ -2,7 +2,7 @@ const path = require('path');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
-    entry: './src/vodplayer.ts',
+    entry: './src/index.ts',
     module: {
         rules: [
             {

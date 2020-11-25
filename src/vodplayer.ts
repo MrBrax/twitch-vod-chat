@@ -2,9 +2,6 @@
 
 // import { Twitch } from 'twitch-embed';
 
-import Vue from 'vue';
-import App from './App.vue'
-
 import EmbedPlayer from './embeds/base';
 import EmbedVideoPlayer from './embeds/html5';
 import EmbedTwitchPlayer from './embeds/twitch';
@@ -142,6 +139,10 @@ export default class VODPlayer {
     status_ffz: string = 'Waiting...';
     status_bttv_channel: string = 'Waiting...';
     status_bttv_global: string = 'Waiting...';
+    
+    chat_source: string;
+    video_source: string;
+    allCommentsFetched: boolean = false;
 
     // settings: any;
 
@@ -784,11 +785,10 @@ export default class VODPlayer {
 
         this.apply();
 
-        /*
-        if (this.onlineOnly) {
-            this.fetchChat();
+        // start chat fetching
+        if (this.chat_source == 'twitch') {
+            // this.fetchChat();
         }
-        */
 
         // offset
         this.timeStart += this.chatOffset;
@@ -963,6 +963,8 @@ export default class VODPlayer {
             return false;
         }
 
+        this.video_source = source;
+
         if (input.files) {
 
             let file = input.files[0];
@@ -1024,6 +1026,8 @@ export default class VODPlayer {
             alert("No chat selected");
             return false;
         }
+
+        this.chat_source = source;
 
         if (input.files) {
             let file = input.files[0];
@@ -1092,6 +1096,10 @@ export default class VODPlayer {
     }
     */
 
+    /**
+     * Load chat file from URL, either locally or remote
+     * @param url 
+     */
     loadChatFileFromURL(url: string) {
 
         fetch(url).then(function (response) {
@@ -1253,6 +1261,10 @@ export default class VODPlayer {
             this.fetchBadges();
             this.fetchEmotes();
 
+            this.fetchChat();
+
+            this.chatLoaded = true;
+
             // this.fetchMarkerInfo();
 
             // this.setupEmbedPlayer();
@@ -1261,6 +1273,9 @@ export default class VODPlayer {
 
     }
 
+    /**
+     * Fetch user badges from twitch
+     */
     fetchBadges() {
 
         if (!this.channelId) {
@@ -1366,7 +1381,7 @@ export default class VODPlayer {
     }
 
     /**
-     * @todo: fix
+     * Continually fetch chat
      */
     async fetchChat() {
 
@@ -1411,6 +1426,12 @@ export default class VODPlayer {
                 console.error("no comment available");
             }
 
+            this.commentAmount = chatLog.comments.length;
+
+            let lastCommentTime = Math.round(chatLog.comments[ this.commentAmount - 1].content_offset_seconds);
+
+            this.status_comments = `OK (dump, ${this.channelName}, ${this.commentAmount}c, ${lastCommentTime}o, ${this.vodLength}s)!`;
+
 
             // debug stop
             /*
@@ -1424,14 +1445,17 @@ export default class VODPlayer {
 
         }
 
-        console.log("Chat fetching stopped");
+        this.allCommentsFetched = true;
 
+        this.status_comments = `OK (dump, ${this.channelName}, ${this.commentAmount}c (complete), ${this.vodLength}s)!`;
+
+        console.log("Chat fetching stopped");
 
     }
 
-    fetchChatFragment(start: any, cursor: any = null) {
+    async fetchChatFragment(start: any, cursor: any = null) {
 
-
+        // unsupported by twitch
         let url = `https://api.twitch.tv/kraken/videos/${this.videoId}/comments`;
 
         // if(start) url += '?content_offset_seconds=' + start;
@@ -1461,7 +1485,7 @@ export default class VODPlayer {
 
     }
 
-    fetchVideoInfo() {
+    async fetchVideoInfo() {
 
         return fetch(`https://api.twitch.tv/helix/videos?id=${this.videoId}`, {
             headers: {
@@ -1694,66 +1718,5 @@ export default class VODPlayer {
     */
 
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    const vodplayer = new VODPlayer();
-
-    const app = new Vue({
-        render: h => h(App),
-        data: {
-            vp: vodplayer
-        }
-    }).$mount('#app');
-
-
-    vodplayer.elements.player = document.getElementById('player');
-    vodplayer.elements.video = document.getElementById('video');
-    vodplayer.elements.comments = document.getElementById('comments');
-    vodplayer.elements.osd = document.getElementById('osd');
-    // vodplayer.elements.timeline = document.getElementById('timeline-text');
-    vodplayer.elements.playback_text = document.getElementById('playback_text');
-
-    vodplayer.hooks();
-
-    console.debug("vodplayer", vodplayer);
-
-    let query = document.location.hash;
-    let query_param = query.split("&");
-    let params: any = {};
-    for (let param of query_param) {
-        params[param.split("=")[0].replace("#", "")] = param.split("=")[1];
-    }
-
-    if (params.source) {
-        // let embedPlayer: EmbedPlayer;
-        console.debug("automate playback");
-        vodplayer.automated = true;
-
-        if (params.source == "youtube") {
-            (<any>window).onYouTubeIframeAPIReady = () => {
-                vodplayer.embedPlayer = new EmbedYouTubePlayer(params.youtube_id);
-            }
-        }
-
-        if (params.source == "file") {
-            vodplayer.embedPlayer = new EmbedVideoPlayer(params.video_path);
-        }
-
-        if (vodplayer.embedPlayer) {
-            vodplayer.embedPlayer.vodplayer = vodplayer;
-            vodplayer.embedPlayer.setup();
-        }
-
-        if (params.chatfile && vodplayer.embedPlayer) {
-            vodplayer.embedPlayer.setCallback('ready', () => {
-                console.debug("player ready, load chat file");
-                vodplayer.loadChatFileFromURL(params.chatfile);
-            });
-        }
-
-    }
-
-});
 
 // window.VODPlayer = VODPlayer;
