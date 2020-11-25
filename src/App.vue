@@ -20,8 +20,7 @@
 
 			<div id="timeline" ref="timeline" @click="seek">
 				<div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: ( $root.vp.videoPosition * 100 ) + '%' }"></div>
-				<div id="timeline-text">Timeline</div>
-				<div id="timeline-auto">{{ $root.vp.videoCurrentTime }}</div>
+				<!--<div id="timeline-auto">{{ $root.vp.videoCurrentTime }}</div>-->
 				<div id="timeline-markers">
 					<div class="timeline-marker" v-for="(marker, id) in $root.vp.videoChapters" v-bind:key="id" v-bind:style="{ left: ( ( marker.time / $root.vp.vodLength ) * 100 ) + '%' }">
 						{{ marker.label }}
@@ -29,27 +28,106 @@
 				</div>
 			</div>
 
+			<div id="playback_info">
+				<div id="playback_text">Playback text</div>
+			</div>
+
 			<div id="controls">
 
 				<div class="option-row">
 					
-					<div v-if="!$root.vp.automated" v-bind:class="{ 'option-group': true, 'ok': $root.vp.videoLoaded }" id="option-group-video">
+					<div v-if="!$root.vp.automated" v-bind:class="{ 'option-group': true, 'ok': $root.vp.videoLoaded }" class="option-group">
 						<div class="option-title">Video</div>
 						<div class="option-content">
+							<select v-model="video_source">
+								<option value="file">Local video file</option>
+								<option value="file_http">Hosted video file</option>
+								<option value="youtube">YouTube</option>
+								<option value="twitch">Twitch VOD</option>
+							</select>
+							<hr>
+							<div v-if="video_source == 'file'">
+								<div class="control">
+									<label><input type="file" name="video-input" ref="video_input" accept="video/*" /> Video</label>
+								</div>
+							</div>
+							<div v-if="video_source == 'file_http'">
+								<div class="control">
+									<label><input type="text" name="video-input" ref="video_input" /> Video URL</label>
+								</div>
+							</div>
+							<div v-if="video_source == 'youtube'">
+								<div class="control">
+									<label><input type="text" name="video-input" ref="video_input" /> YouTube URL</label>
+								</div>
+							</div>
+							<div v-if="video_source == 'twitch'">
+								<div class="control">
+									<label><input type="text" name="video-input" ref="video_input" /> Twitch VOD URL</label>
+								</div>
+								<p class="help-text">Please proceed through the mature warning before clicking start, if it appears.</p>
+							</div>
+							<!--
 							<input type="file" id="inputVideo" accept="video/*" @change="loadVideo" /> or<br>
 							<input type="password" placeholder="Client ID" v-model="$root.vp.settings.twitchClientId" />
+							<input type="password" placeholder="Secret" v-model="$root.vp.settings.twitchSecret" />
 							<input type="text" placeholder="VOD ID" ref="videoIdInput" style="width: 100px" />
 							<button class="button" @click="loadOnline">load online</button>
+							-->
+							<hr>
+							<button class="button" @click="submitVideo">Submit</button>
 						</div>
 					</div>
-
-					<div v-if="!$root.vp.automated" v-bind:class="{ 'option-group': true, 'ok': $root.vp.chatLoaded }" id="option-group-chat">
+					
+					<div v-if="!$root.vp.automated" v-bind:class="{ 'option-group': true, 'ok': $root.vp.chatLoaded }" class="option-group">
 						<div class="option-title">Chat</div>
 						<div class="option-content">
-							<input type="file" id="inputChat" accept="application/json" @change="loadChat" />
+							<select v-model="chat_source">
+								<option value="file">Local chat file</option>
+								<option value="file_http">Hosted chat file</option>
+								<option value="twitch">Twitch VOD dump</option>
+							</select>
+							<hr>
+							<div v-if="chat_source == 'file'">
+								<div class="control">
+									<label><input type="file" name="chat-input" ref="chat_input" accept="application/json" /> Chat</label>
+								</div>
+							</div>
+							<div v-if="chat_source == 'file_http'">
+								<div class="control">
+									<label><input type="url" name="chat-input" ref="chat_input" /> Chat URL</label>
+								</div>
+							</div>
+							<div v-if="chat_source == 'twitch'">
+								<div class="control">
+									<label><input type="url" name="chat-input" ref="chat_input" /> Twitch VOD URL</label>
+								</div>
+							</div>
+							<hr>
+							<button class="button" @click="submitChat">Submit</button>
 							<p class="help-text">
 								Chat logs may take a while to parse, don't worry.
 							</p>
+						</div>
+					</div>
+					
+					<div v-if="twitchApiRequired" class="option-group">
+						<div class="option-title">Twitch API</div>
+						<div class="option-content">
+							<label>
+								<input type="password" placeholder="Client ID" v-model="$root.vp.settings.twitchClientId" />
+								Client ID
+							</label>
+							<label>
+								<input type="password" placeholder="Secret" v-model="$root.vp.settings.twitchSecret" />
+								Secret
+							</label>
+							<br>
+							{{ $root.vp.settings.twitchToken ? 'Has token' : 'No token' }}
+							<br>
+							<button class="button" @click="saveSettings">Save</button>
+							<button class="button" @click="fetchTwitchToken">Fetch Twitch token</button>
+							
 						</div>
 					</div>
 
@@ -185,20 +263,30 @@ export default {
 	components: {
 		ChatMessage
 	},
+	data: function(){
+		return {
+			video_source: 'file',
+			chat_source: 'file',
+			input_video: '',
+			input_chat: '',
+		};
+	},
 	methods: {
-		loadVideo(event){
-			this.$root.vp.load(event, 'video');
+		submitVideo(event){
+			console.log( this.$refs );
+			this.$root.vp.loadVideo( this.video_source, this.$refs.video_input );
 			event.preventDefault();
 			return false;
 		},
-		loadChat(event){
-			this.$root.vp.load(event, 'chat');
+		submitChat(event){
+			console.log( this.$refs );
+			this.$root.vp.loadChat( this.chat_source, this.$refs.chat_input );
 			event.preventDefault();
 			return false;
 		},
-		loadOnline(){
-			this.$root.vp.loadOnline( this.$refs.videoIdInput.value );
-		},
+		fetchTwitchToken(){
+			this.$root.vp.fetchTwitchToken();
+		},	
 		alignChat(dir){
 			this.$root.vp.alignChat(dir);
 		},
@@ -248,6 +336,9 @@ export default {
 				'has-stroke': this.$root.vp.settings.chatStroke
 			}
 		},
+		twitchApiRequired(){
+			return this.video_source == 'twitch' || this.chat_source == 'twitch';
+		}
 		/*
 		timelineText(){
 			// console.log( "CURRENT TIME", this.$root.vp.videoCurrentTime );

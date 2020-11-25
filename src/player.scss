@@ -188,7 +188,7 @@ body {
 
 	/* margin: auto; */
 
-	pointer-events: none; // smart?
+	// pointer-events: none; // smart?
 
 }
 
@@ -314,6 +314,16 @@ body {
 	border-left: 1px solid #fff;
 }
 
+#playback_info {
+	overflow: hidden;
+	font-size: 14px;
+	font-weight: 700;
+	width: $width;
+	background: #222;
+	color: #fff;
+	padding: 2px 4px;
+}
+
 .help-text {
 	color: #aaa;
 	font-weight: 300;
@@ -374,7 +384,7 @@ input {
 	border: 1px solid #717171;
 	color: #ccc;
 	padding: 3px 6px;
-	margin: 0;
+	margin: 1px 0;
 
 	&:focus {
 		border-color: #999;

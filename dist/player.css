@@ -120,8 +120,7 @@ body {
   width: 1280px;
   height: 720px;
   position: relative;
-  /* margin: auto; */
-  pointer-events: none; }
+  /* margin: auto; */ }
 
 #player:fullscreen {
   width: 100%;
@@ -220,6 +219,15 @@ body {
   left: 0px;
   border-left: 1px solid #fff; }
 
+#playback_info {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 700;
+  width: 1280px;
+  background: #222;
+  color: #fff;
+  padding: 2px 4px; }
+
 .help-text {
   color: #aaa;
   font-weight: 300;
@@ -262,7 +270,7 @@ input {
   border: 1px solid #717171;
   color: #ccc;
   padding: 3px 6px;
-  margin: 0; }
+  margin: 1px 0; }
   input:focus {
     border-color: #999;
     color: #fff; }
