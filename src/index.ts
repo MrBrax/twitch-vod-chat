@@ -3,6 +3,7 @@
 import Vue from 'vue';
 import App from './App.vue'
 import EmbedVideoPlayer from './embeds/html5';
+import EmbedTwitchPlayer from './embeds/twitch';
 import EmbedYouTubePlayer from './embeds/youtube';
 
 import VODPlayer from './vodplayer';
@@ -31,41 +32,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.debug("vodplayer", vodplayer);
 
-    let query = document.location.hash;
-    let query_param = query.split("&");
-    let params: any = {};
-    for (let param of query_param) {
-        params[param.split("=")[0].replace("#", "")] = param.split("=")[1];
-    }
+    let processHash = () => {
 
-    // automate it
-    if (params.source) {
-        // let embedPlayer: EmbedPlayer;
-        console.debug("automate playback");
-        vodplayer.automated = true;
+        console.debug("Process hash", window.location.hash);
 
-        if (params.source == "youtube") {
-            (<any>window).onYouTubeIframeAPIReady = () => {
-                vodplayer.embedPlayer = new EmbedYouTubePlayer(params.youtube_id);
+        let query = window.location.hash;
+        let query_param = query.split("&");
+        let params: any = {};
+        for (let param of query_param) {
+            params[param.split("=")[0].replace("#", "")] = param.split("=")[1];
+        }
+
+        /*
+        if(params.taci){
+            vodplayer.settings.twitchClientId = params.taci;
+        }
+        if(params.tas){
+            vodplayer.settings.twitchSecret = params.tas;
+        }
+        */
+
+        // automate it
+        if (params.source) {
+            
+            console.debug("automate playback");
+            vodplayer.automated = true;
+
+            // load video
+            if (params.source == "youtube") {
+                (<any>window).onYouTubeIframeAPIReady = () => {
+                    vodplayer.embedPlayer = new EmbedYouTubePlayer(params.youtube_id);
+                }
+            } else if (params.source == "twitch") {
+                vodplayer.embedPlayer = new EmbedTwitchPlayer(params.twitch_id);
+            } else if (params.source == "file") {
+                vodplayer.embedPlayer = new EmbedVideoPlayer(params.video_path);
+            }else{
+                alert("No video source set");
+                return false;
             }
-        }
 
-        if (params.source == "file") {
-            vodplayer.embedPlayer = new EmbedVideoPlayer(params.video_path);
-        }
+            // set up embed player
+            if (vodplayer.embedPlayer) {
+                vodplayer.embedPlayer.vodplayer = vodplayer;
+                vodplayer.embedPlayer.setup();
+            }
 
-        if (vodplayer.embedPlayer) {
-            vodplayer.embedPlayer.vodplayer = vodplayer;
-            vodplayer.embedPlayer.setup();
-        }
+            // load chat
+            if (params.chatdump && vodplayer.embedPlayer) {
+                vodplayer.loadTwitchChat(params.chatdump);
+            } else if (params.chatfile && vodplayer.embedPlayer) {
+                vodplayer.embedPlayer.setCallback('ready', () => {
+                    console.debug("player ready, load chat file");
+                    vodplayer.loadChatFileFromURL(params.chatfile);
+                });
+            }else{
+                alert("No chat source set");
+                return false;
+            }
 
-        if (params.chatfile && vodplayer.embedPlayer) {
-            vodplayer.embedPlayer.setCallback('ready', () => {
-                console.debug("player ready, load chat file");
-                vodplayer.loadChatFileFromURL(params.chatfile);
-            });
         }
-
     }
+
+    window.addEventListener("hashchange", () => processHash);
+
+    processHash();
 
 });

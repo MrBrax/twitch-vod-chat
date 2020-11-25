@@ -3,9 +3,16 @@ $width: 1280px;
 $height: 720px;
 $center: true;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter&family=Open+Sans&display=swap');
+
 @keyframes fade {
 	0% { opacity: 0; }
 	100% { opacity: 1; }
+}
+
+@keyframes meme {
+	0% { left: -5% }
+	100% { left: 105%; }
 }
 
 @keyframes flashing {
@@ -218,6 +225,8 @@ hr {
 
 	position: relative;
 
+	overflow: hidden;
+
 	/* margin: auto; */
 
 	// pointer-events: none; // smart?
@@ -423,6 +432,10 @@ input, select {
 	padding: 3px 6px;
 	margin: 1px 0;
 
+	optgroup {
+		background-color: #666;
+	}
+
 	&[type="range"]{
 		height: 16px;
 		vertical-align: middle;
@@ -439,7 +452,29 @@ input, select {
 
 }
 
+.meme {
+	position: absolute;
+	left: 50%;
+	bottom: -5px;
+	animation: 60s meme linear infinite;
+	/*
+	-webkit-transform: translate(-50%, -50%);
+  	transform: translate(-50%, -50%);
+	pointer-events: none;
+	*/
+}
 
+.meme-bg {
+	background-image: url(https://i.imgur.com/0Lwjy2o.gif);
+	background-repeat: no-repeat;
+	background-size: cover;
+	image-rendering: crisp-edges;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
 
 /*
 p {
