@@ -128,12 +128,13 @@
 					</div>
 
 					<div class="option-group">
+						<div class="option-title">Status</div>
 						<div class="option-content">
-							<strong>Video:</strong> <span id="status-text-video">Waiting</span><br>
-							<strong>Comments:</strong> <span id="status-text-comments">Waiting</span><br>
-							<strong>FFZ:</strong> <span id="status-text-ffz">Waiting</span><br>
-							<strong>BTTV Channel:</strong> <span id="status-text-bttv_channel">Waiting</span><br>
-							<strong>BTTV Global:</strong> <span id="status-text-bttv_global">Waiting</span>
+							<strong>Video:</strong> <span>{{ $root.vp.status_video }}</span><br>
+							<strong>Comments:</strong> <span>{{ $root.vp.status_comments }}</span><br>
+							<strong>FFZ:</strong> <span>{{ $root.vp.status_ffz }}</span><br>
+							<strong>BTTV Channel:</strong> <span>{{ $root.vp.status_bttv_channel }}</span><br>
+							<strong>BTTV Global:</strong> <span>{{ $root.vp.status_bttv_global }}</span>
 						</div>
 					</div>
 

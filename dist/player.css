@@ -38,6 +38,10 @@ hr {
   border: none;
   background-color: #444; }
 
+#app {
+  width: 1280px;
+  margin: 0 auto; }
+
 #comments {
   padding: 5px;
   font-size: 12px;

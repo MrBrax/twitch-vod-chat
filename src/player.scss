@@ -1,6 +1,7 @@
 // player dimensions, hardcoded for now
 $width: 1280px;
 $height: 720px;
+$center: true;
 
 @keyframes fade {
 	0% { opacity: 0; }
@@ -42,6 +43,13 @@ hr {
 	height: 1px;
 	border: none;
 	background-color: #444;
+}
+
+#app {
+	width: $width;
+	@if $center {
+		margin: 0 auto;
+	}
 }
 
 #comments {
