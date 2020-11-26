@@ -302,8 +302,11 @@ export default {
 			this.$root.vp.fullscreen();
 		},
 		seek(ev){
-			let percent = ev.clientX / timeline.clientWidth;
-			this.$root.vp.seek( percent );
+			let duration = this.$root.vp.embedPlayer.getDuration();
+			let rect = timeline.getBoundingClientRect();
+			let percent = ( ev.clientX - rect.left ) / timeline.clientWidth;
+			let seconds = Math.round(duration * percent);
+			this.$root.vp.seek( seconds );
 		},
 		saveSettings(){
 			this.$root.vp.saveSettings();

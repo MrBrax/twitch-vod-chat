@@ -57,8 +57,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if(params.tk){
             vodplayer.settings.twitchToken = params.tk;
         }
-        
 
+        if(params.offset){
+            vodplayer.chatOffset = parseInt(params.offset);
+        }
+        
         // automate it
         if (params.source) {
             

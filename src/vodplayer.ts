@@ -243,6 +243,7 @@ export default class VODPlayer {
     };
 
     lastCommentTime: number | null = null;
+    lastCommentOffset: number | null = null;
 
     status_video: string = 'Waiting...';
     status_comments: string = 'Waiting...';
@@ -921,10 +922,10 @@ export default class VODPlayer {
     }
 
     /**
-     * 
-     * @param percent percentage of video to seek to, todo fix this
+     * Seek in the video
+     * @param seconds
      */
-    seek(percent: number) {
+    seek(seconds: number) {
 
         if (!this.vodLength) {
             throw ('no vod length when seeking');
@@ -933,21 +934,21 @@ export default class VODPlayer {
 
         if (this.embedPlayer) {
 
-            let seekedToSeconds = Math.floor(this.vodLength * percent);
+            // let seekedToSeconds = Math.floor(this.vodLength * percent);
 
-            console.debug("Call seek", percent, seekedToSeconds, this.timeFormat(seekedToSeconds), this.videoCurrentTime);
+            // console.debug("Call seek", percent, seekedToSeconds, this.timeFormat(seekedToSeconds), this.videoCurrentTime);
 
-            console.debug("Pre seek", this.videoCurrentTime, this.timeStart);
+            // console.debug("Pre seek", this.videoCurrentTime, this.timeStart);
 
             /*
             if (this.embedPlayer) this.embedPlayer.seek(seekedToSeconds);
 
             if (this.elements.video.src) this.elements.video.currentTime = seekedToSeconds;
             */
-            this.embedPlayer.seek(seekedToSeconds);
+            this.embedPlayer.seek( seconds );
 
             // offset chat
-            this.timeStart = (Date.now() - (seekedToSeconds * 1000)) + this.chatOffset;
+            this.timeStart = (Date.now() - (seconds * 1000)) + this.chatOffset;
 
             console.debug("Post seek", this.videoCurrentTime, this.timeStart);
 
@@ -1282,7 +1283,13 @@ export default class VODPlayer {
                 // this.fetchMarkerInfo();
             }
 
-            this.status_comments = `OK (v${this.chatlog_version}, ${this.channelName}, ${this.commentAmount}c, ${this.vodLength}s)!`;
+            this.lastCommentOffset = Math.round(chatLog.comments[this.commentAmount - 1].content_offset_seconds);
+
+            this.status_comments = `OK (v${this.chatlog_version}, ${this.channelName}, ${this.commentAmount}c, ${this.lastCommentOffset}o, ${this.vodLength}s)!`;
+
+            if( this.vodLength && this.vodLength > this.lastCommentOffset + 90 ){
+                this.status_comments += " (end of comments don't sync up)";
+            }
 
             this.chatLoaded = true;
 
@@ -1495,10 +1502,13 @@ export default class VODPlayer {
 
             this.commentAmount = chatLog.comments.length;
 
-            let lastCommentTime = Math.round(chatLog.comments[this.commentAmount - 1].content_offset_seconds);
+            this.lastCommentOffset = Math.round(chatLog.comments[this.commentAmount - 1].content_offset_seconds);
 
-            this.status_comments = `OK (dump, ${this.channelName}, ${this.commentAmount}c, ${lastCommentTime}o, ${this.vodLength}s)!`;
+            this.status_comments = `OK (dump, ${this.channelName}, ${this.commentAmount}c, ${this.lastCommentOffset}o, ${this.vodLength}s)!`;
 
+            if( this.vodLength && this.vodLength > this.lastCommentOffset + 90 ){
+                this.status_comments += " (end of comments don't sync up)";
+            }
 
             // debug stop
             /*
