@@ -24,10 +24,11 @@
 		<div id="timeline" ref="timeline" @click="seek">
 			<div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: ( $root.vp.videoPosition * 100 ) + '%' }"></div>
 			<!--<div id="timeline-auto">{{ $root.vp.videoCurrentTime }}</div>-->
-			<div id="timeline-markers">
-				<div class="timeline-marker" v-for="(marker, id) in $root.vp.videoChapters" v-bind:key="id" v-bind:style="{ left: ( ( marker.time / $root.vp.vodLength ) * 100 ) + '%' }">
-					{{ marker.label }}
-				</div>
+		</div>
+
+		<div v-if="$root.vp.videoChapters" id="timeline-markers">
+			<div class="timeline-marker" v-for="(marker, id) in $root.vp.videoChapters" v-bind:key="id" v-bind:style="{ left: ( ( marker.time / $root.vp.vodLength ) * 100 ) + '%' }">
+				{{ marker.label }}
 			</div>
 		</div>
 

@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }).$mount('#app');
 
-
     vodplayer.elements.player = document.getElementById('player');
     vodplayer.elements.video = document.getElementById('video');
     vodplayer.elements.comments = document.getElementById('comments');
@@ -60,6 +59,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if(params.offset){
             vodplayer.chatOffset = parseInt(params.offset);
+        }
+
+        if(params.chapters){
+            vodplayer.videoChapters = [];
+            let ch = params.chapters.split(";");
+            for( let c of ch ){
+                let d = c.split(":");
+                let chapter = {
+                    time: parseInt(d[0]),
+                    label: d[1]
+                };
+                console.log("add chapter", chapter);
+                vodplayer.videoChapters.push(chapter);
+            }
+            console.log(vodplayer.videoChapters);
         }
         
         // automate it

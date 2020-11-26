@@ -194,7 +194,10 @@ export default class VODPlayer {
     videoId: string = '';
     videoTitle: string = '';
 
-    videoChapters: [];
+    videoChapters: {
+        time: number;
+        label: string;
+    }[];
 
     interval: NodeJS.Timeout; // huh
 
@@ -989,16 +992,17 @@ export default class VODPlayer {
 
         if (this.elements.comments) this.elements.comments.innerHTML = '';
 
+        console.debug(`Resetting queue, still ${this.commentQueue.length} comments.`);
         this.commentQueue = [];
 
         if (this.commentAmount) {
+            console.debug(`Reset ${this.commentAmount} comments`);
             for (let i = 0; i < this.commentAmount; i++) {
-
                 let comment = chatLog.comments[i];
-
                 (<any>comment).displayed = null;
-
             }
+        }else{
+            console.debug(`No comment queue`);
         }
 
     }
@@ -1221,8 +1225,7 @@ export default class VODPlayer {
                 let durMinutes = rawMinutes ? parseInt(rawMinutes[1]) : 0;
                 let durSeconds = rawSeconds ? parseInt(rawSeconds[1]) : 0;
 
-                console.debug(durHours, durMinutes, durSeconds);
-
+                console.debug("v2 date parse", durHours, durMinutes, durSeconds);
 
                 this.vodLength = (durHours * 60 * 60) + (durMinutes * 60) + durSeconds;
 
@@ -1748,7 +1751,11 @@ export default class VODPlayer {
 
     get videoPosition() {
 
-        if (!this.timeStart || !this.vodLength) return 0;
+        if(!this.embedPlayer) return 0;
+
+        return this.embedPlayer.getCurrentTime() / this.embedPlayer.getDuration();
+
+        // if (!this.timeStart || !this.vodLength) return 0;
         /*
         if( this.embedPlayer ){
             return this.embedPlayer.getCurrentTime() / this.vodLength;
@@ -1760,7 +1767,7 @@ export default class VODPlayer {
 
         */
 
-        return ((Date.now() - this.timeStart) / 1000) / this.vodLength;
+        // return ((Date.now() - this.timeStart) / 1000) / this.vodLength;
 
     }
 
