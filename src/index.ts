@@ -43,14 +43,21 @@ document.addEventListener("DOMContentLoaded", () => {
             params[param.split("=")[0].replace("#", "")] = param.split("=")[1];
         }
 
-        /*
-        if(params.taci){
-            vodplayer.settings.twitchClientId = params.taci;
+        // twitch client id
+        if(params.tci){
+            vodplayer.settings.twitchClientId = params.tci;
         }
-        if(params.tas){
-            vodplayer.settings.twitchSecret = params.tas;
+
+        // twitch secret
+        if(params.ts){
+            vodplayer.settings.twitchSecret = params.ts;
         }
-        */
+
+        // token
+        if(params.tk){
+            vodplayer.settings.twitchToken = params.tk;
+        }
+        
 
         // automate it
         if (params.source) {
