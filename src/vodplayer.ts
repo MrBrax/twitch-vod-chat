@@ -425,7 +425,7 @@ export default class VODPlayer {
 
 
 
-            let commentObj: TwitchCommentProxy;
+            let commentObj: any = {};
 
             commentObj.gid = i;
 
@@ -443,7 +443,7 @@ export default class VODPlayer {
 
                 for (let b of comment.message.user_badges) {
 
-                    let badgeObj: TwitchUserBadgeProxy;
+                    
 
                     // if( b._id == 'sub-gifter' ) continue;
                     /*
@@ -453,7 +453,7 @@ export default class VODPlayer {
                     let badgeId = b._id;
                     let badgeVersion = b.version;
 
-                    let imageSrc = null;
+                    let imageSrc: string | null = null;
 
                     // global badge
                     if (this.badges.global[badgeId] && this.badges.global[badgeId].versions[badgeVersion])
@@ -468,8 +468,10 @@ export default class VODPlayer {
                         continue;
                     }
 
-                    badgeObj.id = b._id;
-                    badgeObj.url = imageSrc;
+                    let badgeObj: TwitchUserBadgeProxy = {
+                        id: b._id,
+                        url: imageSrc,
+                    };
 
                     commentObj.badges.unshift(badgeObj); // TODO: insert in what order?
 
