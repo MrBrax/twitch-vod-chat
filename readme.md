@@ -26,6 +26,8 @@ Just download chat, but don't input a video at all.
 
 ## Automated
 
+`/#source=file&video_path=PATH&chatfile=CHATFILE.json`
+
 `/#source=youtube&youtube_id=VIDEO_ID&chatfile=CHATFILE.json`
 
 `/#source=twitch&twitch_id=VIDEO_ID&chatfile=CHATFILE.json`
