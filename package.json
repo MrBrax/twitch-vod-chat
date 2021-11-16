@@ -1,6 +1,6 @@
 {
   "name": "twitch-vod-chat",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "http://vod.dongers.net/player.html",
   "main": "src/vodplayer.js",
   "private": true,

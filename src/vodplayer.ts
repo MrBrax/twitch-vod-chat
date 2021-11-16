@@ -145,6 +145,7 @@ export default class VODPlayer {
         ffz: any;
         bttv_channel: any;
         bttv_global: any;
+        seventv: any;
     };
     
     badges: {
@@ -253,6 +254,7 @@ export default class VODPlayer {
     status_ffz: string = 'Waiting...';
     status_bttv_channel: string = 'Waiting...';
     status_bttv_global: string = 'Waiting...';
+    status_seventv: string = 'Waiting...';
 
     chat_source: string = '';
     video_source: string = '';
@@ -269,7 +271,8 @@ export default class VODPlayer {
         this.emotes = {
             ffz: null,
             bttv_channel: null,
-            bttv_global: null
+            bttv_global: null,
+            seventv: null,
         };
 
         this.badges = {
@@ -637,6 +640,33 @@ export default class VODPlayer {
                                 // finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_global bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
                             }
                         }
+
+                        // seventv
+                        for (let fEmo of this.emotes.seventv) {
+                            if (fEmo.name == word) {
+
+                                if(!fEmo.urls || !fEmo.urls[0] || fEmo.urls[0][1]){
+                                    console.error("invalid seventv emote", fEmo);
+                                    continue;
+                                }
+
+                                commentObj.messageFragments.push({
+                                    type: 'emote',
+                                    data: {
+                                        network: 'seventv',
+                                        name: word,
+                                        url: fEmo.urls[0][1] // TODO: check that this https url is standardised
+                                    }
+                                });
+
+                                emotes++;
+
+                                found_emote = true;
+                                break;
+
+                            }
+                        }
+                        
 
                         /*
                         if(!found_emote){
@@ -1415,7 +1445,7 @@ export default class VODPlayer {
 
             this.emotes.ffz = json2;
             console.log('ffz', this.emotes.ffz);
-            this.status_ffz = 'OK!';
+            this.status_ffz = `OK! (${Object.keys(this.emotes.ffz.sets).length} sets)`;
         });
 
         // bttv_channel v3
@@ -1453,6 +1483,29 @@ export default class VODPlayer {
             this.emotes.bttv_global = json2;
             console.log('bttv_global', this.emotes.bttv_global);
             this.status_bttv_global = `OK! (${Object.keys(this.emotes.bttv_global).length} emotes)`;
+        });
+        
+        console.log('Fetching seventv');
+        this.status_seventv = 'Fetching...';
+        fetch(`https://api.7tv.app/v2/users/${this.channelId}/emotes`).then(function (response) {
+            return response.json();
+        }).then((json2) => {
+
+            if(json2.message){
+                console.error("failed to load seventv", json2);
+                this.status_seventv = `Error: ${json2.message}`;
+                return;
+            }
+
+            if (json2.length <= 0) {
+                console.error("failed to load seventv", json2);
+                this.status_seventv = 'Failed to load';
+                return;
+            }
+
+            this.emotes.seventv = json2;
+            console.log('seventv', this.emotes.seventv);
+            this.status_seventv = `OK! (${this.emotes.seventv.length} emotes)`;
         });
 
     }

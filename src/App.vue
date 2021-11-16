@@ -90,7 +90,7 @@
 						<hr>
 						<div v-if="chat_source == 'file'">
 							<div class="control">
-								<label><input type="file" name="chat-input" ref="chat_input" accept="application/json" /> Chat</label>
+								<label><input type="file" name="chat-input" ref="chat_input" accept="application/json,.chatdump" /> Chat</label>
 							</div>
 						</div>
 						<div v-if="chat_source == 'file_http'">
@@ -138,7 +138,8 @@
 						<strong>Comments:</strong> <span>{{ $root.vp.status_comments }}</span><br>
 						<strong>FFZ:</strong> <span>{{ $root.vp.status_ffz }}</span><br>
 						<strong>BTTV Channel:</strong> <span>{{ $root.vp.status_bttv_channel }}</span><br>
-						<strong>BTTV Global:</strong> <span>{{ $root.vp.status_bttv_global }}</span>
+						<strong>BTTV Global:</strong> <span>{{ $root.vp.status_bttv_global }}</span><br>
+						<strong>SevenTV:</strong> <span>{{ $root.vp.status_seventv }}</span>
 					</div>
 				</div>
 
