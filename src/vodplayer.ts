@@ -58,6 +58,11 @@ interface TwitchCommentDump {
         view_count: number;
         viewable: string;
 
+        /** TwitchDownloader */
+        start: number;
+        /** TwitchDownloader */
+        end: number;
+
         /** @deprecated */
         length: string;
         /** @deprecated */
@@ -141,6 +146,22 @@ export default class VODPlayer {
 
     baseTitle: string = "braxen's vod replay";
 
+    fonts = {
+        "Inter":        "Inter (Twitch)",
+        "Arial":        "Arial",
+        "Helvetica":    "Helvetica",
+        "Raleway":      "Raleway",
+        "Hack":         "Hack",
+        "Open Sans":    "Open Sans",
+        "Roboto":       "Roboto",
+        "Segoe UI":     "Segoe UI",
+        "Verdana":      "Verdana",
+                
+        "Consolas":         "Consolas",
+        "Lucida Console":   "Lucida Console",
+        "monospace":        "monospace",
+    };
+
     emotes: {
         ffz: any;
         bttv_channel: any;
@@ -221,7 +242,7 @@ export default class VODPlayer {
 
     niconico: boolean;
 
-    chatlog_version: number | null = null;
+    chatlog_version: string | null = null;
 
     fetchChatRunning: boolean = false;
     // onlineOnly: boolean;
@@ -522,6 +543,7 @@ export default class VODPlayer {
                     bodyC.appendChild(emoC);
                     */
 
+                    this.debug(`Insert emote "${f.text}" from Twitch into comment #${commentObj.gid}`);
                     commentObj.messageFragments.push({
                         type: 'emote',
                         data: {
@@ -548,6 +570,7 @@ export default class VODPlayer {
                             for (let fEmo of this.emotes.ffz.sets[fSet].emoticons) {
                                 if (fEmo.name == word) {
 
+                                    this.debug(`Insert emote "${word}" from FFZ into comment #${commentObj.gid}`);
                                     commentObj.messageFragments.push({
                                         type: 'emote',
                                         data: {
@@ -566,12 +589,13 @@ export default class VODPlayer {
                             }
                         }
 
-                        // bttv_channel
+                        // bttv shared emotes
                         if (this.emotes.bttv_channel && this.emotes.bttv_channel.sharedEmotes && !found_emote) {
 
                             for (let fEmo of this.emotes.bttv_channel.sharedEmotes) {
                                 if (fEmo.code == word) {
 
+                                    this.debug(`Insert emote "${word}" from BTTV Shared into comment #${commentObj.gid}`);
                                     commentObj.messageFragments.push({
                                         type: 'emote',
                                         data: {
@@ -587,16 +611,18 @@ export default class VODPlayer {
                                     found_emote = true;
                                     break;
                                 }
-                                // finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_channel bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+
                             }
 
                         }
-
+                        
+                        // bttv channel emotes
                         if (this.emotes.bttv_channel && this.emotes.bttv_channel.channelEmotes && !found_emote) {
 
                             for (let fEmo of this.emotes.bttv_channel.channelEmotes) {
                                 if (fEmo.code == word) {
 
+                                    this.debug(`Insert emote "${word}" from BTTV Channel into comment #${commentObj.gid}`);
                                     commentObj.messageFragments.push({
                                         type: 'emote',
                                         data: {
@@ -612,7 +638,7 @@ export default class VODPlayer {
                                     found_emote = true;
                                     break;
                                 }
-                                // finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_channel bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+
                             }
 
                         }
@@ -622,6 +648,7 @@ export default class VODPlayer {
                             for (let fEmo of this.emotes.bttv_global) {
                                 if (fEmo.code == word) {
 
+                                    this.debug(`Insert emote "${word}" from BTTV Global into comment #${commentObj.gid}`);
                                     commentObj.messageFragments.push({
                                         type: 'emote',
                                         data: {
@@ -637,7 +664,7 @@ export default class VODPlayer {
                                     found_emote = true;
                                     break;
                                 }
-                                // finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_global bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
+
                             }
                         }
 
@@ -650,6 +677,7 @@ export default class VODPlayer {
                                     continue;
                                 }
 
+                                this.debug(`Insert emote "${word}" from SevenTV into comment #${commentObj.gid}`);
                                 commentObj.messageFragments.push({
                                     type: 'emote',
                                     data: {
@@ -1233,7 +1261,13 @@ export default class VODPlayer {
 
                     this.vodLength = parseInt(chatLog.video.length);
 
-                    this.chatlog_version = 1;
+                    this.chatlog_version = "twitch_v1";
+                
+                }else if(chatLog.video.end){
+
+                    this.vodLength = chatLog.video.end;
+
+                    this.chatlog_version = "td_v1";
 
                 } else {
 
@@ -1245,7 +1279,7 @@ export default class VODPlayer {
 
             } else {
 
-                this.chatlog_version = 2;
+                this.chatlog_version = "twitch_v2";
 
                 let rawHours = rawDuration.match(/([0-9]+)h/);
                 let rawMinutes = rawDuration.match(/([0-9]+)m/);
@@ -1282,8 +1316,13 @@ export default class VODPlayer {
                 this.chatOffset = (this.vodLength - this.archiveLength);
             }
 
+            if(this.chatlog_version == "td_v1"){ // weird format
 
-            if (this.chatlog_version == 2) {
+                this.channelName = (chatLog as any).streamer.name;
+                this.channelId = (chatLog as any).streamer.id;
+                this.videoId = chatLog.comments[0].content_id;
+
+            }else if (this.chatlog_version == "twitch_v2") {
 
                 this.channelName = chatLog.video.user_name;
                 this.channelId = chatLog.video.user_id;
@@ -1800,6 +1839,11 @@ export default class VODPlayer {
 
     resetSettings() {
         this.settings = { ...defaultSettings };
+    }
+
+    debug( text: string ): void {
+        if( process.env.NODE_ENV !== "development" ) return;
+        console.debug(text);
     }
 
     get videoPosition() {

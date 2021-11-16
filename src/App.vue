@@ -205,6 +205,13 @@
 							<option value="">None</option>
 						</select>
 						<select v-model="$root.vp.settings.fontName">
+							<option
+								v-for="k, v in $root.vp.fonts"
+								:key="k"
+								:value="k"
+								:style="{ fontFamily: k }"
+							>{{ v }}</option>
+							<!--
 							<option value="Inter">Inter (Twitch)</option>
 							<option>Arial</option>
 							<option>Helvetica</option>
@@ -216,6 +223,7 @@
 								<option>Consolas</option>
 								<option>monospace</option>
 							</optgroup>
+							-->
 						</select>
 						<table>
 							<tr>
