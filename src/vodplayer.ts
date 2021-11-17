@@ -637,8 +637,13 @@ export default class VODPlayer {
                             for (let fEmo of this.emotes.seventv) {
                                 if (fEmo.name == word) {
 
-                                    if(!fEmo.urls || !fEmo.urls[0] || fEmo.urls[0][1]){
-                                        console.error("invalid seventv emote", fEmo);
+                                    if(!fEmo.urls || fEmo.urls.length == 0){
+                                        console.error("no urls on seventv emote", fEmo);
+                                        continue;
+                                    }
+
+                                    if(!fEmo.urls[0] || !fEmo.urls[0][1]){
+                                        console.error("invalid url on seventv emote", fEmo);
                                         continue;
                                     }
 
@@ -648,7 +653,7 @@ export default class VODPlayer {
                                         data: {
                                             network: 'seventv',
                                             name: word,
-                                            url: fEmo.urls[0][1] // TODO: check that this https url is standardised
+                                            url: fEmo.urls[0][1]
                                         }
                                     });
 
