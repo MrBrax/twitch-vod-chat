@@ -51,31 +51,31 @@
 						</select>
 						<hr>
 						<div v-if="video_source == 'file'">
-							<div class="control">
-								<label><input type="file" name="video-input" ref="video_input" accept="video/*" /> Video</label>
+							<div class="control fullwidth">
+								<label><input type="file" name="video-input" ref="video_input" accept="video/*" /></label>
 							</div>
 						</div>
 						<div v-if="video_source == 'file_http'">
-							<div class="control">
-								<label><input type="text" name="video-input" ref="video_input" /> Video URL</label>
+							<div class="control fullwidth">
+								<label><input type="text" name="video-input" ref="video_input" placeholder="Video URL" /></label>
 							</div>
 						</div>
 						<div v-if="video_source == 'youtube'">
-							<div class="control">
-								<label><input type="text" name="video-input" ref="video_input" /> YouTube URL</label>
+							<div class="control fullwidth">
+								<label><input type="text" name="video-input" ref="video_input" placeholder="YouTube URL" /></label>
 							</div>
 						</div>
 						<div v-if="video_source == 'twitch'">
-							<div class="control">
-								<label><input type="text" name="video-input" ref="video_input" /> Twitch VOD URL</label>
+							<div class="control fullwidth">
+								<label><input type="text" name="video-input" ref="video_input" placeholder="Twitch VOD URL" /></label>
 							</div>
-							<p class="help-text">Please proceed through the mature warning before clicking start, if it appears.</p>
+							<p class="help-text">
+								Please proceed through the mature warning before clicking start, if it appears.<br />
+								This feature requires Twitch API credentials.
+							</p>
 						</div>
 						<hr>
-						<button class="button" @click="submitVideo">Submit</button>
-						<p class="help-text">
-							Nothing is uploaded, everything runs in your browser.
-						</p>
+						<button class="button is-submit" @click="submitVideo">Submit</button>
 					</div>
 				</div>
 				
@@ -85,26 +85,26 @@
 						<select class="fullsize" v-model="chat_source">
 							<option value="file">Local chat file</option>
 							<option value="file_http">Hosted chat file</option>
-							<option value="twitch">Twitch VOD dump</option>
+							<option value="twitch">Twitch API VOD dump</option>
 						</select>
 						<hr>
 						<div v-if="chat_source == 'file'">
-							<div class="control">
-								<label><input type="file" name="chat-input" ref="chat_input" accept="application/json,.chatdump" /> Chat</label>
+							<div class="control fullwidth">
+								<label><input type="file" name="chat-input" ref="chat_input" accept="application/json,.chatdump" placeholder="Chat" /></label>
 							</div>
 						</div>
 						<div v-if="chat_source == 'file_http'">
-							<div class="control">
-								<label><input type="url" name="chat-input" ref="chat_input" /> Chat URL</label>
+							<div class="control fullwidth">
+								<label><input type="url" name="chat-input" ref="chat_input" placeholder="Chat URL" /></label>
 							</div>
 						</div>
 						<div v-if="chat_source == 'twitch'">
-							<div class="control">
-								<label><input type="url" name="chat-input" ref="chat_input" /> Twitch VOD URL</label>
+							<div class="control fullwidth">
+								<label><input type="url" name="chat-input" ref="chat_input" placeholder="Twitch VOD URL" /></label>
 							</div>
 						</div>
 						<hr>
-						<button class="button" @click="submitChat">Submit</button>
+						<button class="button is-submit" @click="submitChat">Submit</button>
 						<p class="help-text">
 							Chat logs may take a while to parse, don't worry.
 						</p>
@@ -123,7 +123,7 @@
 							Secret
 						</label>
 						<br>
-						{{ $root.vp.settings.twitchToken ? 'Has token' : 'No token' }}
+						<span class="is-error">{{ $root.vp.settings.twitchToken ? 'Has token' : 'No token' }}</span>
 						<br>
 						<button class="button" @click="saveSettings">Save</button>
 						<button class="button" @click="fetchTwitchToken">Fetch Twitch token</button>
@@ -247,11 +247,15 @@
 
 			<div class="option-group">
 				<div class="option-content">
-					<button class="button color-green is-flashing" @click="play">Play</button>
+					<button class="button is-submit is-flashing" @click="play">Play</button>
+					<button class="button" @click="stop">Stop</button>
 					<button class="button" @click="apply">Apply</button>
 					<button class="button" @click="fullscreen">Fullscreen</button>
 					<button class="button" @click="saveSettings">Save settings</button>
 					<button class="button" @click="resetSettings">Reset settings</button>
+					<span>
+						Nothing is uploaded, everything runs in your browser.
+					</span>
 				</div>
 			</div>
 
@@ -304,6 +308,9 @@ export default {
 		},
 		play(){
 			this.$root.vp.play();
+		},
+		stop(){
+			this.$root.vp.stop();
 		},
 		apply(){
 			this.$root.vp.apply();

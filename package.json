@@ -10,7 +10,9 @@
   "scripts": {
     "watch": "webpack --watch",
     "start": "webpack-dev-server --open --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js"
+    "build": "webpack --config webpack.prod.js",
+    "watch:style": "sass --watch .\\src\\player.scss:.\\dist\\player.css",
+    "build:style": "sass --sourcemap=none --style compressed .\\src\\player.scss:.\\dist\\player.css"
   },
   "repository": {
     "type": "git",

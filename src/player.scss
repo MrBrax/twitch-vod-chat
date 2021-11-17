@@ -25,7 +25,7 @@ $center: true;
 
 body {
 
-	font: 12px 'Open Sans', 'Arial';
+	font: 12px 'Roboto', 'Open Sans', 'Arial';
 	
 	height: 100%;
 	margin: 0;
@@ -286,6 +286,8 @@ hr {
 	background: #222;
 	color: #ccc;
 
+	box-shadow: inset 0 -1px 10px rgba(0, 0, 0, .2);
+
 	&.ok {
 		background: #3B5134;
 		border-color: #5D963A;
@@ -298,16 +300,19 @@ hr {
 	}
 
 	.option-title {
+		color: #ddd;
 		padding: 2px 4px;
-		background: #333;
+		// background: #333;
+		background-image: linear-gradient(#444, #333);
 		font-weight: 700;
 		font-size: 90%;
-		text-shadow: 0 1px 0 #000;
+		letter-spacing: 0.05em;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
 		border-bottom: 1px solid #555;
 	}
 
 	.option-content {
-		padding: 4px;
+		padding: 5px;
 	}
 
 }
@@ -379,15 +384,22 @@ hr {
 }
 
 .button {
+
+	font-family: inherit;
+
 	background: #555;
-	border: 1px solid #666;
+	border: 1px solid #252525;
 	color: #ccc;
-	padding: 4px 15px;
-	text-shadow: 0 1px 0 rgba(0, 0, 0, .4);
+	padding: 4px 10px;
+	
+	text-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+	box-shadow: inset 0 -1px 2px rgba(0, 0, 0, .4);
+
+	// border-radius: 3px;
 
 	&:not(:disabled):hover {
 		background: #666;
-		border-color: #999;
+		// border-color: #999;
 		color: #fff;
 		cursor: pointer;
 	}
@@ -410,6 +422,15 @@ hr {
 		animation: 1s infinite flashing ease-in-out;
 	}
 
+	&.is-submit {
+		color: #eee;
+		// border-color: #222;
+		background: #1d912d;
+		&:hover {
+			background-color: lighten(#1d912d, 5%);
+		}
+	}
+
 }
 
 .button-group {
@@ -428,7 +449,17 @@ hr {
 	vertical-align: -2px;
 }
 
+.control {
+	&.fullwidth {
+		input {
+			width: 100%;
+		}
+	}
+}
+
 input, select {
+
+	font-family: inherit;
 
 	background: #555;
 	border: 1px solid #717171;
@@ -436,8 +467,14 @@ input, select {
 	padding: 3px 6px;
 	margin: 1px 0;
 
+	border-radius: 3px;
+
 	optgroup {
 		background-color: #666;
+	}
+
+	&[type="file"] {
+		width: 100%;
 	}
 
 	&[type="range"]{
@@ -478,6 +515,10 @@ input, select {
 	right: 0;
 	top: 0;
 	bottom: 0;
+}
+
+.is-error {
+	color: #bd2525;
 }
 
 /*

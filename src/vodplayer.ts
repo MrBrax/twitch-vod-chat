@@ -281,6 +281,8 @@ export default class VODPlayer {
     video_source: string = '';
     allCommentsFetched: boolean = false;
 
+    malformed_comments: number;
+
     // settings: any;
 
     constructor() {
@@ -361,6 +363,8 @@ export default class VODPlayer {
 
         this.niconico = false;
 
+        this.malformed_comments = 0;
+
     }
 
     /**
@@ -412,14 +416,19 @@ export default class VODPlayer {
 
             let comment: TwitchComment = chatLog.comments[i];
 
-            if (!comment.content_offset_seconds) {
+            if (comment.content_offset_seconds === undefined || comment.content_offset_seconds < 0) {
                 console.error("Malformed comment", comment);
-                return;
+                this.malformed_comments++;
+                if(this.malformed_comments > 100){
+                    alert("Too many malformed comments, something is wrong with the chat log.");
+                    this.stop();
+                }
+                continue;
             }
 
             // skip already displayed comments
             if ((<any>comment).displayed) {
-                this.debug(`skip comment, already displayed: ${i}`);
+                // this.debug(`skip comment, already displayed: ${i}`);
                 continue;
             }
 
@@ -429,7 +438,7 @@ export default class VODPlayer {
             }
 
             if (timeRelative < (comment.content_offset_seconds / this.timeScale)) {
-                this.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
+                // this.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
                 continue;
             }
 
@@ -624,29 +633,31 @@ export default class VODPlayer {
                         }
 
                         // seventv
-                        for (let fEmo of this.emotes.seventv) {
-                            if (fEmo.name == word) {
+                        if( this.emotes.seventv !== null && this.emotes.seventv.length > 0 && !found_emote ){
+                            for (let fEmo of this.emotes.seventv) {
+                                if (fEmo.name == word) {
 
-                                if(!fEmo.urls || !fEmo.urls[0] || fEmo.urls[0][1]){
-                                    console.error("invalid seventv emote", fEmo);
-                                    continue;
-                                }
-
-                                this.debug(`Insert emote "${word}" from SevenTV into comment #${commentObj.gid}`);
-                                commentObj.messageFragments.push({
-                                    type: 'emote',
-                                    data: {
-                                        network: 'seventv',
-                                        name: word,
-                                        url: fEmo.urls[0][1] // TODO: check that this https url is standardised
+                                    if(!fEmo.urls || !fEmo.urls[0] || fEmo.urls[0][1]){
+                                        console.error("invalid seventv emote", fEmo);
+                                        continue;
                                     }
-                                });
 
-                                emotes++;
+                                    this.debug(`Insert emote "${word}" from SevenTV into comment #${commentObj.gid}`);
+                                    commentObj.messageFragments.push({
+                                        type: 'emote',
+                                        data: {
+                                            network: 'seventv',
+                                            name: word,
+                                            url: fEmo.urls[0][1] // TODO: check that this https url is standardised
+                                        }
+                                    });
 
-                                found_emote = true;
-                                break;
+                                    emotes++;
 
+                                    found_emote = true;
+                                    break;
+
+                                }
                             }
                         }
                         
@@ -889,6 +900,12 @@ export default class VODPlayer {
 
         return true;
 
+    }
+
+    stop(){
+        clearInterval(this.interval);
+        this.embedPlayer.callPause(true);
+        this.malformed_comments = 0;
     }
 
     /**
@@ -1159,6 +1176,8 @@ export default class VODPlayer {
      */
     loadChatFileFromURL(url: string): void {
 
+        this.status_comments = `Loading...`;
+
         fetch(url).then(function (response) {
 
             return response.json();
@@ -1200,6 +1219,7 @@ export default class VODPlayer {
 
                     alert("Chat log unsupported, it might be too old.");
                     console.error("Chat log unsupported, it might be too old.");
+                    this.status_comments = `Error`;
                     return false;
 
                 }
@@ -1284,7 +1304,7 @@ export default class VODPlayer {
 
             this.lastCommentOffset = Math.round(chatLog.comments[this.commentAmount - 1].content_offset_seconds);
 
-            this.status_comments = `OK (v${this.chatlog_version}, ${this.channelName}, ${this.commentAmount}c, ${this.lastCommentOffset}o, ${this.vodLength}s)!`;
+            this.status_comments = `OK (${this.chatlog_version}, ${this.channelName}, ${this.commentAmount}c, ${this.lastCommentOffset}o, ${this.vodLength}s)!`;
 
             if( this.vodLength && this.vodLength > this.lastCommentOffset + 90 ){
                 this.status_comments += " (end of comments don't sync up)";
