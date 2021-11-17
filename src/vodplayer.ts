@@ -137,7 +137,7 @@ let defaultSettings = {
     chatAlign: 'left',
     chatTextAlign: 'left',
     fontSize: 12,
-    fontName: 'Open Sans'
+    fontName: 'Inter'
 }
 
 export default class VODPlayer {
@@ -307,10 +307,6 @@ export default class VODPlayer {
 
         this.videoChapters = [];
 
-        // this.ffz            = null;
-        // this.bttv_channel   = null;
-        // this.bttv_global    = null;
-
         this.timeStart = null;
         this.chatOffset = 0;
 
@@ -367,19 +363,13 @@ export default class VODPlayer {
 
     }
 
+    /**
+     * Set document title (why again?)
+     * @deprecated
+     * @param text Title
+     */
     setTitle(text: string) {
         document.title = `${this.baseTitle} - ${text}`;
-    }
-
-    /**
-     * helper function
-     * @param target 
-     * @param search 
-     * @param replacement 
-     */
-    replaceAll(target: string, search: string, replacement: string) {
-        search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex
-        return target.replace(new RegExp(search, 'g'), replacement);
     }
 
     /**
@@ -429,24 +419,24 @@ export default class VODPlayer {
 
             // skip already displayed comments
             if ((<any>comment).displayed) {
-                // console.debug('skip comment, already displayed', i);
+                this.debug(`skip comment, already displayed: ${i}`);
                 continue;
             }
 
             if (this.settings.showVODComments && comment.source && comment.source == 'comment') {
-                // console.debug('skip comment, vod comment', i);
+                this.debug(`skip comment, vod comment: ${i}`);
                 continue; // skip vod comments?
             }
 
             if (timeRelative < (comment.content_offset_seconds / this.timeScale)) {
-                // console.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
+                this.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
                 continue;
             }
 
             // if skipped or something
             let commentAge = timeRelative - (comment.content_offset_seconds / this.timeScale)
             if (commentAge > 60) {
-                // console.debug('skip comment, too old', i);
+                // this.debug('skip comment, too old', i);
                 (<any>comment).displayed = true;
                 continue;
             }
@@ -458,10 +448,6 @@ export default class VODPlayer {
             commentObj.gid = i;
 
             // timestamp
-            /*
-            
-            */
-
             commentObj.time = this.timeFormat(comment.content_offset_seconds);
 
             commentObj.badges = [];
@@ -470,13 +456,6 @@ export default class VODPlayer {
             if (comment.message.user_badges && this.badges.global && this.badges.channel) {
 
                 for (let b of comment.message.user_badges) {
-
-                    
-
-                    // if( b._id == 'sub-gifter' ) continue;
-                    /*
-                    
-                    */
 
                     let badgeId = b._id;
                     let badgeVersion = b.version;
@@ -503,45 +482,21 @@ export default class VODPlayer {
 
                     commentObj.badges.unshift(badgeObj); // TODO: insert in what order?
 
-                    /*
-                    let badgeImage = document.createElement('img');
-                    badgeImage.className = 'badge ' + b._id;
-                    badgeImage.src = imageSrc;
-                    commentDiv.appendChild(badgeImage);
-                    */
-
                 }
 
             }
 
             // name
-            /*
-            let nameC = document.createElement('span');
-            nameC.className = 'name';
-            nameC.innerHTML = comment.commenter.display_name + ':';
-            nameC.style.color = comment.message.user_color;
-            commentDiv.appendChild(nameC);
-            */
-
             commentObj.username = comment.commenter.display_name;
             commentObj.usernameColour = comment.message.user_color;
 
             commentObj.messageFragments = [];
-
-            // let bodyC = document.createElement('span');
 
             // make message
             for (let f of comment.message.fragments) {
 
                 // official twitch emote
                 if (f.emoticon && this.settings.emotesEnabled) {
-
-                    /*
-                    let emoC = document.createElement('img');
-                    emoC.className = 'emote twitch';
-                    emoC.src = 'https://static-cdn.jtvnw.net/emoticons/v1/' + f.emoticon.emoticon_id + '/1.0';
-                    bodyC.appendChild(emoC);
-                    */
 
                     this.debug(`Insert emote "${f.text}" from Twitch into comment #${commentObj.gid}`);
                     commentObj.messageFragments.push({
@@ -719,50 +674,6 @@ export default class VODPlayer {
 
                     }
 
-                    /*
-                    if( emotes == 0 ){
-                        commentObj.messageFragments.push({
-                            type: 'text',
-                            data: f.text
-                        });
-                    }
-                    */
-
-                    /*
-                    let fragC = document.createElement('span');
-
-                    let finalText : string = f.text;
-
-                    commentObj.messageFragments.push({ type: 'text', data: f.text });
-
-                    if( this.emotesEnabled ){
-
-                        // ffz
-                        for( let fSet in this.emotes.ffz.sets ){
-                            for( let fEmo of this.emotes.ffz.sets[fSet].emoticons ){
-                                finalText = this.replaceAll(finalText, fEmo.name, '<img class="emote ffz" src="https:' + fEmo.urls[1] + '" />');
-                            }
-                        }
-
-                        // bttv_channel
-                        if( this.emotes.bttv_channel && this.emotes.bttv_channel.emotes ){
-                            for( let fEmo of this.emotes.bttv_channel.emotes ){
-                                finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_channel bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
-                            }
-                        }
-
-                        // bttv_global
-                        for( let fEmo of this.emotes.bttv_global.emotes ){
-                            finalText = this.replaceAll(finalText, fEmo.code, '<img class="emote bttv_global bttv-emo-' + fEmo.id + '" src="https://cdn.betterttv.net/emote/' + fEmo.id + '/2x" />');
-                        }
-
-                    }
-
-                    fragC.innerHTML = finalText;
-
-                    bodyC.appendChild(fragC);
-                    */
-
                 }
 
             }
@@ -795,14 +706,6 @@ export default class VODPlayer {
                 this.commentQueue.push(commentObj);
 
             }
-
-            // console.debug('display comment', i);
-
-            // console.debug("Add comment", commentObj, this.commentQueue.length);
-
-            // commentDiv.appendChild(bodyC);
-
-            // this.elements.comments.appendChild( commentDiv );
 
             (<any>comment).displayed = true;
 
@@ -921,7 +824,11 @@ export default class VODPlayer {
 
     }
 
-    play() {
+    /**
+     * Start playing the video and chat. Can't run twice.
+     * @returns {boolean} If started
+     */
+    play(): boolean {
 
         if (this.playing) {
             alert('Already playing');
@@ -979,6 +886,8 @@ export default class VODPlayer {
         }
 
         this.playing = true;
+
+        return true;
 
     }
 
@@ -1044,7 +953,7 @@ export default class VODPlayer {
     /**
      * Reset chat
      */
-    reset() {
+    reset(): void {
 
         console.debug("Reset chat");
 
@@ -1068,7 +977,7 @@ export default class VODPlayer {
     /**
      * Update timing settings
      */
-    apply() {
+    apply(): void {
 
         console.debug('Applying options');
 
@@ -1092,7 +1001,12 @@ export default class VODPlayer {
 
     }
 
-    parseDuration(input: string) {
+    /**
+     * Parse the format twitch uses for duration (1h1m1s)
+     * @param input 1h1m1s
+     * @returns {number} Seconds
+     */
+    parseDuration(input: string): number {
 
         if (!input) return null;
 
@@ -1129,7 +1043,13 @@ export default class VODPlayer {
 
     }
 
-    loadVideo(source: string, input: HTMLInputElement) {
+    /**
+     * Load video from input
+     * @param {string} source file_http, twitch, youtube
+     * @param {HTMLInputElement} input Input element
+     * @returns Success
+     */
+    loadVideo(source: string, input: HTMLInputElement): boolean {
 
         console.debug("video input", input, input.value, input.files);
 
@@ -1193,7 +1113,13 @@ export default class VODPlayer {
 
     }
 
-    loadChat(source: string, input: HTMLInputElement) {
+    /**
+     * Load chat from input
+     * @param {string} source file_http, twitch
+     * @param {HTMLInputElement} input Input element
+     * @returns Success
+     */
+    loadChat(source: string, input: HTMLInputElement): boolean {
 
         console.debug("chat input", input, input.value, input.files);
 
@@ -1228,9 +1154,10 @@ export default class VODPlayer {
 
     /**
      * Load chat file from URL, either locally or remote
+     * @todo return success
      * @param url 
      */
-    loadChatFileFromURL(url: string) {
+    loadChatFileFromURL(url: string): void {
 
         fetch(url).then(function (response) {
 
@@ -1420,9 +1347,9 @@ export default class VODPlayer {
     }
 
     /**
-     * Fetch user badges from twitch
+     * Fetch global and channel badges from twitch
      */
-    fetchBadges() {
+    fetchBadges(): boolean {
 
         if (!this.channelId) {
             console.error('No channel id for badges');
@@ -1436,19 +1363,19 @@ export default class VODPlayer {
 
             if (json2.badge_sets) {
                 this.badges.global = json2.badge_sets;
-                console.debug('twitch badges channel', this.badges.global);
+                console.debug('twitch badges global', this.badges.global);
             }
 
         });
 
-        // global badges
+        // channel badges
         fetch(`https://badges.twitch.tv/v1/badges/channels/${this.channelId}/display`).then(function (response) {
             return response.json();
         }).then((json2) => {
 
             if (json2.badge_sets) {
                 this.badges.channel = json2.badge_sets;
-                console.debug('twitch badges global', this.badges.channel);
+                console.debug('twitch badges channel', this.badges.channel);
             }
 
         });
@@ -1464,10 +1391,6 @@ export default class VODPlayer {
             console.error('No channel name for emotes');
             return false;
         }
-
-        // let status_ffz = document.getElementById('status-text-ffz');
-        // let status_bttv_channel = document.getElementById('status-text-bttv_channel');
-        // let status_bttv_global = document.getElementById('status-text-bttv_global');
 
         // ffz
         console.log('Fetching FFZ');
@@ -1524,6 +1447,7 @@ export default class VODPlayer {
             this.status_bttv_global = `OK! (${Object.keys(this.emotes.bttv_global).length} emotes)`;
         });
         
+        // seventv
         console.log('Fetching seventv');
         this.status_seventv = 'Fetching...';
         fetch(`https://api.7tv.app/v2/users/${this.channelId}/emotes`).then(function (response) {
@@ -1632,10 +1556,10 @@ export default class VODPlayer {
 
         // if(start) url += '?content_offset_seconds=' + start;
 
-        if (cursor) url += '?cursor=' + cursor;
+        if (cursor) url += `?cursor=${cursor}`;
 
         if (this.videoCurrentTime > 0) {
-            url += (cursor ? '&' : '?') + 'content_offset_seconds=' + this.videoCurrentTime;
+            url += (cursor ? '&' : '?') + `content_offset_seconds=${this.videoCurrentTime}`;
         }
 
         return fetch(url, {
@@ -1657,6 +1581,10 @@ export default class VODPlayer {
 
     }
 
+    /**
+     * Video helper for twitch helix api
+     * @returns {Object} Video JSON
+     */
     async fetchVideoInfo() {
 
         return fetch(`https://api.twitch.tv/helix/videos?id=${this.videoId}`, {
@@ -1667,14 +1595,6 @@ export default class VODPlayer {
         }).then((resp) => {
             return resp.json();
         });
-        /*.then( (json) => {
-
-            console.log( 'fetchVideoInfo', this.videoId, json.data[0] );
-
-            return json;
-
-        });
-        */
 
     }
 
@@ -1707,10 +1627,13 @@ export default class VODPlayer {
     }
     */
 
-    async fetchTwitchToken() {
+    /**
+     * Video helper for twitch helix api
+     */
+    async fetchTwitchToken(): Promise<Object|boolean> {
 
         if (!this.settings.twitchClientId || !this.settings.twitchSecret) {
-            alert("missing either twitch client id or secret");
+            alert("Missing either Twitch client id or secret");
             return false;
         }
 
@@ -1741,7 +1664,9 @@ export default class VODPlayer {
 
     }
 
-
+    /**
+     * @deprecated
+     */
     hooks() {
 
         // seeking on video player
@@ -1792,6 +1717,11 @@ export default class VODPlayer {
 
     }
 
+    /**
+     * Format seconds to HH:MM:SS
+     * @param seconds 
+     * @returns {string} HH:MM:SS
+     */
     timeFormat(seconds: number) {
 
         /*
@@ -1841,9 +1771,9 @@ export default class VODPlayer {
         this.settings = { ...defaultSettings };
     }
 
-    debug( text: string ): void {
+    debug( ...text: any[] ): void {
         if( process.env.NODE_ENV !== "development" ) return;
-        console.debug(text);
+        console.debug(...text);
     }
 
     get videoPosition() {
