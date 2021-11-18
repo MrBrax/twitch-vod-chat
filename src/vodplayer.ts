@@ -85,7 +85,7 @@ export default class VODPlayer {
      * @deprecated
      */
     timeStart: number | null;
-    timeOffset: number;
+    timeOffset: number = 0;
 
     chatOffset: number;
     commentAmount: number | null;
@@ -304,13 +304,17 @@ export default class VODPlayer {
 
         let timeRelative = (timeNow - this.timeStart) / 1000;
 
+        // deprecated
         if ((timeRelative * this.timeScale) > this.vodLength + 5) {
             alert('Stopped playback');
             clearInterval(this.interval);
             return;
         }
 
-        // for( let i = 0; i < this.commentAmount; i++ ){
+        if( this.timeOffset > this.vodLength + 5){
+            this.stop();
+            return false;
+        }
 
         if (chatLog.comments.length == 0) {
             console.error("No comments to display");
@@ -331,7 +335,7 @@ export default class VODPlayer {
             }
 
             // skip already displayed comments
-            if ((<any>comment).displayed) {
+            if (comment.displayed) {
                 // this.debug(`skip comment, already displayed: ${i}`);
                 continue;
             }
@@ -341,10 +345,17 @@ export default class VODPlayer {
                 continue; // skip vod comments?
             }
 
+            // deprecated
             if (timeRelative < (comment.content_offset_seconds / this.timeScale)) {
                 // this.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
                 continue;
             }
+
+            /*
+            if(this.timeOffset < (comment.content_offset_seconds / this.timeScale)){
+                continue;
+            }
+            */
 
             // if skipped or something
             let commentAge = timeRelative - (comment.content_offset_seconds / this.timeScale)
@@ -845,6 +856,7 @@ export default class VODPlayer {
 
             // offset chat
             this.timeStart = (Date.now() - (seconds * 1000)) + this.chatOffset;
+            this.timeOffset = seconds;
 
             console.debug("Post seek", this.videoCurrentTime, this.timeStart);
 

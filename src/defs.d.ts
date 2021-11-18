@@ -68,6 +68,9 @@ interface TwitchCommentDump {
 
 interface TwitchComment {
 
+    // internal
+    displayed: boolean;
+
     _id: string;
     channel_id: string;
     // commenter: Array;
