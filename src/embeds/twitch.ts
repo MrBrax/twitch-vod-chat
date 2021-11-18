@@ -112,6 +112,11 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
         // let 
     }
 
+    pause() {
+        this.player.pause();
+        return true;
+    }
+
     seek(seconds: number) {
         this.player.seek(seconds);
     }

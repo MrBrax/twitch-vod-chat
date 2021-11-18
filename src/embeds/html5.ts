@@ -61,6 +61,12 @@ export default class EmbedVideoPlayer extends EmbedPlayer {
         this.player.play();
     }
 
+    pause() {
+        if(!this.player) return false;
+        this.player.pause();
+        return true;
+    }
+
     seek(seconds: number) {
         if(!this.player) return;
         this.player.currentTime = seconds;

@@ -26,6 +26,7 @@
   "homepage": "https://github.com/MrBrax/twitch-vod-chat#readme",
   "dependencies": {},
   "devDependencies": {
+    "@types/youtube-player": "^5.5.5",
     "babel-loader": "^8.1.0",
     "css-loader": "^3.6.0",
     "ts-loader": "^6.2.2",

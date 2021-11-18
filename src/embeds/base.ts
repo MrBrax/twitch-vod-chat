@@ -28,6 +28,11 @@ export default class EmbedPlayer {
         alert('no play implemented');
     }
 
+    pause(): boolean {
+        alert('no pause implemented');
+        return false;
+    }
+
     seek(seconds: number) {
         alert('no seek implemented');
     }

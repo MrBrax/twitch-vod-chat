@@ -1,9 +1,10 @@
 import EmbedPlayer from './base';
+import { YouTubePlayer } from 'youtube-player/dist/types';
 
 export default class EmbedYouTubePlayer extends EmbedPlayer {
 
     youtube_id: string;
-    player: any;
+    player: YouTubePlayer | null;
 
     YT_PLAY: number = 1;
     YT_PAUSE: number = 2;
@@ -51,8 +52,9 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
         video_container.appendChild(player_element);
 
         console.log("Access YouTube API");
+        
         this.player = null;
-        // (<any>window).onYouTubeIframeAPIReady = () => {
+        
         this.player = new (<any>window).YT.Player(player_element, {
             width: '1280',
             height: '720',
@@ -63,7 +65,6 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
                 'onError': onError
             }
         });
-        // }
 
     }
 
@@ -71,8 +72,13 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
         this.player.playVideo();
     }
 
+    pause(){
+        this.player.pauseVideo();
+        return true;
+    }
+
     seek(seconds: number) {
-        this.player.seekTo(seconds);
+        this.player.seekTo(seconds, false);
     }
 
     getDuration() {
