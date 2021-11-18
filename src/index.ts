@@ -104,16 +104,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // load chat
             if (params.chatdump && vodplayer.embedPlayer) {
-                vodplayer.loadTwitchChat(params.chatdump);
+                vodplayer.loadTwitchChat(params.chatdump).then( status => {
+                    console.log("auto chat load 1", status);
+                    if (params.offset) vodplayer.seek(params.offset);
+                });
             } else if (params.chatfile && vodplayer.embedPlayer) {
                 vodplayer.embedPlayer.setCallback('ready', () => {
                     console.debug("player ready, load chat file");
-                    vodplayer.loadChatFileFromURL(params.chatfile);
+                    vodplayer.loadChatFileFromURL(params.chatfile).then( status => {
+                        console.log("auto chat load 2", status);
+                        if (params.offset) vodplayer.seek(params.offset);
+                    });
                 });
             }else{
                 alert("No chat source set");
                 return false;
             }
+
+            
 
         }
     }
