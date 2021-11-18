@@ -32,8 +32,20 @@
 			</div>
 		</div>
 
+		<!--
 		<div id="playback_info">
-			<div id="playback_text">Playback text</div>
+			
+		</div>
+		-->
+
+		<div id="video-controls">
+			<div class="video-controls-buttons">
+				<button class="pb-button" @click="play" v-if="!$root.vp.playing">▶</button>
+				<button class="pb-button" @click="pause" v-else>⏸</button>
+				<button class="pb-button" @click="fullscreen">Fullscreen</button>
+				<button class="pb-button" @click="resetChat">Reset chat</button>
+			</div>
+			<div class="video-controls-text" id="playback_text">Playback text</div>
 		</div>
 
 		<div id="controls">
@@ -256,10 +268,7 @@
 
 			<div class="option-group">
 				<div class="option-content">
-					<button class="button is-submit is-flashing" @click="play">Play</button>
-					<button class="button" @click="stop">Stop</button>
-					<button class="button" @click="apply">Apply</button>
-					<button class="button" @click="fullscreen">Fullscreen</button>
+					<button class="button" @click="apply">Apply timings</button>
 					<button class="button" @click="saveSettings">Save settings</button>
 					<button class="button" @click="resetSettings">Reset settings</button>
 					<span>
@@ -319,11 +328,14 @@ export default {
 		play(){
 			this.$root.vp.play();
 		},
-		stop(){
-			this.$root.vp.stop();
+		pause(){
+			this.$root.vp.pause();
 		},
 		apply(){
 			this.$root.vp.apply();
+		},
+		resetChat(){
+			this.$root.vp.reset();
 		},
 		fullscreen(){
 			this.$root.vp.fullscreen();

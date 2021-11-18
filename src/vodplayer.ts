@@ -312,7 +312,7 @@ export default class VODPlayer {
         }
 
         if( this.timeOffset > this.vodLength + 5){
-            this.stop();
+            this.pause();
             return false;
         }
 
@@ -329,7 +329,7 @@ export default class VODPlayer {
                 this.malformed_comments++;
                 if(this.malformed_comments > 100){
                     alert("Too many malformed comments, something is wrong with the chat log.");
-                    this.stop();
+                    this.pause();
                 }
                 continue;
             }
@@ -822,7 +822,7 @@ export default class VODPlayer {
 
     }
 
-    stop(){
+    pause(){
         clearInterval(this.interval);
         this.embedPlayer.callPause(true);
         this.malformed_comments = 0;
