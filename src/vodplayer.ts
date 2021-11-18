@@ -7,115 +7,12 @@ import EmbedVideoPlayer from './embeds/html5';
 import EmbedTwitchPlayer from './embeds/twitch';
 import EmbedYouTubePlayer from './embeds/youtube';
 
-declare const Twitch: any;
-
-interface HTMLInputEvent extends Event {
-    target: HTMLInputElement & EventTarget;
-}
-
-interface TwitchUserBadgeProxy {
-    url: string;
-    id: string;
-}
-
-interface TwitchUserBadge {
-
-}
-
-interface TwitchCommentProxy extends TwitchComment {
-    time: string;
-    gid: number;
-    messageFragments: {
-        type: string;
-        data: {
-            network?: string;
-            url?: string;
-            name?: string;
-            class?: string;
-        } | string;
-    }[];
-    usernameColour: string;
-    username: string;
-    badges: TwitchUserBadgeProxy[];
-    displayed: boolean;
-}
-
-interface TwitchCommentDump {
-    comments: TwitchComment[];
-    video: {
-        created_at: string;
-        description: string;
-        duration: string;
-        id: string;
-        language: string;
-        published_at: string;
-        thumbnail_url: string;
-        title: string;
-        type: string;
-        url: string;
-        user_id: string;
-        user_name: string;
-        view_count: number;
-        viewable: string;
-
-        /** TwitchDownloader */
-        start: number;
-        /** TwitchDownloader */
-        end: number;
-
-        /** @deprecated */
-        length: string;
-        /** @deprecated */
-        channel: {
-            _id: string;
-            display_name: string;
-        }
-        /** @deprecated */
-        _id: string;
-    }
-}
-
-interface TwitchComment {
-
-    _id: string;
-    channel_id: string;
-    // commenter: Array;
-    content_id: string;
-    content_offset_seconds: number;
-    content_type: string;
-    commenter: {
-        _id: string;
-        bio: string;
-        created_at: string;
-        display_name: string;
-        logo: string;
-        name: string;
-        type: string;
-        updated_at: string;
-    };
-    message: {
-        body: string;
-        // emoticons: {}
-
-        fragments: {
-            text: string;
-            emoticon: {
-                emoticon_id: string;
-                emoticon_set_id: string;
-            }
-        }[];
-        user_badges: {
-            _id: string;
-            version: number;
-        }[];
-        user_color: string;
-    };
-    created_at: string;
-    // message: Array;
-    source: string;
-    state: string;
-    updated_at: string;
-}
+import {
+    TwitchComment,
+    TwitchCommentDump,
+    TwitchCommentProxy,
+    TwitchUserBadgeProxy,
+} from './defs';
 
 // decouple for vue performance
 let chatLog: TwitchCommentDump;
@@ -188,6 +85,7 @@ export default class VODPlayer {
      * @deprecated
      */
     timeStart: number | null;
+    timeOffset: number;
 
     chatOffset: number;
     commentAmount: number | null;
@@ -198,6 +96,10 @@ export default class VODPlayer {
     channelName: string;
 
     noVideo: boolean;
+
+    /**
+     * Is video+chat playing?
+     */
     playing: boolean;
 
     automated: boolean;
@@ -855,7 +757,6 @@ export default class VODPlayer {
 
         console.debug('Started playback');
 
-
         if (!this.chatLoaded) {
             alert('No chat log added');
             return false;
@@ -866,6 +767,7 @@ export default class VODPlayer {
             return false;
         }
 
+        // clear comment queue, this will be populated and cleaned over time
         this.commentQueue = [];
 
         this.timeStart = Date.now();
@@ -879,7 +781,7 @@ export default class VODPlayer {
 
         let offsetInput = (<HTMLInputElement>document.getElementById('optionOffset'));
         if (offsetInput) {
-            console.debug('Offset: ' + offsetInput.value);
+            console.debug(`Offset: ${offsetInput.value}`);
         }
 
         this.apply();
