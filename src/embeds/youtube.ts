@@ -9,6 +9,8 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
     YT_PLAY: number = 1;
     YT_PAUSE: number = 2;
 
+    isReady: boolean;
+
     constructor(youtube_id: string) {
         super();
         this.youtube_id = youtube_id;
@@ -24,6 +26,7 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
             if(!this.vodplayer) return;
             this.setStatusText('YouTube Player ready!');
             console.log("player ready", event);
+            this.isReady = true;
             this.vodplayer.videoLoaded = true;
             if (this.callbacks['ready']) {
                 this.callbacks['ready']();
@@ -82,10 +85,12 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
     }
 
     getDuration() {
+        if(!this.isReady) return;
         return this.player.getDuration();
     }
 
     getCurrentTime() {
+        if(!this.isReady) return;
         return this.player.getCurrentTime();
     }
 

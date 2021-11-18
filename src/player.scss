@@ -223,6 +223,8 @@ hr {
 	width: $width;
 	height: $height;
 
+	aspect-ratio: 16 / 9;
+
 	position: relative;
 
 	overflow: hidden;
@@ -245,9 +247,16 @@ hr {
 	background: #f0f;
 }
 
-#video-container {
+#video_container {
 	width: 100%;
 	height: 100%;
+	video {
+		width: 100%;
+		height: 100%;
+	}
+	iframe {
+		pointer-events: none; // maybe
+	}
 }
 
 #osd {
@@ -266,7 +275,8 @@ hr {
 }
 
 #controls {
-	width: $width;
+	// width: $width;
+	width: 100%;
 }
 
 .option-row {
@@ -323,7 +333,8 @@ hr {
 	height: 24px;
 	font-size: 14px;
 	font-weight: 700;
-	width: $width;
+	// width: $width;
+	width: 100%;
 	background: #222;
 	border-bottom: 1px solid #333;
 	color: #fff;
@@ -349,7 +360,8 @@ hr {
 
 #timeline-markers {
 	position: relative;
-	width: $width;
+	// width: $width;
+	width: 100%;
 	height: 16px;
 	pointer-events: none;
 }
@@ -369,7 +381,8 @@ hr {
 	overflow: hidden;
 	font-size: 14px;
 	font-weight: 700;
-	width: $width;
+	// width: $width;
+	width: 100%;
 	background: #222;
 	color: #fff;
 	padding: 2px 4px;

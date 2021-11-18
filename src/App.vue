@@ -1,6 +1,6 @@
 <template>
-	<div id="app">
-    	<div id="player">
+	<div ref="app" id="app">
+    	<div ref="player" id="player">
 
 			<div id="video_container"></div>
 
@@ -76,6 +76,15 @@
 						</div>
 						<hr>
 						<button class="button is-submit" @click="submitVideo">Submit</button>
+						<!--
+						<select v-model="video_height">
+							<option value="480">480p</option>
+							<option value="720">720p</option>
+							<option value="1080">1080p</option>
+							<option value="1440">1440p</option>
+							<option value="2160">2160p</option>
+						</select>
+						-->
 					</div>
 				</div>
 				
@@ -266,9 +275,6 @@
 </template>
 
 <script>
-
-import HelloWorld from './components/HelloWorld.vue'
-
 import ChatMessage from './components/ChatMessage.vue'
 
 export default {
@@ -282,7 +288,11 @@ export default {
 			chat_source: 'file',
 			input_video: '',
 			input_chat: '',
+			video_height: 720,
 		};
+	},
+	mounted(){
+		console.log("Vod player mounted", this.video_height);
 	},
 	methods: {
 		submitVideo(event){
@@ -319,6 +329,10 @@ export default {
 			this.$root.vp.fullscreen();
 		},
 		seek(ev){
+			if(!this.$root.vp.embedPlayer){
+				console.error("trying to seek from gui with no embed player");
+				return false;
+			}
 			let duration = this.$root.vp.embedPlayer.getDuration();
 			let rect = timeline.getBoundingClientRect();
 			let percent = ( ev.clientX - rect.left ) / timeline.clientWidth;
@@ -361,6 +375,14 @@ export default {
 			return this.video_source == 'twitch' || this.chat_source == 'twitch';
 		}
 
-    }
+    },
+	watch: {
+		video_height(newVal, oldVal){
+			console.log(newVal);
+			this.$refs.player.style.width = "auto";
+			this.$refs.player.style.height = `${newVal}px`;
+			this.$refs.app.style.width = `auto`;
+		}
+	},
 }
 </script>
