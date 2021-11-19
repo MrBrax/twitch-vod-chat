@@ -75,13 +75,11 @@ interface Set {
     emoticons: Emoticon[];
 }
 
-interface Sets {
-    [key: number]: Set;
-}
-
 interface FFZEmoteData {
     room: Room;
-    sets: Sets;
+    // [sets: number]: Set;
+    // sets: Map<number, Set>;
+    sets: Record<number, Set>;
 }
 
 export default class FFZEmoteProvider extends BaseEmoteProvider {
@@ -104,7 +102,8 @@ export default class FFZEmoteProvider extends BaseEmoteProvider {
         this.emotes = json2;
 
         console.log('ffz', this.emotes);
-        this.status = `OK! (${Object.keys(this.emotes.sets).length} sets)`;
+        let amount = Object.values(this.emotes.sets).reduce((count, row) => count + Object.keys(row.emoticons).length, 0);
+        this.status = `OK! (${Object.keys(this.emotes.sets).length} sets, ${amount} emotes)`;
 
     }
 

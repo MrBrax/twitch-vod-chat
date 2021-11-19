@@ -50,7 +50,7 @@ export default class BTTVChannelEmoteProvider extends BaseEmoteProvider {
         this.emotes = json2;
 
         console.log('bttvchannel', this.emotes);
-        this.status = `OK! (${this.emotes.channelEmotes.length}c, ${this.emotes.sharedEmotes.length}s)`;
+        this.status = `OK! (${this.emotes.channelEmotes.length} channel, ${this.emotes.sharedEmotes.length} shared)`;
 
     }
 

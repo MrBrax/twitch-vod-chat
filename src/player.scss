@@ -22,8 +22,16 @@ $center: true;
 }
 
 @keyframes slide {
-	0% { max-height: 0px; }
-	100% { max-height: 100px; }
+	0% {
+		// max-height: 0px;
+		opacity: 0;
+		transform: translate(0px, 32px);
+	}
+	100% {
+		// max-height: 100px;
+		opacity: 1;
+		transform: translate(0px, 0px);
+	}
 }
 
 * { box-sizing: border-box; }
