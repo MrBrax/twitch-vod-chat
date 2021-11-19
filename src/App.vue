@@ -157,10 +157,10 @@
 					<div class="option-content">
 						<strong>Video:</strong> <span>{{ $root.vp.status_video }}</span><br>
 						<strong>Comments:</strong> <span>{{ $root.vp.status_comments }}</span><br>
-						<strong>FFZ:</strong> <span>{{ $root.vp.status_ffz }}</span><br>
-						<strong>BTTV Channel:</strong> <span>{{ $root.vp.status_bttv_channel }}</span><br>
-						<strong>BTTV Global:</strong> <span>{{ $root.vp.status_bttv_global }}</span><br>
-						<strong>SevenTV:</strong> <span>{{ $root.vp.status_seventv }}</span>
+						<strong>FFZ:</strong> <span>{{ $root.vp.emotes.ffz.status }}</span><br>
+						<strong>BTTV Channel:</strong> <span>{{ $root.vp.emotes.bttv_channel.status }}</span><br>
+						<strong>BTTV Global:</strong> <span>{{ $root.vp.emotes.bttv_global.status }}</span><br>
+						<strong>SevenTV:</strong> <span>{{ $root.vp.emotes.seventv.status }}</span>
 					</div>
 				</div>
 

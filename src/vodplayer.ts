@@ -13,6 +13,11 @@ import {
     TwitchCommentProxy,
     TwitchUserBadgeProxy,
 } from './defs';
+import FFZEmoteProvider from './emoteproviders/ffz';
+import BTTVGlobalEmoteProvider from './emoteproviders/bttv_global';
+import BTTVChannelEmoteProvider from './emoteproviders/bttv_channel';
+import SevenTVEmoteProvider from './emoteproviders/seventv';
+import BaseEmoteProvider from './emoteproviders/base';
 
 // decouple for vue performance
 let chatLog: TwitchCommentDump;
@@ -59,13 +64,17 @@ export default class VODPlayer {
         "monospace":        "monospace",
     };
 
+    /*
     emotes: {
-        ffz: any;
-        bttv_channel: any;
-        bttv_global: any;
-        seventv: any;
+        ffz: FFZEmoteProvider;
+        bttv_channel: BTTVChannelEmoteProvider;
+        bttv_global: BTTVGlobalEmoteProvider;
+        seventv: SevenTVEmoteProvider;
     };
-    
+    */
+    // emotes: {[key: string]: BaseEmoteProvider};
+    emotes: Record<string, BaseEmoteProvider>;
+
     badges: {
         global: any;
         channel: any;
@@ -104,16 +113,6 @@ export default class VODPlayer {
 
     automated: boolean;
 
-    /*
-    emotesEnabled: boolean;
-    timestampsEnabled: boolean;
-    badgesEnabled: boolean;
-    smallEmotes: boolean;
-    showVODComments: boolean;
-    */
-
-    // chatStroke: boolean;
-
     twitchClientId: string;
 
     channelId: string = '';
@@ -132,14 +131,6 @@ export default class VODPlayer {
 
     videoLoaded: boolean;
     chatLoaded: boolean;
-
-    /*
-    _chatWidth: number;
-    _chatTop: number;
-    _chatBottom: number;
-    _chatStyle: string;
-    _chatBackgroundOpacity: number;
-    */
 
     commentQueue: TwitchCommentProxy[];
     commentLimit: number;
@@ -196,10 +187,10 @@ export default class VODPlayer {
         this.automated = false;
 
         this.emotes = {
-            ffz: null,
-            bttv_channel: null,
-            bttv_global: null,
-            seventv: null,
+            ffz: new FFZEmoteProvider(),
+            bttv_channel: new BTTVChannelEmoteProvider(),
+            bttv_global: new BTTVGlobalEmoteProvider(),
+            seventv: new SevenTVEmoteProvider(),
         };
 
         this.badges = {
@@ -444,30 +435,41 @@ export default class VODPlayer {
 
                         let found_emote = false;
 
+                        for(let provider in this.emotes){
+                            this.emotes[provider].parseComment(word, commentObj);
+                        }
+
                         // ffz
-                        for (let fSet in this.emotes.ffz.sets) {
-                            for (let fEmo of this.emotes.ffz.sets[fSet].emoticons) {
-                                if (fEmo.name == word) {
+                        // this.emotes.forEach(() => {});
+                        // this.emotes.ffz.parseComment(word, commentObj);
+                        /*
+                        if(this.emotes.ffz.getEmotes()){
+                            for (let fSet in this.emotes.ffz.getEmotes().sets) {
+                                for (let fEmo of this.emotes.ffz.getEmotes().sets[fSet].emoticons) {
+                                    if (fEmo.name == word) {
 
-                                    this.debug(`Insert emote "${word}" from FFZ into comment #${commentObj.gid}`);
-                                    commentObj.messageFragments.push({
-                                        type: 'emote',
-                                        data: {
-                                            network: 'ffz',
-                                            name: word,
-                                            url: 'https:' + fEmo.urls[1] // TODO: check that this https url is standardised
-                                        }
-                                    });
+                                        this.debug(`Insert emote "${word}" from FFZ into comment #${commentObj.gid}`);
+                                        commentObj.messageFragments.push({
+                                            type: 'emote',
+                                            data: {
+                                                network: 'ffz',
+                                                name: word,
+                                                url: 'https:' + fEmo.urls[1] // TODO: check that this https url is standardised
+                                            }
+                                        });
 
-                                    emotes++;
+                                        emotes++;
 
-                                    found_emote = true;
-                                    break;
+                                        found_emote = true;
+                                        break;
 
+                                    }
                                 }
                             }
                         }
+                        */
 
+                        /*
                         // bttv shared emotes
                         if (this.emotes.bttv_channel && this.emotes.bttv_channel.sharedEmotes && !found_emote) {
 
@@ -521,8 +523,12 @@ export default class VODPlayer {
                             }
 
                         }
+                        */
+                        // this.emotes.bttv_channel.parseComment(word, commentObj);
 
                         // bttv_global
+                        // this.emotes.bttv_global.parseComment(word, commentObj);
+                        /*
                         if (this.emotes.bttv_global && !found_emote) {
                             for (let fEmo of this.emotes.bttv_global) {
                                 if (fEmo.code == word) {
@@ -1345,7 +1351,12 @@ export default class VODPlayer {
             return false;
         }
 
+        for(let provider in this.emotes){
+            this.emotes[provider].fetchEmotes(this.channelId);
+        }
+
         // ffz
+        /*
         console.log('Fetching FFZ');
         this.status_ffz = 'Fetching...';
         fetch(`https://api.frankerfacez.com/v1/room/id/${this.channelId}`).then(function (response) {
@@ -1362,8 +1373,11 @@ export default class VODPlayer {
             console.log('ffz', this.emotes.ffz);
             this.status_ffz = `OK! (${Object.keys(this.emotes.ffz.sets).length} sets)`;
         });
+        */
+        // this.emotes.ffz.fetchEmotes(this.channelId);
 
         // bttv_channel v3
+        /*
         console.log('Fetching BTTV_Channel');
         this.status_bttv_channel = 'Fetching...';
         fetch(`https://api.betterttv.net/3/cached/users/twitch/${this.channelId}`).then(function (response) {
@@ -1381,8 +1395,11 @@ export default class VODPlayer {
             let emoteNum = Object.keys(this.emotes.bttv_channel.channelEmotes).length + Object.keys(this.emotes.bttv_channel.sharedEmotes).length;
             this.status_bttv_channel = `OK! (${emoteNum} emotes)`;
         });
+        */
+        // this.emotes.bttv_channel.fetchEmotes(this.channelId);
 
         // bttv_global v3
+        /*
         console.log('Fetching BTTV_Global');
         this.status_bttv_global = 'Fetching...';
         fetch('https://api.betterttv.net/3/cached/emotes/global').then(function (response) {
@@ -1399,8 +1416,11 @@ export default class VODPlayer {
             console.log('bttv_global', this.emotes.bttv_global);
             this.status_bttv_global = `OK! (${Object.keys(this.emotes.bttv_global).length} emotes)`;
         });
+        */
+        // this.emotes.bttv_global.fetchEmotes(this.channelId);
         
         // seventv
+        /*
         console.log('Fetching seventv');
         this.status_seventv = 'Fetching...';
         fetch(`https://api.7tv.app/v2/users/${this.channelId}/emotes`).then(function (response) {
@@ -1423,6 +1443,8 @@ export default class VODPlayer {
             console.log('seventv', this.emotes.seventv);
             this.status_seventv = `OK! (${this.emotes.seventv.length} emotes)`;
         });
+        */
+        // this.emotes.seventv.fetchEmotes(this.channelId);
 
     }
 
