@@ -124,9 +124,11 @@ hr {
 	}
 
 	.comment {
-		// min-height: 20px;
-		/* animation: fade 0.2s; */
-		animation: slide 0.1s ease-out;
+		min-height: 20px;
+		
+		// broken atm
+		// animation: slide 0.3s ease-out;
+		// overflow: hidden;
 	}
 
 	&.has-stroke .comment {

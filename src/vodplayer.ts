@@ -371,7 +371,7 @@ export default class VODPlayer {
 
             let commentObj: any = {};
 
-            commentObj.gid = i;
+            commentObj.gid = comment._id;
 
             // timestamp
             commentObj.time = this.timeFormat(comment.content_offset_seconds);
