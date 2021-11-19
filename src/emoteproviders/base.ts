@@ -14,7 +14,13 @@ export default class BaseEmoteProvider {
         return this.emotes;
     }
 
-    parseComment(word: string, commentObj: TwitchCommentProxy){
+    /**
+     * 
+     * @param word 
+     * @param commentObj 
+     * @returns If emote was found
+     */
+    parseComment(word: string, commentObj: TwitchCommentProxy): boolean {
         throw('Not implemented');
     }
 

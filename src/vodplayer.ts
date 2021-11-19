@@ -447,7 +447,9 @@ export default class VODPlayer {
                         let found_emote = false;
 
                         for(let provider in this.emotes){
-                            this.emotes[provider].parseComment(word, commentObj);
+                            if( this.emotes[provider].parseComment(word, commentObj) ){
+                                found_emote = true;
+                            }
                         }
 
                         // ffz
