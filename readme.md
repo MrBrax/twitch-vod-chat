@@ -38,11 +38,9 @@ Just download chat, but don't input a video at all.
 
 Open the player.html page, load the video file (for better stability) and chat dump (can take a while).
 
-Set settings as wanted, then press Start. Pressing apply while playing will apply modified settings.
+Set settings as wanted, then press Start Playback. Pressing apply while playing will apply modified settings.
 
-Right clicking the video and showing controls makes it so you can seek the video.
-
-Press space when player is focused to play, useful if you've toggled fullscreen.
+Press space when player is focused to play, useful if you've toggled fullscreen. Arrow keys to seek.
 
 # Recording
 

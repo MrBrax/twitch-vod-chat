@@ -1717,15 +1717,26 @@ export default class VODPlayer {
         */
 
         // space to play
-        /*
-        this.elements.player.addEventListener('keyup', (ev: KeyboardEvent) => {
-            if (ev.keyCode == 32) {
-                ev.preventDefault();
-                this.play();
-                return false;
+        document.body.addEventListener('keyup', (ev: KeyboardEvent) => {
+            console.log("keyup", ev.key);
+            if(this.isReady){
+                if (ev.key == " ") {
+                    console.log("Try to pause video from space");
+                    this.togglePause();
+                    ev.preventDefault();
+                    return false;
+                }else if(ev.key == "ArrowLeft"){
+                    this.seek(Math.min(Math.max(this.embedPlayer.getCurrentTime() - 10, 0), this.vodLength));
+                    ev.preventDefault();
+                    return false;
+                }else if(ev.key == "ArrowRight"){
+                    this.seek(Math.min(Math.max(this.embedPlayer.getCurrentTime() + 10, 0), this.vodLength));
+                    ev.preventDefault();
+                    return false;
+                }
             }
         });
-        */
+        
 
         console.debug('Added hooks');
 
