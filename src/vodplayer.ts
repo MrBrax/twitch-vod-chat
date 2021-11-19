@@ -94,7 +94,7 @@ export default class VODPlayer {
      * @deprecated
      */
     timeStart: number | null;
-    timeOffset: number = 0;
+    // timeOffset: number = 0;
 
     chatOffset: number;
     commentAmount: number | null;
@@ -108,8 +108,10 @@ export default class VODPlayer {
 
     /**
      * Is video+chat playing?
+     * @deprecated
      */
-    playing: boolean;
+    isPlaying: boolean;
+    isReady: boolean;
 
     automated: boolean;
 
@@ -244,7 +246,7 @@ export default class VODPlayer {
 
         this.noVideo = false;
 
-        this.playing = false;
+        this.isPlaying = false;
 
         /*
         this._chatTop       = 0;
@@ -276,10 +278,12 @@ export default class VODPlayer {
      */
     tick() {
 
+        /*
         if (!this.timeStart) {
             throw ('No start time in tick');
             return false;
         }
+        */
 
         if (!this.vodLength) {
             throw ('No vod length in tick');
@@ -291,18 +295,21 @@ export default class VODPlayer {
             return false;
         }
 
-        let timeNow = Date.now();
+        // let timeNow = Date.now();
 
-        let timeRelative = (timeNow - this.timeStart) / 1000;
-
+        // let timeRelative = (timeNow - this.timeStart) / 1000;
+        
         // deprecated
+        /*
         if ((timeRelative * this.timeScale) > this.vodLength + 5) {
             alert('Stopped playback');
             clearInterval(this.interval);
             return;
         }
+        */
 
-        if( this.timeOffset > this.vodLength + 5){
+        
+        if( this.embedPlayer.getCurrentTime() >= this.vodLength ){
             this.pause();
             return false;
         }
@@ -310,6 +317,10 @@ export default class VODPlayer {
         if (chatLog.comments.length == 0) {
             console.error("No comments to display");
         }
+
+        let videoTime = this.embedPlayer.getCurrentTime();
+
+        // console.log("tick test", timeRelative, this.embedPlayer.getCurrentTime());
 
         for (let i = 0; i < chatLog.comments.length; i++) {
 
@@ -337,7 +348,7 @@ export default class VODPlayer {
             }
 
             // deprecated
-            if (timeRelative < (comment.content_offset_seconds / this.timeScale)) {
+            if (videoTime < (comment.content_offset_seconds / this.timeScale)) {
                 // this.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
                 continue;
             }
@@ -349,7 +360,7 @@ export default class VODPlayer {
             */
 
             // if skipped or something
-            let commentAge = timeRelative - (comment.content_offset_seconds / this.timeScale)
+            let commentAge = videoTime - (comment.content_offset_seconds / this.timeScale)
             if (commentAge > 60) {
                 // this.debug('skip comment, too old', i);
                 (<any>comment).displayed = true;
@@ -650,7 +661,7 @@ export default class VODPlayer {
 
         // update timeline
 
-        let timelineText = 'C: ' + this.timeFormat(timeRelative * this.timeScale);
+        let timelineText = 'C: ' + this.timeFormat(videoTime * this.timeScale);
 
         if (this.embedPlayer.getCurrentTime()) {
             timelineText += ' / V: ' + this.timeFormat(this.embedPlayer.getCurrentTime());
@@ -765,9 +776,9 @@ export default class VODPlayer {
      * Start playing the video and chat. Can't run twice.
      * @returns {boolean} If started
      */
-    play(): boolean {
+    startPlayback(): boolean {
 
-        if (this.playing) {
+        if (this.isPlaying) {
             alert('Already playing');
             return false;
         }
@@ -780,9 +791,23 @@ export default class VODPlayer {
         }
 
         if (!this.embedPlayer) {
-            throw ('no embed player when playing');
+            alert("No embed player has been created, can't play.");
             return false;
         }
+
+        
+        this.embedPlayer.addEventListener("play", () => {
+            console.log("custom event play");
+        });
+
+        this.embedPlayer.addEventListener("pause", () => {
+            console.log("custom event pause");
+        });
+
+        this.embedPlayer.addEventListener("seeked", (seconds: number) => {
+            console.log(`custom event seeked: ${seconds}`);
+        });
+        
 
         // clear comment queue, this will be populated and cleaned over time
         this.commentQueue = [];
@@ -793,7 +818,7 @@ export default class VODPlayer {
             this.elements.comments.classList.add('niconico');
         }
 
-        this.embedPlayer.seek(0);
+        // this.embedPlayer.seek(0);
         this.embedPlayer.play();
 
         let offsetInput = (<HTMLInputElement>document.getElementById('optionOffset'));
@@ -801,7 +826,7 @@ export default class VODPlayer {
             console.debug(`Offset: ${offsetInput.value}`);
         }
 
-        this.apply();
+        this.applyTimings();
 
         // start chat fetching
         if (this.chat_source == 'twitch') {
@@ -811,8 +836,10 @@ export default class VODPlayer {
         // offset
         this.timeStart += this.chatOffset;
 
-        this.interval = setInterval(this.tick.bind(this), this.tickDelay / this.timeScale);
+        // this.interval = setInterval(this.tick.bind(this), this.tickDelay / this.timeScale);
         // window.requestAnimationFrame(this.tick.bind(this));
+
+        this.play();
 
         let button_start = (<HTMLInputElement>document.getElementById('buttonStart'));
 
@@ -822,16 +849,33 @@ export default class VODPlayer {
             // (<HTMLInputElement>document.getElementById('inputChat')).disabled = true;
         }
 
-        this.playing = true;
+        this.isPlaying = true;
+        
+        this.isReady = true;
 
         return true;
 
     }
 
+    play(){
+        console.log("Play executed");
+        this.interval = setInterval(this.tick.bind(this), this.tickDelay / this.timeScale);
+        this.embedPlayer.play();
+    }
+
     pause(){
+        console.log("Pause executed");
         clearInterval(this.interval);
-        this.embedPlayer.callPause(true);
+        this.embedPlayer.pause();
         this.malformed_comments = 0;
+    }
+
+    togglePause(){
+        if( this.embedPlayer.isPaused ){
+            this.play();
+        }else{
+            this.pause();
+        }
     }
 
     /**
@@ -861,8 +905,8 @@ export default class VODPlayer {
             this.embedPlayer.seek( seconds );
 
             // offset chat
-            this.timeStart = (Date.now() - (seconds * 1000)) + this.chatOffset;
-            this.timeOffset = seconds;
+            // this.timeStart = (Date.now() - (seconds * 1000)) + this.chatOffset;
+            // this.timeOffset = seconds;
 
             console.debug("Post seek", this.videoCurrentTime, this.timeStart);
 
@@ -921,7 +965,7 @@ export default class VODPlayer {
     /**
      * Update timing settings
      */
-    apply(): void {
+    applyTimings(): void {
 
         console.debug('Applying options');
 

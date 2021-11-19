@@ -48,10 +48,20 @@ export default class EmbedVideoPlayer extends EmbedPlayer {
 
         this.player.addEventListener("play", () => {
             this.callPause(false);
+            this.emit("play");
         });
 
         this.player.addEventListener("pause", () => {
             this.callPause(true);
+            this.emit("pause");
+        });
+
+        this.player.addEventListener("seeked", (ev) => {
+            /*
+            if (this.callbacks['seeked']) {
+                this.callbacks['seeked']();
+            }*/
+            this.emit("seeked", this.getCurrentTime());
         });
 
     }

@@ -5,11 +5,28 @@ export default class EmbedPlayer {
     vodplayer: VODPlayer | null;
     callbacks: any;
     manualPause: boolean;
+    listeners: Record<string, Function>;
 
     constructor() {
         this.vodplayer = null;
         this.manualPause = false;
         this.callbacks = {};
+        this.listeners = {};
+    }
+
+    emit(method: string, payload: any = null) {
+        const callback = this.listeners[method];
+        if(typeof callback === 'function'){
+            callback(payload);
+        }
+    }
+
+    addEventListener(method: string, callback: Function) {
+        this.listeners[method] = callback;
+    }
+
+    removeEventListener(method: string) {
+        delete this.listeners[method];
     }
 
     html() {

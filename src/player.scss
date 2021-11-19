@@ -21,6 +21,11 @@ $center: true;
 	100% { border-color: #000; }
 }
 
+@keyframes slide {
+	0% { max-height: 0px; }
+	100% { max-height: 100px; }
+}
+
 * { box-sizing: border-box; }
 
 body {
@@ -119,8 +124,9 @@ hr {
 	}
 
 	.comment {
-		min-height: 20px;
+		// min-height: 20px;
 		/* animation: fade 0.2s; */
+		animation: slide 0.1s ease-out;
 	}
 
 	&.has-stroke .comment {
@@ -484,6 +490,9 @@ hr {
 	cursor: pointer;
 	&:hover {
 		background-color: #555;
+	}
+	&.is-submit {
+		background-color: #219c21;
 	}
 }
 

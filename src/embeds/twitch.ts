@@ -56,23 +56,26 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
             if (this.callbacks['ready']) {
                 this.callbacks['ready']();
             }
+            this.emit("ready");
 
         });
 
         this.player.addEventListener(Twitch.Player.PLAY, () => {
             if(!this.vodplayer) return;
             console.log("embed player play");
-            if (!this.vodplayer.playing) {
+            if (!this.vodplayer.isPlaying) {
                 console.log("oops, player started without user wanting it");
                 this.player.seek(0);
                 this.player.pause();
                 return;
             }
             this.callPause(false);
+            this.emit("play");
         });
 
         this.player.addEventListener(Twitch.Player.PAUSE, () => {
             this.callPause(true);
+            this.emit("pause");
         });
 
         /*

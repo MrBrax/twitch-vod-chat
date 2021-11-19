@@ -31,13 +31,20 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
             if (this.callbacks['ready']) {
                 this.callbacks['ready']();
             }
+            this.emit("ready");
         }
 
         console.log("OnPlayerStateChange function");
         let onPlayerStateChange = (event: any) => {
             console.log("state change", event);
-            if (event == this.YT_PAUSE) this.callPause(true); // paused
-            if (event == this.YT_PLAY) this.callPause(true); // paused
+            if (event == this.YT_PAUSE){
+                this.callPause(true); // paused
+                this.emit("pause");
+            }
+            if (event == this.YT_PLAY){
+                this.callPause(true); // paused
+                this.emit("play");
+            }
         }
 
         console.log("OnError function");
@@ -65,7 +72,7 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
             events: {
                 'onReady': onPlayerReady,
                 'onStateChange': onPlayerStateChange,
-                'onError': onError
+                'onError': onError,
             }
         });
 

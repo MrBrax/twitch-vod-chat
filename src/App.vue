@@ -39,9 +39,13 @@
 		-->
 
 		<div id="video-controls">
-			<div class="video-controls-buttons">
-				<button class="pb-button" @click="play" v-if="!$root.vp.playing">▶</button>
-				<button class="pb-button" @click="pause" v-else>⏸</button>
+			<div class="video-controls-buttons" v-if="!$root.vp.isReady">
+				<button class="pb-button is-submit" @click="startPlayback" v-if="!$root.vp.isPlaying">Start playback</button>
+			</div>
+			<div class="video-controls-buttons" v-else>
+				<button class="pb-button" @click="togglePause">
+					{{ $root.vp.embedPlayer.isPaused ? "▶" : "⏸" }}
+				</button>
 				<button class="pb-button" @click="fullscreen">Fullscreen</button>
 				<button class="pb-button" @click="resetChat">Reset chat</button>
 			</div>
@@ -325,14 +329,14 @@ export default {
 		alignText(dir){
 			this.$root.vp.alignText(dir);
 		},
-		play(){
-			this.$root.vp.play();
+		startPlayback(){
+			this.$root.vp.startPlayback();
 		},
-		pause(){
-			this.$root.vp.pause();
+		togglePause(){
+			this.$root.vp.togglePause();
 		},
 		apply(){
-			this.$root.vp.apply();
+			this.$root.vp.applyTimings();
 		},
 		resetChat(){
 			this.$root.vp.reset();
