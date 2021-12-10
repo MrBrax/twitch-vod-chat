@@ -72,6 +72,12 @@ hr {
 	}
 }
 
+.viewer-container {
+	display: flex;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+}
+
 #comments {
 
 	padding: 5px;
@@ -83,11 +89,12 @@ hr {
 	width: 25%;
 	overflow: hidden;
 
-	position: absolute;
-	top: 0%;
-	bottom: 0%;
+	max-height: 100%;
 
-	pointer-events: none;
+	// put all the comments at the bottom, don't know how heavy this is
+	display: flex;
+	flex-direction: column;
+	justify-content: end;
 	
 	&.align-left {
 
@@ -132,7 +139,8 @@ hr {
 	}
 
 	.comment {
-		min-height: 20px;
+		// min-height: 20px;
+		flex-shrink: 0;
 		
 		// broken atm
 		// animation: slide 0.3s ease-out;
@@ -230,14 +238,24 @@ hr {
 		}
 
 	}
+
+
+	&.is-overlay {
+		position: absolute;
+		top: 0%;
+		bottom: 0%;
+		pointer-events: none;
+		max-height: unset;
+		height: unset;
+	}
 	
 
 }
 
 #player {
 
-	width: $width;
-	height: $height;
+	width: 100%;
+	// height: $height;
 
 	aspect-ratio: 16 / 9;
 
@@ -245,7 +263,9 @@ hr {
 
 	overflow: hidden;
 
-	/* margin: auto; */
+	height: fit-content; // ?
+
+	margin: auto;
 
 	// pointer-events: none; // smart?
 
@@ -265,7 +285,8 @@ hr {
 
 #video_container {
 	width: 100%;
-	height: 100%;
+	aspect-ratio: 16 / 9;
+	// height: 100%;
 	video {
 		width: 100%;
 		height: 100%;
@@ -567,11 +588,14 @@ input, select {
 	background-repeat: no-repeat;
 	background-size: cover;
 	image-rendering: crisp-edges;
-	position: absolute;
+	// position: absolute;
 	left: 0;
-	right: 0;
+	// right: 0;
 	top: 0;
-	bottom: 0;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	// bottom: 0;
+	z-index: -1;
 }
 
 .is-error {

@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }).$mount('#app');
 
+    vodplayer.elements.viewer = document.getElementById('viewer');
     vodplayer.elements.player = document.getElementById('player');
     vodplayer.elements.video = document.getElementById('video');
     vodplayer.elements.comments = document.getElementById('comments');

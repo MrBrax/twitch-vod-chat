@@ -38,6 +38,7 @@ let defaultSettings = {
     chatStyle: 'has-gradient',
     chatAlign: 'left',
     chatTextAlign: 'left',
+    chatOverlay: true,
     fontSize: 12,
     fontName: 'Inter'
 }
@@ -81,6 +82,7 @@ export default class VODPlayer {
     };
 
     elements: {
+        viewer: HTMLElement | null;
         video: HTMLElement | null;
         comments: HTMLElement | null;
         osd: HTMLElement | null;
@@ -160,6 +162,7 @@ export default class VODPlayer {
         chatStyle: string;
         chatAlign: string;
         chatTextAlign: string;
+        chatOverlay: boolean;
         fontSize: number;
         fontName: string;
     };
@@ -220,6 +223,7 @@ export default class VODPlayer {
         this.commentQueue.push(<any>{ time: '00:00:00', username: 'braxen', usernameColour: '#ff0000', messageFragments: [{ type: 'text', data: 'welcome to my vod player' }] });
 
         this.elements = {
+            viewer: null,
             video: null,
             comments: null,
             // timeline: null,
@@ -1017,7 +1021,7 @@ export default class VODPlayer {
      */
     fullscreen() {
 
-        let element = this.elements.player;
+        let element = this.elements.viewer;
 
         if (!element) return false;
 

@@ -1,24 +1,25 @@
 <template>
 	<div ref="app" id="app">
-    	<div ref="player" id="player">
+    	
+		<div id="viewer" class="viewer-container">
+			<div ref="player" id="player">
 
-			<div id="video_container"></div>
+				<div v-show="$root.vp.videoLoaded" id="video_container"></div>
 
-			<div v-if="!$root.vp.videoLoaded" class="meme-bg"></div>
-			<div v-if="!$root.vp.videoLoaded" class="meme"><img src="https://i.imgur.com/YmMUr7z.gif" rel="noreferrer" /></div>
-
-			<div id="comments" v-bind:class="commentsClass" v-bind:style="commentsStyle">
-				<!--<div class="comment">
-					<span class="time">[00:00:00]</span>
-					<span class="name">Username:</span>
-					<span class="body">Body text</span>
+				<div v-if="!$root.vp.videoLoaded" class="meme-bg">
+					<div v-if="!$root.vp.videoLoaded" class="meme"><img src="https://i.imgur.com/YmMUr7z.gif" rel="noreferrer" /></div>
 				</div>
-				-->
+
+				<div v-if="$root.vp.settings.chatOverlay" id="comments" v-bind:class="commentsClass" v-bind:style="commentsStyle">
+					<ChatMessage v-for="message in $root.vp.commentQueue" v-bind:message="message" v-bind:key="message.gid" :data-id="message.gid"></ChatMessage>
+				</div>
+
+				<div id="osd">SYNC NOT STARTED</div>
+
+			</div>
+			<div v-if="!$root.vp.settings.chatOverlay" id="comments" v-bind:class="commentsClass" v-bind:style="commentsStyle">
 				<ChatMessage v-for="message in $root.vp.commentQueue" v-bind:message="message" v-bind:key="message.gid" :data-id="message.gid"></ChatMessage>
 			</div>
-
-			<div id="osd">SYNC NOT STARTED</div>
-
 		</div>
 
 		<div id="timeline" ref="timeline" @click="seek">
@@ -198,6 +199,10 @@
 				<div class="option-group">
 					<div class="option-title">Chat location</div>
 					<div class="option-content">
+
+						<div>
+							<label><input type="checkbox" name="comments-overlay" v-model="$root.vp.settings.chatOverlay" value="1"> Overlay</label>
+						</div>
 
 						<div>
 							Chat align:
@@ -384,7 +389,8 @@ export default {
 				'text-left': this.$root.vp.settings.chatTextAlign == 'left',
 				'text-right': this.$root.vp.settings.chatTextAlign == 'right',
 				[this.$root.vp.settings.chatStyle]: true,
-				'has-stroke': this.$root.vp.settings.chatStroke
+				'has-stroke': this.$root.vp.settings.chatStroke,
+				'is-overlay': this.$root.vp.settings.chatOverlay,
 			}
 		},
 		twitchApiRequired(){
