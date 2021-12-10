@@ -76,6 +76,13 @@ hr {
 	display: flex;
 	width: 100%;
 	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	&.ultrawide {
+		aspect-ratio: 21 / 9;
+		#comments {
+			width: 31% !important;
+		}
+	}
 }
 
 #comments {

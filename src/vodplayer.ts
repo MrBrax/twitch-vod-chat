@@ -40,7 +40,8 @@ let defaultSettings = {
     chatTextAlign: 'left',
     chatOverlay: true,
     fontSize: 12,
-    fontName: 'Inter'
+    fontName: 'Inter',
+    ultrawide: false,
 }
 
 export default class VODPlayer {
@@ -165,6 +166,7 @@ export default class VODPlayer {
         chatOverlay: boolean;
         fontSize: number;
         fontName: string;
+        ultrawide: boolean;
     };
 
     lastCommentTime: number | null = null;

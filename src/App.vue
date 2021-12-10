@@ -1,7 +1,7 @@
 <template>
 	<div ref="app" id="app">
     	
-		<div id="viewer" class="viewer-container">
+		<div id="viewer" :class="{ 'viewer-container': true, 'ultrawide': $root.vp.settings.ultrawide }">
 			<div ref="player" id="player">
 
 				<div v-show="$root.vp.videoLoaded" id="video_container"></div>
@@ -202,6 +202,7 @@
 
 						<div>
 							<label><input type="checkbox" name="comments-overlay" v-model="$root.vp.settings.chatOverlay" value="1"> Overlay</label>
+							<label><input type="checkbox" name="ultrawide" v-model="$root.vp.settings.ultrawide" value="0"> Ultrawide</label>
 						</div>
 
 						<div>
