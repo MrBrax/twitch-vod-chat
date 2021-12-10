@@ -702,14 +702,9 @@ export default class VODPlayer {
         }
         */
 
-
+        // remove old comments from queue to not waste drawing
         if (this.commentQueue.length >= this.commentLimit) {
-
-            for (let i = this.commentQueue.length; i > this.commentLimit; i--) {
-                this.commentQueue.splice(0, 1);
-            }
-
-            // this.commentQueue.splice(0, this.commentLimit - this.commentQueue.length );
+            this.commentQueue.splice(0, this.commentQueue.length - this.commentLimit);
             // console.debug( 'Comments overflowing, delete', this.commentQueue.length, this.commentQueue.length - this.commentLimit );
         }
 
