@@ -32,7 +32,7 @@ interface BTTVChannelEmoteData {
 
 export default class BTTVChannelEmoteProvider extends BaseEmoteProvider {
 
-    emotes: BTTVChannelEmoteData;
+    declare emotes: BTTVChannelEmoteData;
 
     async fetchEmotes(channelId: string | number) {
 
@@ -59,7 +59,7 @@ export default class BTTVChannelEmoteProvider extends BaseEmoteProvider {
         
         if (this.emotes.sharedEmotes) {
 
-            for (let fEmo of this.emotes.sharedEmotes) {
+            for (const fEmo of this.emotes.sharedEmotes) {
                 if (fEmo.code == word) {
 
                     // this.debug(`Insert emote "${word}" from BTTV Shared into comment #${commentObj.gid}`);
@@ -83,7 +83,7 @@ export default class BTTVChannelEmoteProvider extends BaseEmoteProvider {
         // bttv channel emotes
         if (this.emotes.channelEmotes) {
 
-            for (let fEmo of this.emotes.channelEmotes) {
+            for (const fEmo of this.emotes.channelEmotes) {
                 if (fEmo.code == word) {
 
                     // this.debug(`Insert emote "${word}" from BTTV Channel into comment #${commentObj.gid}`);

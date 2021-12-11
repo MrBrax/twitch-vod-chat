@@ -6,8 +6,8 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
     youtube_id: string;
     player: YouTubePlayer | null;
 
-    YT_PLAY: number = 1;
-    YT_PAUSE: number = 2;
+    YT_PLAY = 1;
+    YT_PAUSE = 2;
 
     isReady: boolean;
 
@@ -22,7 +22,7 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
         this.setStatusText('Set up YouTube player...');
 
         console.log("OnPlayerReady function");
-        let onPlayerReady = (event: any) => {
+        const onPlayerReady = (event: any) => {
             if(!this.vodplayer) return;
             this.setStatusText('YouTube Player ready!');
             console.log("player ready", event);
@@ -35,7 +35,7 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
         }
 
         console.log("OnPlayerStateChange function");
-        let onPlayerStateChange = (event: any) => {
+        const onPlayerStateChange = (event: any) => {
             console.log("state change", event);
             if (event == this.YT_PAUSE){
                 this.callPause(true); // paused
@@ -48,13 +48,13 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
         }
 
         console.log("OnError function");
-        let onError = (event: any) => {
+        const onError = (event: any) => {
             console.log("error", event);
         }
 
         console.log("Create player div");
-        let player_element = document.createElement('div');
-        let video_container = document.getElementById('video_container');
+        const player_element = document.createElement('div');
+        const video_container = document.getElementById('video_container');
         if(!video_container){
             console.error("No video container");
             return false;
@@ -92,16 +92,17 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
     }
 
     getDuration() {
-        if(!this.isReady) return;
+        if(!this.isReady || !this.player) return undefined;
         return this.player.getDuration();
     }
 
     getCurrentTime() {
-        if(!this.isReady) return;
+        if(!this.isReady || !this.player) return undefined;
         return this.player.getCurrentTime();
     }
 
     get isPaused() {
+        if(!this.isReady || !this.player) return;
         return this.player.getPlayerState() == 2;
     }
 

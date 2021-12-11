@@ -1,0 +1,28 @@
+@keyframes fade {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@keyframes meme {
+	0% { left: -5% }
+	100% { left: 105%; }
+}
+
+@keyframes flashing {
+	0% { border-color: #000; }
+	50% { border-color: #888; }
+	100% { border-color: #000; }
+}
+
+@keyframes slide {
+	0% {
+		// max-height: 0px;
+		opacity: 0;
+		transform: translate(0px, 32px);
+	}
+	100% {
+		// max-height: 100px;
+		opacity: 1;
+		transform: translate(0px, 0px);
+	}
+}

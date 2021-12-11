@@ -14,7 +14,7 @@ interface BTTVGlobalEmoteData {
 
 export default class BTTVGlobalEmoteProvider extends BaseEmoteProvider {
 
-    emotes: Emoticon[];
+    declare emotes: Emoticon[];
 
     async fetchEmotes(channelId: string | number) {
 
@@ -38,7 +38,7 @@ export default class BTTVGlobalEmoteProvider extends BaseEmoteProvider {
 
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
-        for (let fEmo of this.emotes) {
+        for (const fEmo of this.emotes) {
             if (fEmo.code == word) {
 
                 // this.debug(`Insert emote "${word}" from BTTV Global into comment #${commentObj.gid}`);

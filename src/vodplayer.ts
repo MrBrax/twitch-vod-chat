@@ -22,7 +22,7 @@ import BaseEmoteProvider from './emoteproviders/base';
 // decouple for vue performance
 let chatLog: TwitchCommentDump;
 
-let defaultSettings = {
+const defaultSettings = {
     twitchClientId: '',
     twitchSecret: '',
     twitchToken: '',
@@ -48,7 +48,7 @@ export default class VODPlayer {
 
     chatLog: TwitchCommentDump;
 
-    baseTitle: string = "braxen's vod replay";
+    baseTitle = "braxen's vod replay";
 
     fonts = {
         "Inter":        "Inter (Twitch)",
@@ -120,16 +120,16 @@ export default class VODPlayer {
 
     twitchClientId: string;
 
-    channelId: string = '';
-    videoId: string = '';
-    videoTitle: string = '';
+    channelId = '';
+    videoId = '';
+    videoTitle = '';
 
     videoChapters: {
         time: number;
         label: string;
     }[];
 
-    interval: NodeJS.Timeout; // huh
+    interval: number; // huh
 
     embedPlayer: EmbedPlayer | null = null;
     // embedPlayerPog: any;
@@ -144,7 +144,7 @@ export default class VODPlayer {
 
     chatlog_version: string | null = null;
 
-    fetchChatRunning: boolean = false;
+    fetchChatRunning = false;
     // onlineOnly: boolean;
 
     settings: {
@@ -172,16 +172,16 @@ export default class VODPlayer {
     lastCommentTime: number | null = null;
     lastCommentOffset: number | null = null;
 
-    status_video: string = 'Waiting...';
-    status_comments: string = 'Waiting...';
-    status_ffz: string = 'Waiting...';
-    status_bttv_channel: string = 'Waiting...';
-    status_bttv_global: string = 'Waiting...';
-    status_seventv: string = 'Waiting...';
+    status_video = 'Waiting...';
+    status_comments = 'Waiting...';
+    status_ffz = 'Waiting...';
+    status_bttv_channel = 'Waiting...';
+    status_bttv_global = 'Waiting...';
+    status_seventv = 'Waiting...';
 
-    chat_source: string = '';
-    video_source: string = '';
-    allCommentsFetched: boolean = false;
+    chat_source = '';
+    video_source = '';
+    allCommentsFetched = false;
 
     malformed_comments: number;
 
@@ -324,13 +324,13 @@ export default class VODPlayer {
             console.error("No comments to display");
         }
 
-        let videoTime = this.embedPlayer.getCurrentTime();
+        const videoTime = this.embedPlayer.getCurrentTime();
 
         // console.log("tick test", timeRelative, this.embedPlayer.getCurrentTime());
 
         for (let i = 0; i < chatLog.comments.length; i++) {
 
-            let comment: TwitchComment = chatLog.comments[i];
+            const comment: TwitchComment = chatLog.comments[i];
 
             if (comment.content_offset_seconds === undefined || comment.content_offset_seconds < 0) {
                 console.error("Malformed comment", comment);
@@ -366,7 +366,7 @@ export default class VODPlayer {
             */
 
             // if skipped or something
-            let commentAge = videoTime - (comment.content_offset_seconds / this.timeScale)
+            const commentAge = videoTime - (comment.content_offset_seconds / this.timeScale)
             if (commentAge > 60) {
                 // this.debug('skip comment, too old', i);
                 (<any>comment).displayed = true;
@@ -375,7 +375,7 @@ export default class VODPlayer {
 
 
 
-            let commentObj: any = {};
+            const commentObj: any = {};
 
             commentObj.gid = comment._id;
 
@@ -387,10 +387,10 @@ export default class VODPlayer {
             // badges
             if (comment.message.user_badges && this.badges.global && this.badges.channel) {
 
-                for (let b of comment.message.user_badges) {
+                for (const b of comment.message.user_badges) {
 
-                    let badgeId = b._id;
-                    let badgeVersion = b.version;
+                    const badgeId = b._id;
+                    const badgeVersion = b.version;
 
                     let imageSrc: string | null = null;
 
@@ -407,7 +407,7 @@ export default class VODPlayer {
                         continue;
                     }
 
-                    let badgeObj: TwitchUserBadgeProxy = {
+                    const badgeObj: TwitchUserBadgeProxy = {
                         id: b._id,
                         url: imageSrc,
                     };
@@ -425,7 +425,7 @@ export default class VODPlayer {
             commentObj.messageFragments = [];
 
             // make message
-            for (let f of comment.message.fragments) {
+            for (const f of comment.message.fragments) {
 
                 // official twitch emote
                 if (f.emoticon && this.settings.emotesEnabled) {
@@ -442,17 +442,17 @@ export default class VODPlayer {
 
                 } else {
 
-                    let fragWords = f.text.split(' ');
+                    const fragWords = f.text.split(' ');
 
-                    let paragraph = "";
+                    const paragraph = "";
 
-                    let emotes = 0;
+                    const emotes = 0;
 
-                    for (let word of fragWords) {
+                    for (const word of fragWords) {
 
                         let found_emote = false;
 
-                        for(let provider in this.emotes){
+                        for(const provider in this.emotes){
                             if( this.emotes[provider].parseComment(word, commentObj) ){
                                 found_emote = true;
                             }
@@ -636,17 +636,17 @@ export default class VODPlayer {
 
             if (this.niconico && this.elements.comments) {
 
-                let c = this.createLegacyCommentElement(commentObj);
+                const c = this.createLegacyCommentElement(commentObj);
                 this.elements.comments.appendChild(c);
 
                 c.style.top = (Math.random() * 720).toString();
                 c.style.left = (1280).toString();
                 let x = 1280;
-                let s = (Math.random() * 5) + 3;
+                const s = (Math.random() * 5) + 3;
 
                 c.style.fontSize = ((Math.random() * 2.5) + 1).toString() + "em";
 
-                let ani = () => {
+                const ani = () => {
                     x -= s;
                     c.style.left = x.toString();
                     if (x < -500) {
@@ -717,13 +717,13 @@ export default class VODPlayer {
         console.debug("Create legacy comment", comment);
 
         // main comment element
-        let commentDiv = document.createElement('div');
+        const commentDiv = document.createElement('div');
         commentDiv.className = 'comment';
 
         if (this.settings.timestampsEnabled) {
             // calc time
-            let commentTime = this.timeFormat(comment.content_offset_seconds);
-            let timeC = document.createElement('span');
+            const commentTime = this.timeFormat(comment.content_offset_seconds);
+            const timeC = document.createElement('span');
             timeC.className = 'time';
             timeC.innerHTML = `[${commentTime}]`;
             commentDiv.appendChild(timeC);
@@ -736,33 +736,33 @@ export default class VODPlayer {
         commentDiv.appendChild(badgeC);
         */
 
-        let badgeC = document.createElement('span');
+        const badgeC = document.createElement('span');
         badgeC.className = 'badges';
-        for (let b of comment.badges) {
-            let badgeImage = document.createElement('img');
+        for (const b of comment.badges) {
+            const badgeImage = document.createElement('img');
             badgeImage.className = 'badge ' + b.id;
             badgeImage.src = b.url;
             badgeC.appendChild(badgeImage);
         }
         commentDiv.appendChild(badgeC);
 
-        let nameC = document.createElement('span');
+        const nameC = document.createElement('span');
         nameC.className = 'name';
         nameC.innerHTML = comment.username + ':';
         nameC.style.color = comment.usernameColour;
         commentDiv.appendChild(nameC);
 
-        let bodyC = document.createElement('span');
+        const bodyC = document.createElement('span');
         bodyC.className = 'body';
-        for (let frag of comment.messageFragments) {
+        for (const frag of comment.messageFragments) {
 
             if (frag.type == 'text') {
-                let t = document.createElement('span');
+                const t = document.createElement('span');
                 t.className = 'text';
                 t.innerHTML = <string>frag.data;
                 bodyC.appendChild(t);
             } else if (frag.type == 'emote') {
-                let t = document.createElement('img');
+                const t = document.createElement('img');
                 t.className = 'emote';
                 t.src = (<any>frag).data.url;
                 bodyC.appendChild(t);
@@ -824,7 +824,7 @@ export default class VODPlayer {
         // this.embedPlayer.seek(0);
         this.embedPlayer.play();
 
-        let offsetInput = (<HTMLInputElement>document.getElementById('optionOffset'));
+        const offsetInput = (<HTMLInputElement>document.getElementById('optionOffset'));
         if (offsetInput) {
             console.debug(`Offset: ${offsetInput.value}`);
         }
@@ -844,7 +844,7 @@ export default class VODPlayer {
 
         this.play();
 
-        let button_start = (<HTMLInputElement>document.getElementById('buttonStart'));
+        const button_start = (<HTMLInputElement>document.getElementById('buttonStart'));
 
         if (button_start) button_start.disabled = true;
         if (!this.automated) {
@@ -956,7 +956,7 @@ export default class VODPlayer {
         if (this.commentAmount) {
             console.debug(`Reset ${this.commentAmount} comments`);
             for (let i = 0; i < this.commentAmount; i++) {
-                let comment = chatLog.comments[i];
+                const comment = chatLog.comments[i];
                 (<any>comment).displayed = null;
             }
         }else{
@@ -1001,13 +1001,13 @@ export default class VODPlayer {
 
         if (!input) return null;
 
-        let matchHours = input.match(/([0-9]+)h/);
-        let matchMinutes = input.match(/([0-9]+)m/);
-        let matchSeconds = input.match(/([0-9]+)s/);
+        const matchHours = input.match(/([0-9]+)h/);
+        const matchMinutes = input.match(/([0-9]+)m/);
+        const matchSeconds = input.match(/([0-9]+)s/);
 
-        let durHours = matchHours ? parseInt(matchHours[1]) : 0;
-        let durMinutes = matchMinutes ? parseInt(matchMinutes[1]) : 0;
-        let durSeconds = matchSeconds ? parseInt(matchSeconds[1]) : 0;
+        const durHours = matchHours ? parseInt(matchHours[1]) : 0;
+        const durMinutes = matchMinutes ? parseInt(matchMinutes[1]) : 0;
+        const durSeconds = matchSeconds ? parseInt(matchSeconds[1]) : 0;
 
         return (durHours * 60 * 60) + (durMinutes * 60) + durSeconds;
 
@@ -1018,7 +1018,7 @@ export default class VODPlayer {
      */
     fullscreen() {
 
-        let element = this.elements.viewer;
+        const element = this.elements.viewer;
 
         if (!element) return false;
 
@@ -1053,14 +1053,14 @@ export default class VODPlayer {
 
         if (input.files) {
 
-            let file = input.files[0];
+            const file = input.files[0];
 
             if (!file) {
                 alert("No video selected");
                 return false;
             }
 
-            let fileURL = URL.createObjectURL(file);
+            const fileURL = URL.createObjectURL(file);
 
             this.embedPlayer = new EmbedVideoPlayer(fileURL);
             this.embedPlayer.vodplayer = this;
@@ -1072,7 +1072,7 @@ export default class VODPlayer {
             this.loadChatFileFromURL(input.value);
             return true;
         } else if (source == 'twitch') {
-            let twitch_id = input.value.match(/\/videos\/([0-9]+)/);
+            const twitch_id = input.value.match(/\/videos\/([0-9]+)/);
             if (!twitch_id) {
                 alert('invalid twitch vod link');
                 return false;
@@ -1083,8 +1083,8 @@ export default class VODPlayer {
             return true;
         } else if (source == 'youtube') {
 
-            let regex_1 = input.value.match(/v=([A-Za-z0-9]+)/);
-            let regex_2 = input.value.match(/\.be\/([A-Za-z0-9]+)/);
+            const regex_1 = input.value.match(/v=([A-Za-z0-9]+)/);
+            const regex_2 = input.value.match(/\.be\/([A-Za-z0-9]+)/);
             let youtube_id;
             if (regex_1) youtube_id = regex_1[1];
             if (regex_2) youtube_id = regex_2[1];
@@ -1095,9 +1095,14 @@ export default class VODPlayer {
             }
 
             this.embedPlayer = new EmbedYouTubePlayer(youtube_id);
-            this.embedPlayer.vodplayer = this;
-            this.embedPlayer.setup();
-            return true;
+            if( this.embedPlayer ){
+                this.embedPlayer.vodplayer = this;
+                this.embedPlayer.setup();
+                return true;
+            }else{
+                return false;
+            }
+            
         }
 
         console.error("unhandled video input");
@@ -1122,15 +1127,15 @@ export default class VODPlayer {
         this.chat_source = source;
 
         if (input.files) {
-            let file = input.files[0];
-            let fileURL = URL.createObjectURL(file);
+            const file = input.files[0];
+            const fileURL = URL.createObjectURL(file);
             this.loadChatFileFromURL(fileURL);
             return true;
         } else if (source == 'file_http') {
             this.loadChatFileFromURL(input.value);
             return true;
         } else if (source == 'twitch') {
-            let twitch_id = input.value.match(/\/videos\/([0-9]+)/);
+            const twitch_id = input.value.match(/\/videos\/([0-9]+)/);
             if (!twitch_id) {
                 alert('invalid twitch vod link');
                 return false;
@@ -1140,6 +1145,8 @@ export default class VODPlayer {
         }
 
         console.error("unhandled chat input");
+
+        return false;
 
     }
 
@@ -1166,7 +1173,7 @@ export default class VODPlayer {
 
         if(!(json as any).comments){
             console.error("loadChatFileFromURL json has no comments", json);
-            return;
+            return false;
         }
 
         (chatLog as any) = json;
@@ -1177,7 +1184,7 @@ export default class VODPlayer {
         console.debug(`Amount: ${this.commentAmount}`);
 
         // get duration, this changed in the new api. if you know of a better parsing solution, please fix this
-        let rawDuration = chatLog.video.duration;
+        const rawDuration = chatLog.video.duration;
 
         if (!rawDuration) {
             /*
@@ -1211,13 +1218,13 @@ export default class VODPlayer {
 
             this.chatlog_version = "twitch_v2";
 
-            let rawHours = rawDuration.match(/([0-9]+)h/);
-            let rawMinutes = rawDuration.match(/([0-9]+)m/);
-            let rawSeconds = rawDuration.match(/([0-9]+)s/);
+            const rawHours = rawDuration.match(/([0-9]+)h/);
+            const rawMinutes = rawDuration.match(/([0-9]+)m/);
+            const rawSeconds = rawDuration.match(/([0-9]+)s/);
 
-            let durHours = rawHours ? parseInt(rawHours[1]) : 0;
-            let durMinutes = rawMinutes ? parseInt(rawMinutes[1]) : 0;
-            let durSeconds = rawSeconds ? parseInt(rawSeconds[1]) : 0;
+            const durHours = rawHours ? parseInt(rawHours[1]) : 0;
+            const durMinutes = rawMinutes ? parseInt(rawMinutes[1]) : 0;
+            const durSeconds = rawSeconds ? parseInt(rawSeconds[1]) : 0;
 
             console.debug("v2 date parse", durHours, durMinutes, durSeconds);
 
@@ -1321,7 +1328,7 @@ export default class VODPlayer {
                 return false;
             }
 
-            let data = json.data[0];
+            const data = json.data[0];
 
             console.log('loadOnline', data);
 
@@ -1398,7 +1405,7 @@ export default class VODPlayer {
             return false;
         }
 
-        for(let provider in this.emotes){
+        for(const provider in this.emotes){
             this.emotes[provider].fetchEmotes(this.channelId);
         }
 
@@ -1502,7 +1509,7 @@ export default class VODPlayer {
 
         chatLog.comments = [];
 
-        let fragment = await this.fetchChatFragment(0);
+        const fragment = await this.fetchChatFragment(0);
 
         if (!fragment.comments) {
             console.error("could not fetch comments");
@@ -1519,7 +1526,7 @@ export default class VODPlayer {
         // for( let i = 0; i < 5; i++ ){
         while (cursor && this.fetchChatRunning) {
 
-            let f = await this.fetchChatFragment(null, cursor);
+            const f = await this.fetchChatFragment(null, cursor);
 
             cursor = f._next;
 
@@ -1722,17 +1729,17 @@ export default class VODPlayer {
         // space to play
         document.body.addEventListener('keyup', (ev: KeyboardEvent) => {
             console.log("keyup", ev.key);
-            if(this.isReady){
+            if(this.isReady && this.embedPlayer != null){
                 if (ev.key == " ") {
                     console.log("Try to pause video from space");
                     this.togglePause();
                     ev.preventDefault();
                     return false;
-                }else if(ev.key == "ArrowLeft"){
+                }else if(ev.key == "ArrowLeft" && this.vodLength && this.embedPlayer.getCurrentTime() !== undefined){
                     this.seek(Math.min(Math.max(this.embedPlayer.getCurrentTime() - 10, 0), this.vodLength));
                     ev.preventDefault();
                     return false;
-                }else if(ev.key == "ArrowRight"){
+                }else if(ev.key == "ArrowRight" && this.vodLength && this.embedPlayer.getCurrentTime()){
                     this.seek(Math.min(Math.max(this.embedPlayer.getCurrentTime() + 10, 0), this.vodLength));
                     ev.preventDefault();
                     return false;
@@ -1765,7 +1772,7 @@ export default class VODPlayer {
         return hours + ':' + minutes + ':' + seconds;
         */
 
-        let date = new Date();
+        const date = new Date();
         date.setSeconds(seconds); // specify value for SECONDS here
         return date.toISOString().substr(11, 8);
 
@@ -1790,7 +1797,7 @@ export default class VODPlayer {
     }
 
     loadSettings() {
-        let v = localStorage.getItem('settings');
+        const v = localStorage.getItem('settings');
         if (v) {
             this.settings = JSON.parse(v);
             console.debug("Loaded settings");
@@ -1809,9 +1816,9 @@ export default class VODPlayer {
         console.debug(...text);
     }
 
-    get videoPosition() {
+    get videoPosition(): number {
 
-        if(!this.embedPlayer) return 0;
+        if (!this.embedPlayer || this.embedPlayer.getCurrentTime() == undefined || this.embedPlayer.getDuration() == undefined) return 0;
 
         return this.embedPlayer.getCurrentTime() / this.embedPlayer.getDuration();
 

@@ -4,7 +4,7 @@ export default class BaseEmoteProvider {
 
     channelId: string;
     emotes: any;
-    status: string = "Waiting...";
+    status = "Waiting...";
 
     fetchEmotes(channelId: string|number){
         throw('Not implemented');

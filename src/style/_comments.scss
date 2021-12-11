@@ -1,0 +1,174 @@
+
+#comments {
+
+	padding: 5px;
+
+	font-size: 12px;
+	color: #fff;
+
+	/* height: 100%; */
+	width: 25%;
+	overflow: hidden;
+
+	max-height: 100%;
+
+	// put all the comments at the bottom, don't know how heavy this is
+	display: flex;
+	flex-direction: column;
+	justify-content: end;
+	
+	&.align-left {
+
+		top: 0px;
+		left: 0px;
+
+		&.has-gradient {
+			/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,7db9e8+100&1+0,0+100 */
+			background: -moz-linear-gradient(left, rgba(0,0,0,0.7) 0%, rgba(125,185,232,0) 100%); /* FF3.6-15 */
+			background: -webkit-linear-gradient(left, rgba(0,0,0,0.7) 0%,rgba(125,185,232,0) 100%); /* Chrome10-25,Safari5.1-6 */
+			background: linear-gradient(to right, rgba(0,0,0,0.7) 0%,rgba(125,185,232,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+		}			
+	}
+
+	&.align-right {
+
+		top: 0px;
+		right: 0px;
+
+		&.has-gradient {
+			/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,7db9e8+100&1+0,0+100 */
+			background: -moz-linear-gradient(right, rgba(0,0,0,0.7) 0%, rgba(125,185,232,0) 100%); /* FF3.6-15 */
+			background: -webkit-linear-gradient(right, rgba(0,0,0,0.7) 0%,rgba(125,185,232,0) 100%); /* Chrome10-25,Safari5.1-6 */
+			background: linear-gradient(to left, rgba(0,0,0,0.7) 0%,rgba(125,185,232,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+		}
+	}
+
+	&.text-left {
+		text-align: left;
+	}
+
+	&.text-right {
+		text-align: right;
+	}
+
+	&.has-fill40 {
+		background: rgba(0, 0, 0, .4);
+	}
+
+	&.has-fill80 {
+		background: rgba(0, 0, 0, .8);
+	}
+
+	.comment {
+		// min-height: 20px;
+		flex-shrink: 0;
+		
+		// broken with vue, no animations supported
+		// animation: slide 0.3s ease-out;
+		// overflow: hidden;
+	}
+
+	&.has-stroke .comment {
+		text-shadow:
+			-1px -1px 0 #111,  
+			1px -1px 0 #111,
+			-1px 1px 0 #111,
+			1px 1px 0 #111,
+		1px 1px 3px rgba(0,0,0,.7);
+	}
+
+	/*
+	span {
+		padding: 0 1px;
+	}
+	*/
+
+	.time {
+		color: #aaa;
+	}
+
+	/*
+	#comments .badge {
+		display: inline-block;
+		font-weight: 700;
+		color: #eee;
+		padding: 0 3px;
+		background: #832B2B;
+		border-radius: 3px;
+		margin: 0 2px;
+	}
+
+	#comments .badge.premium {
+		background: #427EBC;
+	}
+	*/
+
+	.badge {
+		display: inline-block;
+		margin: 0 3px;
+	}
+
+	.name {
+		font-weight: 700;
+		color: #ccc;
+	}
+
+	.emote {
+
+		max-height: 32px;
+
+		&.is-small {
+			max-height: 18px;
+		}
+
+	}
+
+	img {
+		vertical-align: middle;
+	}
+
+	
+	&.niconico {
+
+		width: $width;
+		height: $height;
+
+		display: block;
+
+		// position: relative;
+
+		overflow: hidden;
+
+		.comment {
+
+			display: block;
+			width: 800px;
+			overflow: hidden;
+
+			font-size: 2em;
+
+			position: absolute;
+
+			.body { display: inline-block }
+
+			.text { display: inline-block; margin-right: 5px; }
+
+			.name { display: none; }
+			.badges { display: none; }
+
+		}
+
+	}
+
+
+	&.is-overlay {
+		position: absolute;
+		top: 0%;
+		bottom: 0%;
+		pointer-events: none;
+		max-height: unset;
+		height: unset;
+	}
+	
+
+}

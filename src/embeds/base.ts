@@ -34,7 +34,7 @@ export default class EmbedPlayer {
     }
 
     setup() {
-        let e = document.getElementById("video_container");
+        const e = document.getElementById("video_container");
         if(e){
             e.innerHTML = this.html();
             console.log("Set up embed player");
@@ -54,12 +54,12 @@ export default class EmbedPlayer {
         alert('no seek implemented');
     }
 
-    getDuration() {
+    getDuration(): number | undefined {
         alert('no duration implemented');
         return 0;
     }
 
-    getCurrentTime() {
+    getCurrentTime(): number | undefined {
         alert('no current time implemented');
         return 0;
     }

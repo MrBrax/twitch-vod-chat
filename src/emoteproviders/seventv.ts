@@ -40,7 +40,7 @@ interface SevenTVError {
 
 export default class SevenTVEmoteProvider extends BaseEmoteProvider {
 
-    emotes: Emoticon[];
+    declare emotes: Emoticon[];
 
     async fetchEmotes(channelId: string|number) {
 
@@ -72,7 +72,7 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
         if(!this.emotes) return false;
-        for (let fEmo of this.emotes) {
+        for (const fEmo of this.emotes) {
             if (fEmo.name == word) {
 
                 if(!fEmo.urls || fEmo.urls.length == 0){

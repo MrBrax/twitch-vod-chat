@@ -1,5 +1,6 @@
 'use strict';
 
+/*
 import Vue from 'vue';
 import App from './App.vue'
 import EmbedVideoPlayer from './embeds/html5';
@@ -15,9 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const app = new Vue({
         render: h => h(App),
-        data: {
+        data: function() {
+return {
             vp: vodplayer
-        }
+        };
+}
     }).$mount('#app');
 
     vodplayer.elements.viewer = document.getElementById('viewer');
@@ -32,14 +35,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.debug("vodplayer", vodplayer);
 
-    let processHash = () => {
+    const processHash = () => {
 
         console.debug("Process hash", window.location.hash);
 
-        let query = window.location.hash;
-        let query_param = query.split("&");
-        let params: any = {};
-        for (let param of query_param) {
+        const query = window.location.hash;
+        const query_param = query.split("&");
+        const params: any = {};
+        for (const param of query_param) {
             params[param.split("=")[0].replace("#", "")] = param.split("=")[1];
         }
 
@@ -64,10 +67,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if(params.chapters){
             vodplayer.videoChapters = [];
-            let ch = params.chapters.split(";");
-            for( let c of ch ){
-                let d = c.split(":");
-                let chapter = {
+            const ch = params.chapters.split(";");
+            for( const c of ch ){
+                const d = c.split(":");
+                const chapter = {
                     time: parseInt(d[0]),
                     label: d[1]
                 };
@@ -132,3 +135,4 @@ document.addEventListener("DOMContentLoaded", () => {
     processHash();
 
 });
+*/

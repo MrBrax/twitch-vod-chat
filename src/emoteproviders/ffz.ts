@@ -22,7 +22,7 @@ interface UserBadgeIds {
 interface Room {
     _id: number;
     twitch_id: number;
-    youtube_id?: any;
+    youtube_id?: string;
     id: string;
     is_group: boolean;
     display_name: string;
@@ -84,7 +84,7 @@ interface FFZEmoteData {
 
 export default class FFZEmoteProvider extends BaseEmoteProvider {
 
-    emotes: FFZEmoteData;
+    declare emotes: FFZEmoteData;
 
     async fetchEmotes(channelId: string|number) {
 
@@ -102,14 +102,14 @@ export default class FFZEmoteProvider extends BaseEmoteProvider {
         this.emotes = json2;
 
         console.log('ffz', this.emotes);
-        let amount = Object.values(this.emotes.sets).reduce((count, row) => count + Object.keys(row.emoticons).length, 0);
+        const amount = Object.values(this.emotes.sets).reduce((count, row) => count + Object.keys(row.emoticons).length, 0);
         this.status = `OK! (${Object.keys(this.emotes.sets).length} sets, ${amount} emotes)`;
 
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
-        for (let fSet in this.emotes.sets) {
-            for (let fEmo of this.emotes.sets[fSet].emoticons) {
+        for (const fSet in this.emotes.sets) {
+            for (const fEmo of this.emotes.sets[fSet].emoticons) {
                 if (fEmo.name == word) {
 
                     // this.debug(`Insert emote "${word}" from FFZ into comment #${commentObj.gid}`);
