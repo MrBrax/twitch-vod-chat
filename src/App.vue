@@ -10,14 +10,14 @@
 				</div>
 
 				<div v-if="vp.settings.chatOverlay" id="comments" v-bind:class="commentsClass" v-bind:style="commentsStyle">
-					<ChatMessage v-for="message in vp.commentQueue" v-bind:message="message" v-bind:key="message.gid" :data-id="message.gid"></ChatMessage>
+					<ChatMessage v-for="message in vp.commentQueue" v-bind:message="message" v-bind:vp="vp" v-bind:key="message.gid" :data-id="message.gid"></ChatMessage>
 				</div>
 
 				<div id="osd">SYNC NOT STARTED</div>
 
 			</div>
 			<div v-if="!vp.settings.chatOverlay" id="comments" v-bind:class="commentsClass" v-bind:style="commentsStyle">
-				<ChatMessage v-for="message in vp.commentQueue" v-bind:message="message" v-bind:key="message.gid" :data-id="message.gid"></ChatMessage>
+				<ChatMessage v-for="message in vp.commentQueue" v-bind:message="message" v-bind:vp="vp" v-bind:key="message.gid" :data-id="message.gid"></ChatMessage>
 			</div>
 		</div>
 

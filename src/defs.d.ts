@@ -110,3 +110,9 @@ interface TwitchComment {
     state: string;
     updated_at: string;
 }
+
+export interface ChatEmote {
+    network: string;
+    name: string;
+    url: string;
+}

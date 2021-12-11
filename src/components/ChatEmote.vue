@@ -2,11 +2,13 @@
     <img v-bind:class="classObject" v-bind:src="emote.url" >
 </template>
 
-<script>
+<script lang="ts">
+import { ChatEmote } from '../defs';
+
 export default {
     name: 'ChatEmote',
     props: {
-        emote: Object
+        emote: Object as () => ChatEmote,
     },
     computed: {
         classObject(){

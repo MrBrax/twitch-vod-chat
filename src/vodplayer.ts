@@ -1659,7 +1659,7 @@ export default class VODPlayer {
     /**
      * Video helper for twitch helix api
      */
-    async fetchTwitchToken(): Promise<Object|boolean> {
+    async fetchTwitchToken(): Promise<string|boolean> {
 
         if (!this.settings.twitchClientId || !this.settings.twitchSecret) {
             alert("Missing either Twitch client id or secret");
