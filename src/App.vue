@@ -236,7 +236,7 @@
 						</select>
 						<select v-model="vp.settings.fontName">
 							<option
-								v-for="k, v in vp.fonts"
+								v-for="v, k in vp.fonts"
 								:key="k"
 								:value="k"
 								:style="{ fontFamily: k }"
