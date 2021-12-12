@@ -13,11 +13,13 @@ interface ModUrls {
     4: string;
 }
 
+/*
 interface UserBadges {
 }
 
 interface UserBadgeIds {
 }
+*/
 
 interface Room {
     _id: number;
@@ -30,8 +32,8 @@ interface Room {
     moderator_badge: string;
     vip_badge: VipBadge;
     mod_urls: ModUrls;
-    user_badges: UserBadges;
-    user_badge_ids: UserBadgeIds;
+    // user_badges: UserBadges;
+    // user_badge_ids: UserBadgeIds;
     css?: unknown;
 }
 

@@ -30,9 +30,9 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
             console.log("youtube player ready", event);
             this.isReady = true;
             this.vodplayer.videoLoaded = true;
-            if (this.callbacks['ready']) {
-                this.callbacks['ready']();
-            }
+            // if (this.callbacks['ready']) {
+            //     this.callbacks['ready']();
+            // }
             this.emit("ready");
         }
 
@@ -83,7 +83,7 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
                 'onReady': onPlayerReady,
                 'onStateChange': onPlayerStateChange,
                 'onError': onError,
-            } as any
+            } as never
         }) as YouTubePlayer;
 
     }

@@ -40,9 +40,10 @@ export default class EmbedVideoPlayer extends EmbedPlayer {
             console.log("html5 video player ready");
             this.setStatusText('HTML5 video player ready!');
             this.vodplayer.videoLoaded = true;
-            if (this.callbacks['ready']) {
-                this.callbacks['ready']();
-            }
+            this.emit("ready");
+            // if (this.callbacks['ready']) {
+            //     this.callbacks['ready']();
+            // }
             this.isReady = true;
         });
 

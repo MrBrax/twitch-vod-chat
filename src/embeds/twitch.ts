@@ -53,9 +53,9 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
             }, 500);
 
             this.vodplayer.videoLoaded = true;
-            if (this.callbacks['ready']) {
-                this.callbacks['ready']();
-            }
+            // if (this.callbacks['ready']) {
+            //     this.callbacks['ready']();
+            // }
             this.emit("ready");
 
         });

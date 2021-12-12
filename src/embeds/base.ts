@@ -5,26 +5,26 @@ export default class EmbedPlayer {
     vodplayer: VODPlayer | null;
 
     /** @deprecated */
-    callbacks: any;
+    // callbacks: any;
 
     manualPause: boolean;
-    listeners: Record<string, Function>;
+    listeners: Record<string, (payload: unknown) => void>;
 
     constructor() {
         this.vodplayer = null;
         this.manualPause = false;
-        this.callbacks = {};
+        // this.callbacks = {};
         this.listeners = {};
     }
 
-    emit(method: string, payload: any = null) {
+    emit(method: string, payload: unknown = null) {
         const callback = this.listeners[method];
         if(typeof callback === 'function'){
             callback(payload);
         }
     }
 
-    addEventListener(method: string, callback: Function) {
+    addEventListener(method: string, callback: (payload: unknown) => void) {
         this.listeners[method] = callback;
     }
 
@@ -67,9 +67,9 @@ export default class EmbedPlayer {
         return 0;
     }
 
-    setCallback(key: string, callback: any) {
-        this.callbacks[key] = callback;
-    }
+    // setCallback(key: string, callback: any) {
+    //     this.callbacks[key] = callback;
+    // }
 
     callPause(state: boolean) {
         console.log("call pause", state);
