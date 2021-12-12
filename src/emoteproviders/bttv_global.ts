@@ -8,9 +8,11 @@ interface Emoticon {
     userId: string;
 }
 
+/*
 interface BTTVGlobalEmoteData {
 
 }
+*/
 
 export default class BTTVGlobalEmoteProvider extends BaseEmoteProvider {
 
@@ -18,7 +20,7 @@ export default class BTTVGlobalEmoteProvider extends BaseEmoteProvider {
 
     async fetchEmotes(channelId: string | number) {
 
-        console.log('Fetching BTTV Global');
+        console.log('Fetching BTTV Global', channelId);
 
         const response = await fetch(`https://api.betterttv.net/3/cached/emotes/global`);
         const json2: Emoticon[] = await response.json();

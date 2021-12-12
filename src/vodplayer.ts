@@ -357,7 +357,7 @@ export default class VODPlayer {
             const commentAge = videoTime - (comment.content_offset_seconds / this.timeScale)
             if (commentAge > 60) {
                 // this.debug('skip comment, too old', i);
-                (<any>comment).displayed = true;
+                comment.displayed = true;
                 continue;
             }
 
@@ -604,10 +604,10 @@ export default class VODPlayer {
                 t.className = 'text';
                 t.innerHTML = <string>frag.data;
                 bodyC.appendChild(t);
-            } else if (frag.type == 'emote') {
+            } else if (frag.type == 'emote' && typeof frag.data != 'string') {
                 const t = document.createElement('img');
                 t.className = 'emote';
-                t.src = (<any>frag).data.url;
+                t.src = frag.data.url || "";
                 bodyC.appendChild(t);
             }
 
@@ -1103,8 +1103,8 @@ export default class VODPlayer {
 
         if(this.chatlog_version == "td_v1"){ // weird format
 
-            this.channelName = (chatLog as any).streamer.name;
-            this.channelId = (chatLog as any).streamer.id;
+            this.channelName = chatLog.streamer.name;
+            this.channelId = chatLog.streamer.id;
             this.videoId = chatLog.comments[0].content_id;
 
         }else if (this.chatlog_version == "twitch_v2") {
@@ -1575,7 +1575,7 @@ export default class VODPlayer {
         this.settings = { ...defaultSettings };
     }
 
-    debug( ...text: any[] ): void {
+    debug( ...text: unknown[] ): void {
         if( process.env.NODE_ENV !== "development" ) return;
         console.debug(...text);
     }

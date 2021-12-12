@@ -42,10 +42,6 @@ interface TwitchPlayerOptions {
     controls?: boolean;
 }
 
-interface YoutubePlayerOptions {
-
-}
-
 export interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget;
 }
@@ -128,6 +124,12 @@ interface TwitchCommentDump {
         }
         /** @deprecated */
         _id: string;
+    }
+
+    /** @deprecated */
+    streamer: {
+        name: string;
+        id: string; // ?
     }
 }
 

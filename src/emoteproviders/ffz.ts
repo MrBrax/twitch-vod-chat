@@ -32,16 +32,16 @@ interface Room {
     mod_urls: ModUrls;
     user_badges: UserBadges;
     user_badge_ids: UserBadgeIds;
-    css?: any;
+    css?: unknown;
 }
 
-interface Owner {
+interface EmoticonOwner {
     _id: number;
     name: string;
     display_name: string;
 }
 
-interface Urls {
+interface EmoticonUrls {
     1: string;
     2: string;
     4: string;
@@ -55,23 +55,23 @@ interface Emoticon {
     public: boolean;
     hidden: boolean;
     modifier: boolean;
-    offset?: any;
-    margins?: any;
-    css?: any;
-    owner: Owner;
-    urls: Urls;
+    offset?: unknown;
+    margins?: unknown;
+    css?: unknown;
+    owner: EmoticonOwner;
+    urls: EmoticonUrls;
     status: number;
     usage_count: number;
     created_at: Date;
     last_updated: Date;
 }
 
-interface Set {
+interface EmoticonSet {
     id: number;
     _type: number;
-    icon?: any;
+    icon?: unknown;
     title: string;
-    css?: any;
+    css?: unknown;
     emoticons: Emoticon[];
 }
 
@@ -79,7 +79,7 @@ interface FFZEmoteData {
     room: Room;
     // [sets: number]: Set;
     // sets: Map<number, Set>;
-    sets: Record<number, Set>;
+    sets: Record<number, EmoticonSet>;
 }
 
 export default class FFZEmoteProvider extends BaseEmoteProvider {

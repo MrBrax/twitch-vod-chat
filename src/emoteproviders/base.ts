@@ -3,7 +3,7 @@ import { TwitchCommentProxy } from "../defs";
 export default class BaseEmoteProvider {
 
     channelId: string | undefined;
-    emotes: any;
+    emotes: unknown;
     status = "Waiting...";
 
     fetchEmotes(channelId: string|number){
