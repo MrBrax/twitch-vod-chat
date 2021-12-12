@@ -1,5 +1,5 @@
 <template>
-    <div class="comment">
+    <div class="comment" v-if="vp && message">
         <span class="time" v-if="vp.settings.timestampsEnabled">{{ message.time }}</span>
         <span class="badges" v-if="vp.settings.badgesEnabled">
             <ChatBadge v-for="(badge, id) in message.badges" v-bind:key="id" v-bind:badge="badge" v-bind:vp="vp"></ChatBadge>

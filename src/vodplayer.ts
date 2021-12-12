@@ -204,7 +204,7 @@ export default class VODPlayer {
 
         this.commentQueue = [];
 
-        this.commentQueue.push(<any>{ time: '00:00:00', username: 'braxen', usernameColour: '#ff0000', messageFragments: [{ type: 'text', data: 'welcome to my vod player' }] });
+        this.commentQueue.push({ time: '00:00:00', username: 'braxen', usernameColour: '#ff0000', messageFragments: [{ type: 'text', data: 'welcome to my vod player' }] } as TwitchCommentProxy);
 
         this.elements = {
             viewer: null,
@@ -362,7 +362,7 @@ export default class VODPlayer {
             }
 
 
-            const commentObj: any = {};
+            const commentObj = {} as TwitchCommentProxy;
 
             commentObj.gid = comment._id;
 
@@ -501,7 +501,7 @@ export default class VODPlayer {
 
             }
 
-            (<any>comment).displayed = true;
+            comment.displayed = true;
 
         }
 
@@ -550,6 +550,11 @@ export default class VODPlayer {
 
     }
 
+    /**
+     * @deprecated
+     * @param comment
+     * @returns 
+     */
     createLegacyCommentElement(comment: TwitchCommentProxy) {
 
         console.debug("Create legacy comment", comment);
@@ -798,7 +803,7 @@ export default class VODPlayer {
             console.debug(`Reset ${this.commentAmount} comments`);
             for (let i = 0; i < this.commentAmount; i++) {
                 const comment = chatLog.comments[i];
-                (<any>comment).displayed = null;
+                comment.displayed = false;
             }
         }else{
             console.debug(`No comment queue`);
@@ -1003,7 +1008,7 @@ export default class VODPlayer {
         this.status_comments = `Loading...`;
 
         const response = await fetch(url);
-        let json;
+        let json: TwitchCommentDump;
         
         try {
             json = await response.json();
@@ -1014,12 +1019,12 @@ export default class VODPlayer {
 
         console.debug('Returned JSON for chat');
 
-        if(!(json as any).comments){
+        if (!json.comments){
             console.error("loadChatFileFromURL json has no comments", json);
             return false;
         }
 
-        (chatLog as any) = json;
+        chatLog = json;
 
         console.debug('Saved');
 
@@ -1336,7 +1341,7 @@ export default class VODPlayer {
 
     }
 
-    async fetchChatFragment(start: any, cursor: string | null = null) {
+    async fetchChatFragment(start: number | null, cursor: string | null = null) {
 
         // unsupported by twitch
         let url = `https://api.twitch.tv/kraken/videos/${this.videoId}/comments`;

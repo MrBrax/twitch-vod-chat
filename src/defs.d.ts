@@ -34,7 +34,7 @@ interface TwitchUserBadge {
 
 export interface TwitchCommentProxy extends TwitchComment {
     time: string;
-    gid: number;
+    gid: string | number;
     messageFragments: {
         type: string;
         data: {

@@ -2,10 +2,21 @@ import EmbedPlayer from './base';
 
 declare const Twitch: any;
 
+interface TwitchPlayer {
+    pause(): void;
+    play(): void;
+    seek(timestamp: number): void
+    setMuted(muted: boolean): void;
+    getDuration(): number;
+    getCurrentTime(): number;
+    isPaused(): boolean;
+    addEventListener(event: string, callback: () => void): void;
+}
+
 export default class EmbedTwitchPlayer extends EmbedPlayer {
 
     vod_id: string;
-    player: any;
+    player: TwitchPlayer | null = null;
 
     constructor(vod_id: string) {
         super();
@@ -30,14 +41,14 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
             video: this.vod_id,
             autoplay: false,
             controls: false
-        });
+        }) as TwitchPlayer;
 
         console.log("Embed player created", this.player);
 
         console.log("Add event listeners");
 
         this.player.addEventListener(Twitch.Player.READY, () => {
-            if(!this.vodplayer) return;
+            if(!this.vodplayer || !this.player) return;
 
             console.log("embed player ready");
 
@@ -48,6 +59,7 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
             this.player.setMuted(false);
 
             setTimeout(() => {
+                if(!this.player) return;
                 this.player.seek(0);
                 this.player.pause();
             }, 500);
@@ -63,7 +75,7 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
         this.player.addEventListener(Twitch.Player.PLAY, () => {
             if(!this.vodplayer) return;
             console.log("embed player play");
-            if (!this.vodplayer.isPlaying) {
+            if (!this.vodplayer.isPlaying && this.player) {
                 console.log("oops, player started without user wanting it");
                 this.player.seek(0);
                 this.player.pause();
@@ -111,28 +123,34 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
     }
 
     play() {
+        if (!this.player) return;
         this.player.play();
         // let 
     }
 
     pause() {
+        if (!this.player) return false;
         this.player.pause();
         return true;
     }
 
     seek(seconds: number) {
+        if (!this.player) return;
         this.player.seek(seconds);
     }
 
     getDuration() {
+        if (!this.player) return null;
         return this.player.getDuration();
     }
 
     getCurrentTime() {
+        if (!this.player) return null;
         return this.player.getCurrentTime();
     }
 
     get isPaused() {
+        if (!this.player) return false;
         return this.player.isPaused();
     }
 

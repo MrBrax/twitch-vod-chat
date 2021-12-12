@@ -56,11 +56,12 @@ export default class EmbedVideoPlayer extends EmbedPlayer {
             this.emit("pause");
         });
 
-        this.player.addEventListener("seeked", (ev) => {
+        this.player.addEventListener("seeked", (ev: Event) => {
             /*
             if (this.callbacks['seeked']) {
                 this.callbacks['seeked']();
             }*/
+            console.debug("html5 player seeked", ev);
             this.emit("seeked", this.getCurrentTime());
         });
 

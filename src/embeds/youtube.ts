@@ -1,6 +1,6 @@
 import EmbedPlayer from './base';
 import { YouTubePlayer } from 'youtube-player/dist/types';
-
+// import PlayerStates from 'youtube-player/dist/constants/PlayerStates'
 export default class EmbedYouTubePlayer extends EmbedPlayer {
 
     youtube_id: string;
@@ -24,7 +24,7 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
         this.setStatusText('Set up YouTube player...');
 
         console.log("OnPlayerReady function");
-        const onPlayerReady = (event: any) => {
+        const onPlayerReady = (event: Event) => {
             if(!this.vodplayer) return;
             this.setStatusText('YouTube Player ready!');
             console.log("player ready", event);
@@ -37,20 +37,20 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
         }
 
         console.log("OnPlayerStateChange function");
-        const onPlayerStateChange = (event: any) => {
+        const onPlayerStateChange = (event: number) => {
             console.log("state change", event);
             if (event == this.YT_PAUSE){
                 this.callPause(true); // paused
                 this.emit("pause");
             }
             if (event == this.YT_PLAY){
-                this.callPause(true); // paused
+                this.callPause(true); // wait why
                 this.emit("play");
             }
         }
 
         console.log("OnError function");
-        const onError = (event: any) => {
+        const onError = (event: Event) => {
             console.log("error", event);
         }
 
