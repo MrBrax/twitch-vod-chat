@@ -1,19 +1,15 @@
 {
   "name": "twitch-vod-chat",
-  "version": "1.3.1-a",
+  "version": "1.4.0",
   "private": true,
   "description": "http://vod.dongers.net/player.html",
   "author": "",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "build:style": "sass --no-source-map --style compressed .\\src\\player.scss:.\\dist\\player.css",
-    "start": "webpack-dev-server --open --config webpack.dev.js",
-    "watch": "webpack --watch",
-    "watch:style": "sass --watch .\\src\\player.scss:.\\dist\\player.css"
+    "lint": "vue-cli-service lint"
   },
-  "main": "src/vodplayer.js",
+  "main": "src/main.ts",
   "dependencies": {
     "core-js": "^3.8.3",
     "vue": "^3.2.13",
