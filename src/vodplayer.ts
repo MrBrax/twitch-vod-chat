@@ -46,7 +46,7 @@ const defaultSettings = {
 
 export default class VODPlayer {
 
-    chatLog: TwitchCommentDump;
+    chatLog: TwitchCommentDump | null;
 
     baseTitle = "braxen's vod replay";
 
@@ -129,7 +129,7 @@ export default class VODPlayer {
         label: string;
     }[];
 
-    interval: number; // huh
+    interval: number | null; // huh
 
     embedPlayer: EmbedPlayer | null = null;
     // embedPlayerPog: any;
@@ -253,6 +253,7 @@ export default class VODPlayer {
         this.noVideo = false;
 
         this.isPlaying = false;
+        this.isReady = false;
 
         /*
         this._chatTop       = 0;
@@ -315,7 +316,7 @@ export default class VODPlayer {
         */
 
         
-        if( this.embedPlayer.getCurrentTime() >= this.vodLength ){
+        if (this.embedPlayer.getCurrentTime() >= this.vodLength){
             this.pause();
             return false;
         }
@@ -457,155 +458,6 @@ export default class VODPlayer {
                                 found_emote = true;
                             }
                         }
-
-                        // ffz
-                        // this.emotes.forEach(() => {});
-                        // this.emotes.ffz.parseComment(word, commentObj);
-                        /*
-                        if(this.emotes.ffz.getEmotes()){
-                            for (let fSet in this.emotes.ffz.getEmotes().sets) {
-                                for (let fEmo of this.emotes.ffz.getEmotes().sets[fSet].emoticons) {
-                                    if (fEmo.name == word) {
-
-                                        this.debug(`Insert emote "${word}" from FFZ into comment #${commentObj.gid}`);
-                                        commentObj.messageFragments.push({
-                                            type: 'emote',
-                                            data: {
-                                                network: 'ffz',
-                                                name: word,
-                                                url: 'https:' + fEmo.urls[1] // TODO: check that this https url is standardised
-                                            }
-                                        });
-
-                                        emotes++;
-
-                                        found_emote = true;
-                                        break;
-
-                                    }
-                                }
-                            }
-                        }
-                        */
-
-                        /*
-                        // bttv shared emotes
-                        if (this.emotes.bttv_channel && this.emotes.bttv_channel.sharedEmotes && !found_emote) {
-
-                            for (let fEmo of this.emotes.bttv_channel.sharedEmotes) {
-                                if (fEmo.code == word) {
-
-                                    this.debug(`Insert emote "${word}" from BTTV Shared into comment #${commentObj.gid}`);
-                                    commentObj.messageFragments.push({
-                                        type: 'emote',
-                                        data: {
-                                            network: 'bttv_channel',
-                                            class: 'bttv-emo-' + fEmo.id,
-                                            name: word,
-                                            url: `https://cdn.betterttv.net/emote/${fEmo.id}/2x`
-                                        }
-                                    });
-
-                                    emotes++;
-
-                                    found_emote = true;
-                                    break;
-                                }
-
-                            }
-
-                        }
-                        
-                        // bttv channel emotes
-                        if (this.emotes.bttv_channel && this.emotes.bttv_channel.channelEmotes && !found_emote) {
-
-                            for (let fEmo of this.emotes.bttv_channel.channelEmotes) {
-                                if (fEmo.code == word) {
-
-                                    this.debug(`Insert emote "${word}" from BTTV Channel into comment #${commentObj.gid}`);
-                                    commentObj.messageFragments.push({
-                                        type: 'emote',
-                                        data: {
-                                            network: 'bttv_channel',
-                                            class: 'bttv-emo-' + fEmo.id,
-                                            name: word,
-                                            url: `https://cdn.betterttv.net/emote/${fEmo.id}/2x`
-                                        }
-                                    });
-
-                                    emotes++;
-
-                                    found_emote = true;
-                                    break;
-                                }
-
-                            }
-
-                        }
-                        */
-                        // this.emotes.bttv_channel.parseComment(word, commentObj);
-
-                        // bttv_global
-                        // this.emotes.bttv_global.parseComment(word, commentObj);
-                        /*
-                        if (this.emotes.bttv_global && !found_emote) {
-                            for (let fEmo of this.emotes.bttv_global) {
-                                if (fEmo.code == word) {
-
-                                    this.debug(`Insert emote "${word}" from BTTV Global into comment #${commentObj.gid}`);
-                                    commentObj.messageFragments.push({
-                                        type: 'emote',
-                                        data: {
-                                            network: 'bttv_global',
-                                            class: 'bttv-emo-' + fEmo.id,
-                                            name: word,
-                                            url: `https://cdn.betterttv.net/emote/${fEmo.id}/2x`
-                                        }
-                                    });
-
-                                    emotes++;
-
-                                    found_emote = true;
-                                    break;
-                                }
-
-                            }
-                        }
-
-                        // seventv
-                        if( this.emotes.seventv !== null && this.emotes.seventv.length > 0 && !found_emote ){
-                            for (let fEmo of this.emotes.seventv) {
-                                if (fEmo.name == word) {
-
-                                    if(!fEmo.urls || fEmo.urls.length == 0){
-                                        console.error("no urls on seventv emote", fEmo);
-                                        continue;
-                                    }
-
-                                    if(!fEmo.urls[0] || !fEmo.urls[0][1]){
-                                        console.error("invalid url on seventv emote", fEmo);
-                                        continue;
-                                    }
-
-                                    this.debug(`Insert emote "${word}" from SevenTV into comment #${commentObj.gid}`);
-                                    commentObj.messageFragments.push({
-                                        type: 'emote',
-                                        data: {
-                                            network: 'seventv',
-                                            name: word,
-                                            url: fEmo.urls[0][1]
-                                        }
-                                    });
-
-                                    emotes++;
-
-                                    found_emote = true;
-                                    break;
-
-                                }
-                            }
-                        }
-                        
 
                         /*
                         if(!found_emote){
@@ -1408,97 +1260,6 @@ export default class VODPlayer {
         for(const provider in this.emotes){
             this.emotes[provider].fetchEmotes(this.channelId);
         }
-
-        // ffz
-        /*
-        console.log('Fetching FFZ');
-        this.status_ffz = 'Fetching...';
-        fetch(`https://api.frankerfacez.com/v1/room/id/${this.channelId}`).then(function (response) {
-            return response.json();
-        }).then((json2) => {
-
-            if (!json2.sets) {
-                console.error("failed to load ffz", json2);
-                this.status_ffz = 'Failed to load';
-                return;
-            }
-
-            this.emotes.ffz = json2;
-            console.log('ffz', this.emotes.ffz);
-            this.status_ffz = `OK! (${Object.keys(this.emotes.ffz.sets).length} sets)`;
-        });
-        */
-        // this.emotes.ffz.fetchEmotes(this.channelId);
-
-        // bttv_channel v3
-        /*
-        console.log('Fetching BTTV_Channel');
-        this.status_bttv_channel = 'Fetching...';
-        fetch(`https://api.betterttv.net/3/cached/users/twitch/${this.channelId}`).then(function (response) {
-            return response.json();
-        }).then((json2) => {
-
-            if (!json2.sharedEmotes) {
-                console.error("failed to load bttv_channel", json2);
-                this.status_bttv_channel = 'Failed to load';
-                return;
-            }
-
-            this.emotes.bttv_channel = json2;
-            console.log('bttv_channel', this.emotes.bttv_channel);
-            let emoteNum = Object.keys(this.emotes.bttv_channel.channelEmotes).length + Object.keys(this.emotes.bttv_channel.sharedEmotes).length;
-            this.status_bttv_channel = `OK! (${emoteNum} emotes)`;
-        });
-        */
-        // this.emotes.bttv_channel.fetchEmotes(this.channelId);
-
-        // bttv_global v3
-        /*
-        console.log('Fetching BTTV_Global');
-        this.status_bttv_global = 'Fetching...';
-        fetch('https://api.betterttv.net/3/cached/emotes/global').then(function (response) {
-            return response.json();
-        }).then((json2) => {
-
-            if (!json2 || json2.length == 0) {
-                console.error("failed to load bttv_global", json2);
-                this.status_bttv_global = 'Failed to load';
-                return;
-            }
-
-            this.emotes.bttv_global = json2;
-            console.log('bttv_global', this.emotes.bttv_global);
-            this.status_bttv_global = `OK! (${Object.keys(this.emotes.bttv_global).length} emotes)`;
-        });
-        */
-        // this.emotes.bttv_global.fetchEmotes(this.channelId);
-        
-        // seventv
-        /*
-        console.log('Fetching seventv');
-        this.status_seventv = 'Fetching...';
-        fetch(`https://api.7tv.app/v2/users/${this.channelId}/emotes`).then(function (response) {
-            return response.json();
-        }).then((json2) => {
-
-            if(json2.message){
-                console.error("failed to load seventv", json2);
-                this.status_seventv = `Error: ${json2.message}`;
-                return;
-            }
-
-            if (json2.length <= 0) {
-                console.error("failed to load seventv", json2);
-                this.status_seventv = 'Failed to load';
-                return;
-            }
-
-            this.emotes.seventv = json2;
-            console.log('seventv', this.emotes.seventv);
-            this.status_seventv = `OK! (${this.emotes.seventv.length} emotes)`;
-        });
-        */
-        // this.emotes.seventv.fetchEmotes(this.channelId);
 
     }
 

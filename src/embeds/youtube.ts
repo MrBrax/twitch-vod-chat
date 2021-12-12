@@ -14,6 +14,8 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
     constructor(youtube_id: string) {
         super();
         this.youtube_id = youtube_id;
+        this.player = null;
+        this.isReady = false;
         console.log(`Created YouTube player with id ${youtube_id}`);
     }
 
@@ -65,7 +67,7 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
         
         this.player = null;
         
-        this.player = new (<any>window).YT.Player(player_element, {
+        this.player = new (window as any).YT.Player(player_element, {
             width: '1280',
             height: '720',
             videoId: this.youtube_id,
@@ -74,20 +76,23 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
                 'onStateChange': onPlayerStateChange,
                 'onError': onError,
             }
-        });
+        }) as YouTubePlayer;
 
     }
 
     play() {
+        if (!this.player) return;
         this.player.playVideo();
     }
 
-    pause(){
+    pause() {
+        if (!this.player) return false;
         this.player.pauseVideo();
         return true;
     }
 
     seek(seconds: number) {
+        if (!this.player) return;
         this.player.seekTo(seconds, false);
     }
 
@@ -102,7 +107,7 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
     }
 
     get isPaused() {
-        if(!this.isReady || !this.player) return;
+        if(!this.isReady || !this.player) return undefined;
         return this.player.getPlayerState() == 2;
     }
 

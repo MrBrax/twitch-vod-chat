@@ -3,7 +3,10 @@ import VODPlayer from '../vodplayer';
 export default class EmbedPlayer {
 
     vodplayer: VODPlayer | null;
+
+    /** @deprecated */
     callbacks: any;
+
     manualPause: boolean;
     listeners: Record<string, Function>;
 
@@ -73,11 +76,12 @@ export default class EmbedPlayer {
         this.manualPause = state;
     }
 
-    setStatusText( text: string ){
+    setStatusText( text: string ): void {
+        if(!this.vodplayer) return;
         this.vodplayer.status_video = text;
     }
 
-    get isPaused() {
+    get isPaused(): boolean | undefined {
         return false;
     }
 
