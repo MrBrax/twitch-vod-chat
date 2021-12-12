@@ -2,80 +2,80 @@ import { TwitchPlayer } from "@/defs";
 import EmbedPlayer from "./base";
 
 export default class EmbedTwitchPlayer extends EmbedPlayer {
-  vod_id: string;
-  player: TwitchPlayer | null = null;
+    vod_id: string;
+    player: TwitchPlayer | null = null;
 
-  constructor(vod_id: string) {
-    super();
-    this.vod_id = vod_id;
-  }
-
-  setup() {
-    const player_element = document.createElement("div");
-    const video_container = document.getElementById("video_container");
-    if (!video_container) {
-      console.error("No video container");
-      return false;
+    constructor(vod_id: string) {
+        super();
+        this.vod_id = vod_id;
     }
-    video_container.appendChild(player_element);
 
-    this.setStatusText("Set up Twitch embed player...");
+    setup() {
+        const player_element = document.createElement("div");
+        const video_container = document.getElementById("video_container");
+        if (!video_container) {
+            console.error("No video container");
+            return false;
+        }
+        video_container.appendChild(player_element);
 
-    this.player = new window.Twitch.Player(player_element, {
-      width: "100%",
-      height: "100%",
-      video: this.vod_id,
-      autoplay: false,
-      controls: false,
-    });
+        this.setStatusText("Set up Twitch embed player...");
 
-    console.log("Embed player created", this.player);
+        this.player = new window.Twitch.Player(player_element, {
+            width: "100%",
+            height: "100%",
+            video: this.vod_id,
+            autoplay: false,
+            controls: false,
+        });
 
-    console.log("Add event listeners");
+        console.log("Embed player created", this.player);
 
-    this.player.addEventListener(window.Twitch.Player.READY, () => {
-      if (!this.vodplayer || !this.player) return;
+        console.log("Add event listeners");
 
-      console.log("embed player ready");
+        this.player.addEventListener(window.Twitch.Player.READY, () => {
+            if (!this.vodplayer || !this.player) return;
 
-      this.setStatusText("Embed Twitch player ready!");
+            console.log("embed player ready");
 
-      this.player.seek(0);
-      this.player.pause();
-      this.player.setMuted(false);
+            this.setStatusText("Embed Twitch player ready!");
 
-      setTimeout(() => {
-        if (!this.player) return;
-        this.player.seek(0);
-        this.player.pause();
-      }, 500);
+            this.player.seek(0);
+            this.player.pause();
+            this.player.setMuted(false);
 
-      this.vodplayer.videoLoaded = true;
-      // if (this.callbacks['ready']) {
-      //     this.callbacks['ready']();
-      // }
-      this.emit("ready");
-    });
+            setTimeout(() => {
+                if (!this.player) return;
+                this.player.seek(0);
+                this.player.pause();
+            }, 500);
 
-    this.player.addEventListener(window.Twitch.Player.PLAY, () => {
-      if (!this.vodplayer) return;
-      console.log("embed player play");
-      if (!this.vodplayer.isPlaying && this.player) {
-        console.log("oops, player started without user wanting it");
-        this.player.seek(0);
-        this.player.pause();
-        return;
-      }
-      this.callPause(false);
-      this.emit("play");
-    });
+            this.vodplayer.videoLoaded = true;
+            // if (this.callbacks['ready']) {
+            //     this.callbacks['ready']();
+            // }
+            this.emit("ready", true);
+        });
 
-    this.player.addEventListener(window.Twitch.Player.PAUSE, () => {
-      this.callPause(true);
-      this.emit("pause");
-    });
+        this.player.addEventListener(window.Twitch.Player.PLAY, () => {
+            if (!this.vodplayer) return;
+            console.log("embed player play");
+            if (!this.vodplayer.isPlaying && this.player) {
+                console.log("oops, player started without user wanting it");
+                this.player.seek(0);
+                this.player.pause();
+                return;
+            }
+            this.callPause(false);
+            this.emit("play", true);
+        });
 
-    /*
+        this.player.addEventListener(window.Twitch.Player.PAUSE, () => {
+            this.callPause(true);
+            this.emit("pause", true);
+        });
+
+        /*
         this.embedPlayer.addEventListener("play", () => {
             
             console.log("seek in embed player");
@@ -104,37 +104,37 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
 
         });
         */
-  }
+    }
 
-  play() {
-    if (!this.player) return;
-    this.player.play();
-    // let
-  }
+    play() {
+        if (!this.player) return;
+        this.player.play();
+        // let
+    }
 
-  pause() {
-    if (!this.player) return false;
-    this.player.pause();
-    return true;
-  }
+    pause() {
+        if (!this.player) return false;
+        this.player.pause();
+        return true;
+    }
 
-  seek(seconds: number) {
-    if (!this.player) return;
-    this.player.seek(seconds);
-  }
+    seek(seconds: number) {
+        if (!this.player) return;
+        this.player.seek(seconds);
+    }
 
-  getDuration() {
-    if (!this.player) return null;
-    return this.player.getDuration();
-  }
+    getDuration() {
+        if (!this.player) return null;
+        return this.player.getDuration();
+    }
 
-  getCurrentTime() {
-    if (!this.player) return null;
-    return this.player.getCurrentTime();
-  }
+    getCurrentTime() {
+        if (!this.player) return null;
+        return this.player.getCurrentTime();
+    }
 
-  get isPaused() {
-    if (!this.player) return false;
-    return this.player.isPaused();
-  }
+    get isPaused() {
+        if (!this.player) return false;
+        return this.player.isPaused();
+    }
 }
