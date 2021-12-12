@@ -19,7 +19,8 @@ declare global {
             Player: {
                 new(element: HTMLDivElement, opt: YouTubePlayerOptions): YouTubePlayer;
             }
-        }
+        },
+        onYouTubeIframeAPIReady();
     }
 }
 

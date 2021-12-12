@@ -26,7 +26,7 @@
 			<!--<div id="timeline-auto">{{ vp.videoCurrentTime }}</div>-->
 		</div>
 
-		<div v-if="vp.videoChapters" id="timeline-markers">
+		<div v-if="vp.videoChapters && vp.vodLength" id="timeline-markers">
 			<div class="timeline-marker" v-for="(marker, id) in vp.videoChapters" v-bind:key="id" v-bind:style="{ left: ( ( marker.time / vp.vodLength ) * 100 ) + '%' }">
 				{{ marker.label }}
 			</div>
@@ -44,7 +44,7 @@
 			</div>
 			<div class="video-controls-buttons" v-else>
 				<button class="pb-button" @click="togglePause">
-					{{ vp.embedPlayer.isPaused ? "▶" : "⏸" }}
+					{{ vp?.embedPlayer?.isPaused ? "▶" : "⏸" }}
 				</button>
 				<button class="pb-button" @click="fullscreen">Fullscreen</button>
 				<button class="pb-button" @click="resetChat">Reset chat</button>
@@ -292,7 +292,8 @@
 
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from '@vue/runtime-core';
 import ChatMessage from './components/ChatMessage.vue'
 
 import EmbedVideoPlayer from './embeds/html5';
@@ -305,12 +306,19 @@ import VODPlayer from './vodplayer';
 
 console.log("app.vue init");
 
-export default {
+export default defineComponent({
 	name: 'App',
 	components: {
 		ChatMessage
 	},
-	data: function(){
+	data() : {
+		vp: VODPlayer | null,
+		video_source: string,
+		chat_source: string,
+		input_video: string,
+		input_chat: string;
+		video_height: number,
+	} {
 		return {
 			vp: null,
 			video_source: 'file',
@@ -342,7 +350,7 @@ export default {
 
 			const query = window.location.hash;
 			const query_param = query.split("&");
-			const params = {};
+			const params = {} as Record<string, string>;
 			for (const param of query_param) {
 				params[param.split("=")[0].replace("#", "")] = param.split("=")[1];
 			}
@@ -411,14 +419,14 @@ export default {
 				if (params.chatdump && vodplayer.embedPlayer) {
 					vodplayer.loadTwitchChat(params.chatdump).then( status => {
 						console.log("auto chat load 1", status);
-						if (params.offset) vodplayer.seek(params.offset);
+						if (params.offset) vodplayer.seek(parseInt(params.offset));
 					});
 				} else if (params.chatfile && vodplayer.embedPlayer) {
 					vodplayer.embedPlayer.setCallback('ready', () => {
 						console.debug("player ready, load chat file");
 						vodplayer.loadChatFileFromURL(params.chatfile).then( status => {
 							console.log("auto chat load 2", status);
-							if (params.offset) vodplayer.seek(params.offset);
+							if (params.offset) vodplayer.seek(parseInt(params.offset));
 						});
 					});
 				}else{
@@ -437,67 +445,81 @@ export default {
 
 	},
 	methods: {
-		submitVideo(event){
+		submitVideo(event: Event){
+			if(!this.vp) return;
 			console.log( this.$refs );
-			this.vp.loadVideo( this.video_source, this.$refs.video_input );
+			this.vp.loadVideo( this.video_source, this.$refs.video_input as HTMLInputElement );
 			event.preventDefault();
 			return false;
 		},
-		submitChat(event){
+		submitChat(event: Event){
+			if(!this.vp) return;
 			console.log( this.$refs );
-			this.vp.loadChat( this.chat_source, this.$refs.chat_input );
+			this.vp.loadChat( this.chat_source, this.$refs.chat_input as HTMLInputElement );
 			event.preventDefault();
 			return false;
 		},
 		fetchTwitchToken(){
+			if(!this.vp) return;
 			this.vp.fetchTwitchToken();
 		},	
-		alignChat(dir){
+		alignChat(dir: string){
+			if(!this.vp) return;
 			this.vp.alignChat(dir);
 		},
-		alignText(dir){
+		alignText(dir: string){
+			if(!this.vp) return;
 			this.vp.alignText(dir);
 		},
 		startPlayback(){
+			if(!this.vp) return;
 			this.vp.startPlayback();
 		},
 		togglePause(){
+			if(!this.vp) return;
 			this.vp.togglePause();
 		},
 		apply(){
+			if(!this.vp) return;
 			this.vp.applyTimings();
 		},
 		resetChat(){
+			if(!this.vp) return;
 			this.vp.reset();
 		},
 		fullscreen(){
+			if(!this.vp) return;
 			this.vp.fullscreen();
 		},
-		seek(ev){
+		seek(ev: MouseEvent){
+			if(!this.vp) return;
 			if(!this.vp.embedPlayer){
 				console.error("trying to seek from gui with no embed player");
 				return false;
 			}
-			let duration = this.vp.embedPlayer.getDuration();
-			let rect = timeline.getBoundingClientRect();
+			let duration = this.vp.embedPlayer.getDuration() || 0;
+			let rect = timeline.getBoundingClientRect(); // @todo: what
 			let percent = ( ev.clientX - rect.left ) / timeline.clientWidth;
 			let seconds = Math.round(duration * percent);
 			this.vp.seek( seconds );
 		},
 		saveSettings(){
+			if(!this.vp) return;
 			this.vp.saveSettings();
 		},
 		resetSettings(){
+			if(!this.vp) return;
 			this.vp.resetSettings();
 		}
 	},
 	computed: {
-        videoPosition(){
-
-			return this.vp.embedPlayer.getCurrentTime() / this.vp.vodLength;
-            
+        videoPosition(): number {
+			const currentTime = this.vp?.embedPlayer?.getCurrentTime() || 0;
+			// if (!this.vp || !this.vp.embedPlayer || this.vp.embedPlayer.getCurrentTime() == null || !this.vp.vodLength) return 0;
+			return currentTime / ( this.vp?.vodLength || 0 );
 		},
-		commentsStyle(){
+		commentsStyle(): Record<string, string> | null {
+			if(!this.vp) return null;
 			return {
 				'top': this.vp.settings.chatTop + '%',
 				'bottom': this.vp.settings.chatBottom + '%',
@@ -506,29 +528,30 @@ export default {
 				'fontFamily': this.vp.settings.fontName,
 			}
 		},
-		commentsClass(){
+		commentsClass(): Record<string, boolean> | null {
+			if(!this.vp) return null;
 			return {
 				'align-left': this.vp.settings.chatAlign == 'left',
 				'align-right': this.vp.settings.chatAlign == 'right',
 				'text-left': this.vp.settings.chatTextAlign == 'left',
-				'text-right': this.$root.vp.settings.chatTextAlign == 'right',
-				[this.$root.vp.settings.chatStyle]: true,
-				'has-stroke': this.$root.vp.settings.chatStroke,
-				'is-overlay': this.$root.vp.settings.chatOverlay,
+				'text-right': this.vp.settings.chatTextAlign == 'right',
+				[this.vp.settings.chatStyle]: true,
+				'has-stroke': this.vp.settings.chatStroke,
+				'is-overlay': this.vp.settings.chatOverlay,
 			}
 		},
-		twitchApiRequired(){
+		twitchApiRequired(): boolean {
 			return this.video_source == 'twitch' || this.chat_source == 'twitch';
 		}
 
     },
 	watch: {
-		video_height(newVal, oldVal){
+		video_height(newVal, oldVal): void {
 			console.log(newVal);
 			this.$refs.player.style.width = "auto";
 			this.$refs.player.style.height = `${newVal}px`;
 			this.$refs.app.style.width = `auto`;
 		}
 	},
-}
+});
 </script>
