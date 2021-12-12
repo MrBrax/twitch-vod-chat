@@ -16,7 +16,7 @@
                 <button class="pb-button" @click="fullscreen">Fullscreen</button>
                 <button class="pb-button" @click="resetChat">Reset chat</button>
             </div>
-            <div class="video-controls-buttons-group">
+            <div class="video-controls-buttons-group" v-if="vp.minimal">
                 <label><input type="checkbox" name="comments-overlay" v-model="vp.settings.chatOverlay" /> Overlay</label>
                 <label><input type="checkbox" name="ultrawide" v-model="vp.settings.ultrawide" /> Ultrawide</label>
             </div>

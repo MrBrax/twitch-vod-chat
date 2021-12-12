@@ -360,8 +360,16 @@ export default defineComponent({
 
         vodplayer.hooks();
 
-        const processHash = () => {
-            console.debug("Process hash", window.location.hash);
+        window.addEventListener("hashchange", this.processHash);
+
+        this.processHash();
+    },
+    methods: {
+        processHash(ev?: Event) {
+            console.debug("Process hash", window.location.hash, ev);
+
+            const vodplayer = this.vp;
+            if (!vodplayer) return;
 
             const query = window.location.hash;
             const query_param = query.split("&");
@@ -389,10 +397,7 @@ export default defineComponent({
                 vodplayer.chatOffset = parseInt(params.offset);
             }
 
-            if (params.minimal) {
-                vodplayer.minimal = true;
-                console.log("minimal mode enabled");
-            }
+            vodplayer.minimal = params.minimal !== undefined && parseInt(params.minimal) > 0;
 
             if (params.chapters) {
                 vodplayer.videoChapters = [];
@@ -453,13 +458,7 @@ export default defineComponent({
                     return false;
                 }
             }
-        };
-
-        window.addEventListener("hashchange", () => processHash);
-
-        processHash();
-    },
-    methods: {
+        },
         submitVideo(event: Event) {
             if (!this.vp) return;
             console.log(this.$refs);

@@ -860,6 +860,8 @@ export default class VODPlayer {
             this.embedPlayer.vodplayer = this;
             this.embedPlayer.setup();
 
+            // this.createHash();
+
             return true;
         } else if (source == "file_http") {
             this.loadChatFileFromURL(input.value);
@@ -1486,6 +1488,15 @@ export default class VODPlayer {
         if (process.env.NODE_ENV !== "development") return;
         console.debug(...text);
     }
+
+    /*
+    createHash() {
+        const q = new URLSearchParams();
+        q.append("source", this.video_source);
+        console.log("createHash", q);
+        location.hash = `#${q.toString()}`;
+    }
+    */
 
     get videoPosition(): number {
         if (!this.embedPlayer) return 0;

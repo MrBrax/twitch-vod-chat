@@ -247,6 +247,7 @@ hr {
 
 .video-controls {
 	background-color: #151515;
+	color: #aaa;
 	&.minimal {
 		position: absolute;
 		bottom: 0px;
@@ -260,7 +261,6 @@ hr {
 	padding: 4px;
 }
 .video-controls-text {
-	color: #aaa;
 	padding-left: 5px;
 	font-size: 1.3em;
 }
