@@ -54,15 +54,15 @@ export default class EmbedPlayer {
     }
 
     seek(seconds: number) {
-        alert('no seek implemented');
+        alert(`no seek implemented (${seconds})`);
     }
 
-    getDuration(): number | undefined {
+    getDuration(): number | null {
         alert('no duration implemented');
         return 0;
     }
 
-    getCurrentTime(): number | undefined {
+    getCurrentTime(): number | null {
         alert('no current time implemented');
         return 0;
     }

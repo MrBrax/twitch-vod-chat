@@ -15,7 +15,7 @@ export default class BaseEmoteProvider {
     }
 
     /**
-     * 
+     * Parses comment and inserts emote object into `commentObj` when found.
      * @param word 
      * @param commentObj 
      * @returns If emote was found

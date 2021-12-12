@@ -97,12 +97,12 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
     }
 
     getDuration() {
-        if(!this.isReady || !this.player) return undefined;
+        if(!this.isReady || !this.player) return null;
         return this.player.getDuration();
     }
 
     getCurrentTime() {
-        if(!this.isReady || !this.player) return undefined;
+        if(!this.isReady || !this.player) return null;
         return this.player.getCurrentTime();
     }
 

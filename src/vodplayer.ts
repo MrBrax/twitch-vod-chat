@@ -11,7 +11,9 @@ import {
     TwitchComment,
     TwitchCommentDump,
     TwitchCommentProxy,
+    TwitchUserBadge,
     TwitchUserBadgeProxy,
+    VODPlayerSettings,
 } from './defs';
 import FFZEmoteProvider from './emoteproviders/ffz';
 import BTTVGlobalEmoteProvider from './emoteproviders/bttv_global';
@@ -78,8 +80,8 @@ export default class VODPlayer {
     emotes: Record<string, BaseEmoteProvider>;
 
     badges: {
-        global: any;
-        channel: any;
+        global: Record<string, TwitchUserBadge>;
+        channel: Record<string, TwitchUserBadge>;
     };
 
     elements: {
@@ -147,27 +149,7 @@ export default class VODPlayer {
     fetchChatRunning = false;
     // onlineOnly: boolean;
 
-    settings: {
-        twitchClientId: string;
-        twitchSecret: string;
-        twitchToken: string;
-        emotesEnabled: boolean;
-        timestampsEnabled: boolean;
-        badgesEnabled: boolean;
-        smallEmotes: boolean;
-        showVODComments: boolean;
-        chatTop: number;
-        chatBottom: number;
-        chatWidth: number;
-        chatStroke: boolean;
-        chatStyle: string;
-        chatAlign: string;
-        chatTextAlign: string;
-        chatOverlay: boolean;
-        fontSize: number;
-        fontName: string;
-        ultrawide: boolean;
-    };
+    settings: VODPlayerSettings = { ...defaultSettings };
 
     lastCommentTime: number | null = null;
     lastCommentOffset: number | null = null;
@@ -201,8 +183,8 @@ export default class VODPlayer {
         };
 
         this.badges = {
-            global: null,
-            channel: null
+            global: {},
+            channel: {},
         };
 
         this.embedPlayer = null;
@@ -315,8 +297,13 @@ export default class VODPlayer {
         }
         */
 
+        const videoTime = this.embedPlayer.getCurrentTime();
+
+        if( videoTime === null ){
+            return false;
+        }
         
-        if (this.embedPlayer.getCurrentTime() >= this.vodLength){
+        if ( videoTime >= this.vodLength ){
             this.pause();
             return false;
         }
@@ -325,7 +312,7 @@ export default class VODPlayer {
             console.error("No comments to display");
         }
 
-        const videoTime = this.embedPlayer.getCurrentTime();
+        // const videoTime = this.embedPlayer.getCurrentTime() || 0;
 
         // console.log("tick test", timeRelative, this.embedPlayer.getCurrentTime());
 
@@ -373,7 +360,6 @@ export default class VODPlayer {
                 (<any>comment).displayed = true;
                 continue;
             }
-
 
 
             const commentObj: any = {};
@@ -445,9 +431,9 @@ export default class VODPlayer {
 
                     const fragWords = f.text.split(' ');
 
-                    const paragraph = "";
+                    // const paragraph = "";
 
-                    const emotes = 0;
+                    // const emotes = 0;
 
                     for (const word of fragWords) {
 
@@ -523,8 +509,8 @@ export default class VODPlayer {
 
         let timelineText = 'C: ' + this.timeFormat(videoTime * this.timeScale);
 
-        if (this.embedPlayer.getCurrentTime()) {
-            timelineText += ' / V: ' + this.timeFormat(this.embedPlayer.getCurrentTime());
+        if (videoTime) {
+            timelineText += ' / V: ' + this.timeFormat(videoTime);
         }
 
         if (this.elements.playback_text) this.elements.playback_text.innerHTML = timelineText;
@@ -712,20 +698,23 @@ export default class VODPlayer {
 
     }
 
-    play(){
+    play() {
+        if (!this.embedPlayer) return;
         console.log("Play executed");
         this.interval = setInterval(this.tick.bind(this), this.tickDelay / this.timeScale);
         this.embedPlayer.play();
     }
 
-    pause(){
+    pause() {
+        if (!this.embedPlayer) return;
         console.log("Pause executed");
-        clearInterval(this.interval);
+        if(this.interval) clearInterval(this.interval);
         this.embedPlayer.pause();
         this.malformed_comments = 0;
     }
 
     togglePause(){
+        if (!this.embedPlayer) return;
         if( this.embedPlayer.isPaused ){
             this.play();
         }else{
@@ -849,9 +838,9 @@ export default class VODPlayer {
      * @param input 1h1m1s
      * @returns {number} Seconds
      */
-    parseDuration(input: string): number {
+    parseDuration(input: string): number | undefined {
 
-        if (!input) return null;
+        if (!input) return undefined;
 
         const matchHours = input.match(/([0-9]+)h/);
         const matchMinutes = input.match(/([0-9]+)m/);
@@ -958,6 +947,8 @@ export default class VODPlayer {
         }
 
         console.error("unhandled video input");
+
+        return false;
 
     }
 
@@ -1184,7 +1175,13 @@ export default class VODPlayer {
 
             console.log('loadOnline', data);
 
-            this.vodLength = this.parseDuration(data.duration);
+            const dur = this.parseDuration(data.duration);
+            if(!dur){
+                console.error("invalid duration on video info");
+                return false;
+            }
+
+            this.vodLength = dur;
             this.channelName = data.user_name;
             this.channelId = data.user_id;
 
@@ -1491,17 +1488,18 @@ export default class VODPlayer {
         document.body.addEventListener('keyup', (ev: KeyboardEvent) => {
             console.log("keyup", ev.key);
             if(this.isReady && this.embedPlayer != null){
+                const currentTime = this.embedPlayer.getCurrentTime() || 0;
                 if (ev.key == " ") {
                     console.log("Try to pause video from space");
                     this.togglePause();
                     ev.preventDefault();
                     return false;
                 }else if(ev.key == "ArrowLeft" && this.vodLength && this.embedPlayer.getCurrentTime() !== undefined){
-                    this.seek(Math.min(Math.max(this.embedPlayer.getCurrentTime() - 10, 0), this.vodLength));
+                    this.seek(Math.min(Math.max(currentTime - 10, 0), this.vodLength));
                     ev.preventDefault();
                     return false;
                 }else if(ev.key == "ArrowRight" && this.vodLength && this.embedPlayer.getCurrentTime()){
-                    this.seek(Math.min(Math.max(this.embedPlayer.getCurrentTime() + 10, 0), this.vodLength));
+                    this.seek(Math.min(Math.max(currentTime + 10, 0), this.vodLength));
                     ev.preventDefault();
                     return false;
                 }
@@ -1579,9 +1577,14 @@ export default class VODPlayer {
 
     get videoPosition(): number {
 
-        if (!this.embedPlayer || this.embedPlayer.getCurrentTime() == undefined || this.embedPlayer.getDuration() == undefined) return 0;
+        if (!this.embedPlayer) return 0;
 
-        return this.embedPlayer.getCurrentTime() / this.embedPlayer.getDuration();
+        const currentTime = this.embedPlayer.getCurrentTime();
+        const duration = this.embedPlayer.getDuration();
+
+        if (currentTime === null || duration === null) return 0;
+
+        return currentTime / duration;
 
         // if (!this.timeStart || !this.vodLength) return 0;
         /*

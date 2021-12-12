@@ -10,8 +10,27 @@ interface TwitchUserBadgeProxy {
 }
 
 interface TwitchUserBadge {
+    versions: TwitchUserBadgeEntry[];
+    url: string;
+    id: string;
+}
+
+interface TwitchUserBadgeEntry {
+    image_url_1x: string;
+    image_url_2x: string;
+    image_url_3x: string;
+    description: string;
+    title: string;
+    click_action: string;
+    click_url: string;
+    // last_updated: string;
+}
+
+/*
+interface TwitchUserBadge {
 
 }
+*/
 
 export interface TwitchCommentProxy extends TwitchComment {
     time: string;
@@ -115,4 +134,27 @@ export interface ChatEmote {
     network: string;
     name: string;
     url: string;
+    class?: string;
+}
+
+export interface VODPlayerSettings {
+    twitchClientId: string;
+    twitchSecret: string;
+    twitchToken: string;
+    emotesEnabled: boolean;
+    timestampsEnabled: boolean;
+    badgesEnabled: boolean;
+    smallEmotes: boolean;
+    showVODComments: boolean;
+    chatTop: number;
+    chatBottom: number;
+    chatWidth: number;
+    chatStroke: boolean;
+    chatStyle: string;
+    chatAlign: string;
+    chatTextAlign: string;
+    chatOverlay: boolean;
+    fontSize: number;
+    fontName: string;
+    ultrawide: boolean;
 }
