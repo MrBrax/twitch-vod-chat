@@ -26,11 +26,17 @@
 			<!--<div id="timeline-auto">{{ vp.videoCurrentTime }}</div>-->
 		</div>
 
+		<!--
 		<div v-if="vp.videoChapters && vp.vodLength" id="timeline-markers">
-			<div class="timeline-marker" v-for="(marker, id) in vp.videoChapters" v-bind:key="id" v-bind:style="{ left: ( ( marker.time / vp.vodLength ) * 100 ) + '%' }">
+			<div
+				class="timeline-marker"
+				v-for="(marker, id) in vp.videoChapters"
+				v-bind:key="id"
+				v-bind:style="{ left: ( ( marker.time / (vp.vodLength ?? 0) ) * 100 ) + '%' }">
 				{{ marker.label }}
 			</div>
 		</div>
+		-->
 
 		<!--
 		<div id="playback_info">
@@ -497,6 +503,7 @@ export default defineComponent({
 				console.error("trying to seek from gui with no embed player");
 				return false;
 			}
+			const timeline = this.$refs.timeline as HTMLDivElement;
 			let duration = this.vp.embedPlayer.getDuration() || 0;
 			let rect = timeline.getBoundingClientRect(); // @todo: what
 			let percent = ( ev.clientX - rect.left ) / timeline.clientWidth;
@@ -545,6 +552,7 @@ export default defineComponent({
 		}
 
     },
+	/*
 	watch: {
 		video_height(newVal, oldVal): void {
 			console.log(newVal);
@@ -553,5 +561,6 @@ export default defineComponent({
 			this.$refs.app.style.width = `auto`;
 		}
 	},
+	*/
 });
 </script>
