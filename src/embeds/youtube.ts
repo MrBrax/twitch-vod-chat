@@ -23,11 +23,11 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
 
         this.setStatusText('Set up YouTube player...');
 
-        console.log("OnPlayerReady function");
+        // console.log("OnPlayerReady function");
         const onPlayerReady = (event: Event) => {
             if(!this.vodplayer) return;
             this.setStatusText('YouTube Player ready!');
-            console.log("player ready", event);
+            console.log("youtube player ready", event);
             this.isReady = true;
             this.vodplayer.videoLoaded = true;
             if (this.callbacks['ready']) {
@@ -36,9 +36,11 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
             this.emit("ready");
         }
 
-        console.log("OnPlayerStateChange function");
-        const onPlayerStateChange = (event: number) => {
-            console.log("state change", event);
+        // console.log("OnPlayerStateChange function");
+        const onPlayerStateChange = (event: Event) => {
+            console.log("youtube player state change", event);
+
+            /*
             if (event == this.YT_PAUSE){
                 this.callPause(true); // paused
                 this.emit("pause");
@@ -47,11 +49,12 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
                 this.callPause(true); // wait why
                 this.emit("play");
             }
+            */
         }
 
-        console.log("OnError function");
+        // console.log("OnError function");
         const onError = (event: Event) => {
-            console.log("error", event);
+            console.log("youtube player error", event);
         }
 
         console.log("Create player div");
@@ -67,15 +70,20 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
         
         this.player = null;
         
-        this.player = new (window as any).YT.Player(player_element, {
+        this.player = new window.YT.Player(player_element, {
             width: '1280',
             height: '720',
             videoId: this.youtube_id,
             events: {
+
+                // supplied event names are broken, why?
+                // 'ready': onPlayerReady,
+                // 'stateChange': onPlayerStateChange,
+                // 'error': onError,
                 'onReady': onPlayerReady,
                 'onStateChange': onPlayerStateChange,
                 'onError': onError,
-            }
+            } as any
         }) as YouTubePlayer;
 
     }

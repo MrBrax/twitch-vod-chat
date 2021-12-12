@@ -1,17 +1,5 @@
+import { TwitchPlayer } from '@/defs';
 import EmbedPlayer from './base';
-
-declare const Twitch: any;
-
-interface TwitchPlayer {
-    pause(): void;
-    play(): void;
-    seek(timestamp: number): void
-    setMuted(muted: boolean): void;
-    getDuration(): number;
-    getCurrentTime(): number;
-    isPaused(): boolean;
-    addEventListener(event: string, callback: () => void): void;
-}
 
 export default class EmbedTwitchPlayer extends EmbedPlayer {
 
@@ -35,19 +23,19 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
 
         this.setStatusText('Set up Twitch embed player...');
 
-        this.player = new Twitch.Player(player_element, {
+        this.player = new window.Twitch.Player(player_element, {
             width: '100%',
             height: '100%',
             video: this.vod_id,
             autoplay: false,
             controls: false
-        }) as TwitchPlayer;
+        });
 
         console.log("Embed player created", this.player);
 
         console.log("Add event listeners");
 
-        this.player.addEventListener(Twitch.Player.READY, () => {
+        this.player.addEventListener(window.Twitch.Player.READY, () => {
             if(!this.vodplayer || !this.player) return;
 
             console.log("embed player ready");
@@ -72,7 +60,7 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
 
         });
 
-        this.player.addEventListener(Twitch.Player.PLAY, () => {
+        this.player.addEventListener(window.Twitch.Player.PLAY, () => {
             if(!this.vodplayer) return;
             console.log("embed player play");
             if (!this.vodplayer.isPlaying && this.player) {
@@ -85,7 +73,7 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
             this.emit("play");
         });
 
-        this.player.addEventListener(Twitch.Player.PAUSE, () => {
+        this.player.addEventListener(window.Twitch.Player.PAUSE, () => {
             this.callPause(true);
             this.emit("pause");
         });

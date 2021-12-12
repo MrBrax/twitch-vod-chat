@@ -1,4 +1,50 @@
-declare const Twitch: any;
+/*declare const Twitch: {
+    Player(el: string, opt: any): TwitchPlayer;
+};
+*/
+
+import { YouTubePlayer, Options as YouTubePlayerOptions } from "youtube-player/dist/types";
+
+declare global {
+    interface Window {
+        Twitch: {
+            Player: {
+                new(element: HTMLDivElement, opt: TwitchPlayerOptions): TwitchPlayer;
+                PLAY: "1"; // dunno
+                PAUSE: "2"; // dunno
+                READY: "3"; // dunno
+            }
+        };
+        YT: {
+            Player: {
+                new(element: HTMLDivElement, opt: YouTubePlayerOptions): YouTubePlayer;
+            }
+        }
+    }
+}
+
+interface TwitchPlayer {
+    pause(): void;
+    play(): void;
+    seek(timestamp: number): void
+    setMuted(muted: boolean): void;
+    getDuration(): number;
+    getCurrentTime(): number;
+    isPaused(): boolean;
+    addEventListener(event: string, callback: () => void): void;
+}
+
+interface TwitchPlayerOptions {
+    width?: string;
+    height?: string;
+    video?: string;
+    autoplay?: boolean;
+    controls?: boolean;
+}
+
+interface YoutubePlayerOptions {
+
+}
 
 export interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget;
