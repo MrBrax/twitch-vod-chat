@@ -158,6 +158,7 @@ export default class VODPlayer {
     allCommentsFetched = false;
 
     malformed_comments: number;
+    minimal = false;
 
     // settings: any;
 

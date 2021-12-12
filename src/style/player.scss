@@ -48,6 +48,7 @@ hr {
 }
 
 .viewer-container {
+	position: relative;
 	display: flex;
 	width: 100%;
 	aspect-ratio: 16 / 9;
@@ -244,8 +245,16 @@ hr {
 }
 
 
-#video-controls {
+.video-controls {
 	background-color: #151515;
+	&.minimal {
+		position: absolute;
+		bottom: 0px;
+		left: 0px;
+		right: 0px;
+	}
+}
+.video-controls-buttons {
 	display: flex;
 	align-items: center;
 	padding: 4px;

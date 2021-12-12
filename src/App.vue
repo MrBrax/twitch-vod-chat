@@ -37,11 +37,7 @@
                     :data-id="message.gid"
                 ></ChatMessage>
             </div>
-        </div>
-
-        <div id="timeline" ref="timeline" @click="seek">
-            <div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: vp.videoPosition * 100 + '%' }"></div>
-            <!--<div id="timeline-auto">{{ vp.videoCurrentTime }}</div>-->
+            <video-controls :minimal="1" v-bind:vp="vp" v-if="vp.minimal" />
         </div>
 
         <!--
@@ -62,21 +58,9 @@
 		</div>
 		-->
 
-        <div id="video-controls">
-            <div class="video-controls-buttons" v-if="!vp.isReady">
-                <button class="pb-button is-submit" @click="startPlayback" v-if="!vp.isPlaying">Start playback</button>
-            </div>
-            <div class="video-controls-buttons" v-else>
-                <button class="pb-button" @click="togglePause">
-                    {{ vp?.embedPlayer?.isPaused ? "▶" : "⏸" }}
-                </button>
-                <button class="pb-button" @click="fullscreen">Fullscreen</button>
-                <button class="pb-button" @click="resetChat">Reset chat</button>
-            </div>
-            <div class="video-controls-text" id="playback_text">Playback text</div>
-        </div>
+        <video-controls v-bind:vp="vp" v-if="!vp.minimal" />
 
-        <div id="controls">
+        <div id="controls" v-if="!vp.minimal">
             <div class="option-row">
                 <div v-if="!vp.automated" v-bind:class="{ 'option-group': true, ok: vp.videoLoaded }" class="option-group">
                     <div class="option-title">Video</div>
@@ -324,6 +308,7 @@
 <script lang="ts">
 import { defineComponent } from "@vue/runtime-core";
 import ChatMessage from "./components/ChatMessage.vue";
+import VideoControls from "./components/VideoControls.vue";
 
 import EmbedVideoPlayer from "./embeds/html5";
 import EmbedTwitchPlayer from "./embeds/twitch";
@@ -339,6 +324,7 @@ export default defineComponent({
     name: "App",
     components: {
         ChatMessage,
+        VideoControls,
     },
     data(): {
         vp: VODPlayer | null;
@@ -401,6 +387,11 @@ export default defineComponent({
 
             if (params.offset) {
                 vodplayer.chatOffset = parseInt(params.offset);
+            }
+
+            if (params.minimal) {
+                vodplayer.minimal = true;
+                console.log("minimal mode enabled");
             }
 
             if (params.chapters) {
@@ -495,38 +486,9 @@ export default defineComponent({
             if (!this.vp) return;
             this.vp.alignText(dir);
         },
-        startPlayback() {
-            if (!this.vp) return;
-            this.vp.startPlayback();
-        },
-        togglePause() {
-            if (!this.vp) return;
-            this.vp.togglePause();
-        },
         apply() {
             if (!this.vp) return;
             this.vp.applyTimings();
-        },
-        resetChat() {
-            if (!this.vp) return;
-            this.vp.reset();
-        },
-        fullscreen() {
-            if (!this.vp) return;
-            this.vp.fullscreen();
-        },
-        seek(ev: MouseEvent) {
-            if (!this.vp) return;
-            if (!this.vp.embedPlayer) {
-                console.error("trying to seek from gui with no embed player");
-                return false;
-            }
-            const timeline = this.$refs.timeline as HTMLDivElement;
-            let duration = this.vp.embedPlayer.getDuration() || 0;
-            let rect = timeline.getBoundingClientRect(); // @todo: what
-            let percent = (ev.clientX - rect.left) / timeline.clientWidth;
-            let seconds = Math.round(duration * percent);
-            this.vp.seek(seconds);
         },
         saveSettings() {
             if (!this.vp) return;
