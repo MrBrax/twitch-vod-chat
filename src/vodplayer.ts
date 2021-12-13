@@ -319,12 +319,18 @@ export default class VODPlayer {
         }
         */
 
+        /**
+         * Use current time of active playing video
+         */
         const videoTime = this.embedPlayer.getCurrentTime();
 
         if (videoTime === null) {
             return false;
         }
 
+        /**
+         * If video has ended, pause (stop) the chat playback
+         */
         if (videoTime >= this.vodLength) {
             this.pause();
             return false;
@@ -334,13 +340,16 @@ export default class VODPlayer {
             console.error("No comments to display");
         }
 
-        // const videoTime = this.embedPlayer.getCurrentTime() || 0;
-
-        // console.log("tick test", timeRelative, this.embedPlayer.getCurrentTime());
-
+        /**
+         * Loop through all comments to insert into queue
+         */
         for (let i = 0; i < chatLog.comments.length; i++) {
             const comment: TwitchComment = chatLog.comments[i];
 
+            /**
+             * Skip malformed comments, abort completely if too many found.
+             * Usually a case of formats changing.
+             */
             if (comment.content_offset_seconds === undefined || comment.content_offset_seconds < 0) {
                 console.error("Malformed comment", comment);
                 this.malformed_comments++;
@@ -351,18 +360,26 @@ export default class VODPlayer {
                 continue;
             }
 
-            // skip already displayed comments
+            /**
+             * Skip already displayed comments
+             */
             if (comment.displayed) {
                 // this.debug(`skip comment, already displayed: ${i}`);
                 continue;
             }
 
+            /**
+             * Skip VOD (archive) comments
+             */
             if (this.settings.showVODComments && comment.source && comment.source == "comment") {
                 this.debug(`skip comment, vod comment: ${i}`);
                 continue; // skip vod comments?
             }
 
-            // deprecated
+            /**
+             * Don't show comment yet, its time has not passed current playback time yet
+             * @todo: implement chat offset again
+             */
             if (videoTime < comment.content_offset_seconds / this.timeScale) {
                 // this.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
                 continue;
@@ -374,7 +391,9 @@ export default class VODPlayer {
             }
             */
 
-            // if skipped or something
+            /**
+             * If comment is older than 60 seconds, mark it as displayed in a last ditch effort.
+             */
             const commentAge = videoTime - comment.content_offset_seconds / this.timeScale;
             if (commentAge > 60) {
                 // this.debug('skip comment, too old', i);
@@ -391,7 +410,9 @@ export default class VODPlayer {
 
             commentObj.badges = [];
 
-            // badges
+            /**
+             * Process and insert badges
+             */
             if (comment.message.user_badges && this.badges.global && this.badges.channel) {
                 for (const b of comment.message.user_badges) {
                     const badgeId = b._id;
@@ -425,9 +446,10 @@ export default class VODPlayer {
             commentObj.username = comment.commenter.display_name;
             commentObj.usernameColour = comment.message.user_color;
 
+            /**
+             * Parse message fragments and add emotes
+             */
             commentObj.messageFragments = [];
-
-            // make message
             for (const f of comment.message.fragments) {
                 // official twitch emote
                 if (f.emoticon && this.settings.emotesEnabled) {
@@ -443,7 +465,7 @@ export default class VODPlayer {
                 } else {
                     const fragWords = f.text.split(" ");
 
-                    // const paragraph = "";
+                    let paragraph = "";
 
                     // const emotes = 0;
 
@@ -468,7 +490,10 @@ export default class VODPlayer {
                         }
                         */
 
-                        // TODO: optimize this
+                        /**
+                         * If no emote found in word, insert the word as text instead
+                         * @todo optimize this, currently makes a span for every word
+                         */
                         if (!found_emote) {
                             commentObj.messageFragments.push({
                                 type: "text",
@@ -517,15 +542,6 @@ export default class VODPlayer {
 
         if (this.elements.playback_text) this.elements.playback_text.innerHTML = timelineText;
 
-        /*
-        if( this.noVideo ){
-            this.elements.osd.innerHTML = 'Sync: ' + this.timeFormat( timeRelative * this.timeScale ) + '<br>Scale: ' + this.timeScale + '<br>Offset: ' + this.chatOffset  + '<br>Tick: ' + this.tickDelay;
-            if( !this.elements.osd.classList.contains('running') ){
-                this.elements.osd.classList.add('running');
-            }
-        }
-        */
-
         // scroll
         if (!this.niconico && this.elements.comments) {
             this.elements.comments.scrollTop = this.elements.comments.scrollHeight;
@@ -541,7 +557,9 @@ export default class VODPlayer {
         }
         */
 
-        // remove old comments from queue to not waste drawing
+        /**
+         * Remove old comments from the queue to not waste drawing
+         */
         if (this.commentQueue.length >= this.commentLimit) {
             this.commentQueue.splice(0, this.commentQueue.length - this.commentLimit);
             // console.debug( 'Comments overflowing, delete', this.commentQueue.length, this.commentQueue.length - this.commentLimit );
@@ -625,6 +643,11 @@ export default class VODPlayer {
         }
 
         console.debug("Started playback");
+
+        if (!this.chatLoaded && !this.videoLoaded) {
+            alert("Neither chat nor video loaded, please do that first!");
+            return false;
+        }
 
         if (!this.chatLoaded) {
             alert("No chat log added");

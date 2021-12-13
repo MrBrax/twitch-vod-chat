@@ -144,7 +144,12 @@ interface TwitchComment {
     channel_id: string;
     // commenter: Array;
     content_id: string;
+
+    /**
+     * The offset of the comment being displayed in seconds
+     */
     content_offset_seconds: number;
+
     content_type: string;
     commenter: {
         _id: string;

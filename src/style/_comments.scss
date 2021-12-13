@@ -66,6 +66,36 @@
 		// broken with vue, no animations supported
 		// animation: slide 0.3s ease-out;
 		// overflow: hidden;
+
+		.time {
+			color: #aaa;
+		}
+
+		.badge {
+			display: inline-block;
+			margin: 0 3px;
+		}
+	
+		.name {
+			font-weight: 700;
+			color: #ccc;
+			padding-right: 0.3em;
+		}
+	
+		.emote {
+	
+			max-height: 32px;
+	
+			&.is-small {
+				max-height: 18px;
+			}
+	
+		}
+	
+		img {
+			vertical-align: middle;
+		}
+
 	}
 
 	&.has-stroke .comment {
@@ -83,10 +113,6 @@
 	}
 	*/
 
-	.time {
-		color: #aaa;
-	}
-
 	/*
 	#comments .badge {
 		display: inline-block;
@@ -102,31 +128,6 @@
 		background: #427EBC;
 	}
 	*/
-
-	.badge {
-		display: inline-block;
-		margin: 0 3px;
-	}
-
-	.name {
-		font-weight: 700;
-		color: #ccc;
-	}
-
-	.emote {
-
-		max-height: 32px;
-
-		&.is-small {
-			max-height: 18px;
-		}
-
-	}
-
-	img {
-		vertical-align: middle;
-	}
-
 	
 	&.niconico {
 

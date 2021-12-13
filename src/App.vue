@@ -189,6 +189,7 @@
                     </div>
                 </div>
 
+                <!--
                 <div class="option-group">
                     <div class="option-title">Update frequency in ms</div>
                     <div class="option-content">
@@ -198,6 +199,7 @@
                         <input name="tickDelay" v-model="vp.tickDelay" />
                     </div>
                 </div>
+                -->
 
                 <div class="option-group">
                     <div class="option-title">Chat location</div>
