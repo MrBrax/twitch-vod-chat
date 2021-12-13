@@ -21,7 +21,7 @@
                 <label><input type="checkbox" name="ultrawide" v-model="vp.settings.ultrawide" /> Ultrawide</label>
                 <label><input type="checkbox" name="minimal" v-model="vp.minimal" /> Minimal</label>
             </div>
-            <div class="video-controls-text">{{ vp.playback_text }}</div>
+            <!--<div class="video-controls-text">{{ vp.playback_text }}</div>-->
         </div>
     </div>
 </template>

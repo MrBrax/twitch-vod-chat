@@ -93,7 +93,7 @@ export default class VODPlayer {
         viewer: HTMLElement | null;
         video: HTMLElement | null;
         comments: HTMLElement | null;
-        osd: HTMLElement | null;
+        // osd: HTMLElement | null;
         player: HTMLElement | null;
         // playback_text: HTMLElement | null;
     };
@@ -109,7 +109,7 @@ export default class VODPlayer {
     chatOffset: number;
     commentAmount: number | null;
     tickDelay: number;
-    timeScale: number;
+    // timeScale: number;
     vodLength: number | null;
     archiveLength: number | null;
     channelName: string;
@@ -254,13 +254,13 @@ export default class VODPlayer {
             video: null,
             comments: null,
             // timeline: null,
-            osd: null,
+            // osd: null,
             player: null,
             // playback_text: null,
         };
 
         this.tickDelay = 50;
-        this.timeScale = 1;
+        // this.timeScale = 1;
         this.commentLimit = 50;
 
         this.vodLength = null;
@@ -342,6 +342,7 @@ export default class VODPlayer {
          * Use current time of active playing video
          */
         const videoTime = this.embedPlayer.getCurrentTime();
+        const offsetTime = (this.embedPlayer.getCurrentTime() ?? 0) + this.chatOffset;
 
         if (videoTime === null) {
             return false;
@@ -398,9 +399,9 @@ export default class VODPlayer {
 
             /**
              * Don't show comment yet, its time has not passed current playback time yet
-             * @todo: implement chat offset again
+             * @todo: implement chat offset again (?)
              */
-            if (videoTime < comment.content_offset_seconds / this.timeScale) {
+            if (offsetTime < comment.content_offset_seconds) {
                 // this.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
                 continue;
             }
@@ -414,7 +415,7 @@ export default class VODPlayer {
             /**
              * If comment is older than 60 seconds, mark it as displayed in a last ditch effort.
              */
-            const commentAge = videoTime - comment.content_offset_seconds / this.timeScale;
+            const commentAge = offsetTime - comment.content_offset_seconds;
             if (commentAge > 60) {
                 // this.debug('skip comment, too old', i);
                 comment.displayed = true;
@@ -423,7 +424,7 @@ export default class VODPlayer {
 
             if (chatLog.comments[i + 1] && chatLog.comments[i + 1].content_offset_seconds > comment.content_offset_seconds + 600) {
                 this.pause();
-                alert("Next comment is over 10 minutes in the future, something is probably wrong with the file.")
+                alert("Next comment is over 10 minutes in the future, something is probably wrong with the file.");
                 return false;
             }
 
@@ -534,6 +535,7 @@ export default class VODPlayer {
                 }
             }
 
+            /*
             if (this.niconico && this.elements.comments) {
                 const c = this.createLegacyCommentElement(commentObj);
                 this.elements.comments.appendChild(c);
@@ -556,23 +558,23 @@ export default class VODPlayer {
                 };
                 window.requestAnimationFrame(ani);
             } else {
-                this.commentQueue.push(commentObj);
-            }
+            */
+            this.commentQueue.push(commentObj);
 
             comment.displayed = true;
         }
 
         // update timeline
-
+        /*
         let timelineText = "C: " + this.timeFormat(videoTime * this.timeScale);
-
-        if (videoTime) {
-            timelineText += " / V: " + this.timeFormat(videoTime);
-        }
-
+        if (videoTime) timelineText += " / V: " + this.timeFormat(videoTime);
         this.playback_text = timelineText;
+        */
 
-        // scroll
+        /**
+         * Scroll to bottom of chat window
+         * @todo: check why this doesn't work anymore
+         */
         if (!this.niconico && this.elements.comments) {
             this.elements.comments.scrollTop = this.elements.comments.scrollHeight;
         }
@@ -751,7 +753,7 @@ export default class VODPlayer {
     play() {
         if (!this.embedPlayer) return;
         console.log("Play executed");
-        this.interval = setInterval(this.tick.bind(this), this.tickDelay / this.timeScale);
+        this.interval = setInterval(this.tick.bind(this), this.tickDelay);
         this.embedPlayer.play();
     }
 
@@ -816,7 +818,7 @@ export default class VODPlayer {
             if (this.interval) {
                 console.debug("Restart interval");
                 clearInterval(this.interval);
-                this.interval = setInterval(this.tick.bind(this), this.tickDelay / this.timeScale);
+                this.interval = setInterval(this.tick.bind(this), this.tickDelay);
             }
 
             console.log(`New time start: ${this.timeStart}`);
@@ -831,7 +833,7 @@ export default class VODPlayer {
     reset(): void {
         console.debug("Reset chat");
 
-        if (this.elements.comments) this.elements.comments.innerHTML = "";
+        // if (this.elements.comments) this.elements.comments.innerHTML = "";
 
         console.debug(`Resetting queue, still ${this.commentQueue.length} comments.`);
         this.commentQueue = [];
@@ -855,8 +857,8 @@ export default class VODPlayer {
 
         // timescale
         // this.timeScale = parseInt( (<HTMLInputElement>document.getElementById('optionTimescale')).value );
-        this.timeScale = 1;
-        console.log(`Timescale: ${this.timeScale}`);
+        // this.timeScale = 1;
+        // console.log(`Timescale: ${this.timeScale}`);
 
         // tick delay
         // this.tickDelay = parseInt((<HTMLInputElement>document.getElementById('optionTickDelay')).value);
@@ -868,7 +870,7 @@ export default class VODPlayer {
         if (this.interval) {
             console.debug("clear interval");
             clearInterval(this.interval);
-            this.interval = setInterval(this.tick.bind(this), this.tickDelay / this.timeScale);
+            this.interval = setInterval(this.tick.bind(this), this.tickDelay);
         }
     }
 
@@ -1496,9 +1498,6 @@ export default class VODPlayer {
             });
     }
 
-    /**
-     * @deprecated
-     */
     hooks() {
         // seeking on video player
         /*

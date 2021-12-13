@@ -354,7 +354,7 @@ export default defineComponent({
         vodplayer.elements.player = document.getElementById("player");
         vodplayer.elements.video = document.getElementById("video");
         vodplayer.elements.comments = document.getElementById("comments");
-        vodplayer.elements.osd = document.getElementById("osd");
+        // vodplayer.elements.osd = document.getElementById("osd");
         // vodplayer.elements.timeline = document.getElementById('timeline-text');
         // vodplayer.elements.playback_text = document.getElementById("playback_text");
 
