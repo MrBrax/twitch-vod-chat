@@ -373,8 +373,9 @@ export default class VODPlayer {
                 console.error("Malformed comment", comment);
                 this.malformed_comments++;
                 if (this.malformed_comments > 100) {
-                    alert("Too many malformed comments, something is wrong with the chat log.");
                     this.pause();
+                    alert("Too many malformed comments, something is wrong with the chat log.");
+                    return false;
                 }
                 continue;
             }
@@ -420,9 +421,19 @@ export default class VODPlayer {
                 continue;
             }
 
+            if (chatLog.comments[i + 1] && chatLog.comments[i + 1].content_offset_seconds > comment.content_offset_seconds + 600) {
+                this.pause();
+                alert("Next comment is over 10 minutes in the future, something is probably wrong with the file.")
+                return false;
+            }
+
             const commentObj = {} as TwitchCommentProxy;
 
-            commentObj.gid = comment._id;
+            if (!comment._id) {
+                console.warn(`No id on comment #${i} @ (${comment.content_offset_seconds})`);
+            }
+
+            commentObj.gid = comment._id ?? `tmp${i}`;
 
             // timestamp
             commentObj.time = this.timeFormat(comment.content_offset_seconds);
@@ -1009,6 +1020,7 @@ export default class VODPlayer {
 
             const success = await this.loadChatFileFromURL(fileURL);
             if (success) {
+                console.log("loading chat from file success");
                 this.chat_id = "";
                 return true;
             }
@@ -1046,6 +1058,7 @@ export default class VODPlayer {
         this.status_comments = `Loading...`;
 
         let response;
+        console.debug(`Load chat from url: ${url}`);
         try {
             response = await fetch(url);
         } catch (error) {
@@ -1056,6 +1069,7 @@ export default class VODPlayer {
         }
 
         let json: TwitchCommentDump;
+        console.debug(`Parse chat json...`);
         try {
             json = await response.json();
         } catch (error) {
@@ -1080,10 +1094,10 @@ export default class VODPlayer {
 
         chatLog = json;
 
-        console.debug("Saved");
+        console.debug("Chat JSON stored in memory");
 
         this.commentAmount = Object.values(chatLog.comments).length; // speed?
-        console.debug(`Amount: ${this.commentAmount}`);
+        console.debug(`Comment amount: ${this.commentAmount}`);
 
         // get duration, this changed in the new api. if you know of a better parsing solution, please fix this
         const rawDuration = chatLog.video.duration;
@@ -1130,7 +1144,7 @@ export default class VODPlayer {
 
         if (this.embedPlayer) {
             this.archiveLength = this.embedPlayer.getDuration();
-            console.debug(`Archive length: ${this.archiveLength}`);
+            console.debug(`embedPlayer length: ${this.archiveLength}`);
         } else {
             console.error("No embed player to set archive length from");
         }
