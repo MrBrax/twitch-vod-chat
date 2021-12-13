@@ -13,6 +13,7 @@
   "main": "src/main.ts",
   "dependencies": {
     "core-js": "^3.8.3",
+    "eslint-plugin-deprecation": "^1.2.1",
     "vue": "^3.2.13",
     "vuex": "^4.0.0"
   },

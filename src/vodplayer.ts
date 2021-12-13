@@ -87,7 +87,7 @@ export default class VODPlayer {
 
     /**
      * @todo stop using this
-     * @deprecated
+     * @deprecated use vue dynamic stuff instead
      */
     elements: {
         viewer: HTMLElement | null;
@@ -118,7 +118,7 @@ export default class VODPlayer {
 
     /**
      * Is video+chat playing?
-     * @deprecated
+     * @deprecated use embedPlayer instead
      */
     isPlaying: boolean;
     isReady: boolean;
@@ -228,6 +228,24 @@ export default class VODPlayer {
             username: "braxen",
             usernameColour: "#ff0000",
             messageFragments: [{ type: "text", data: "welcome to my vod player! select video and chat below to begin!" }],
+        } as TwitchCommentProxy);
+
+        /**
+         * Test comment
+         */
+        this.commentQueue.push({
+            time: "00:00:00",
+            username: "helper",
+            usernameColour: "#ffff00",
+            messageFragments: [
+                { type: "text", data: "word" },
+                { type: "text", data: "spacing" },
+                { type: "text", data: "test" },
+                { type: "text", data: "and" },
+                { type: "text", data: "word" },
+                { type: "text", data: "wrapping" },
+                { type: "text", data: "test" },
+            ],
         } as TwitchCommentProxy);
 
         this.elements = {
@@ -465,7 +483,7 @@ export default class VODPlayer {
                 } else {
                     const fragWords = f.text.split(" ");
 
-                    let paragraph = "";
+                    // let paragraph = "";
 
                     // const emotes = 0;
 

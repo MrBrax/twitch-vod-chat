@@ -67,6 +67,8 @@
 		// animation: slide 0.3s ease-out;
 		// overflow: hidden;
 
+		word-wrap: break-word;
+
 		.time {
 			color: #aaa;
 		}
@@ -80,6 +82,13 @@
 			font-weight: 700;
 			color: #ccc;
 			padding-right: 0.3em;
+		}
+
+		// dirty hack
+		.body {
+			span {
+				padding-right: 0.1em;
+			}
 		}
 	
 		.emote {
