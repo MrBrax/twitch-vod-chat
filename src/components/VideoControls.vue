@@ -19,8 +19,9 @@
             <div class="video-controls-buttons-group" v-if="vp.minimal">
                 <label><input type="checkbox" name="comments-overlay" v-model="vp.settings.chatOverlay" /> Overlay</label>
                 <label><input type="checkbox" name="ultrawide" v-model="vp.settings.ultrawide" /> Ultrawide</label>
+                <label><input type="checkbox" name="minimal" v-model="vp.minimal" /> Minimal</label>
             </div>
-            <div class="video-controls-text" id="playback_text">Playback text</div>
+            <div class="video-controls-text">{{ vp.playback_text }}</div>
         </div>
     </div>
 </template>

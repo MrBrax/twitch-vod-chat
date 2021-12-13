@@ -295,6 +295,7 @@
                     <button class="button" @click="saveSettings">Save settings</button>
                     <button class="button" @click="resetSettings">Reset settings</button>
                     <button class="button" @click="generateLink">Generate link</button>
+                    <button v-if="vp != null" class="button" @click="vp.minimal = true">Minimal mode</button>
                     <span> Nothing is uploaded, everything runs in your browser. </span>
                 </div>
             </div>
@@ -355,7 +356,7 @@ export default defineComponent({
         vodplayer.elements.comments = document.getElementById("comments");
         vodplayer.elements.osd = document.getElementById("osd");
         // vodplayer.elements.timeline = document.getElementById('timeline-text');
-        vodplayer.elements.playback_text = document.getElementById("playback_text");
+        // vodplayer.elements.playback_text = document.getElementById("playback_text");
 
         vodplayer.hooks();
 

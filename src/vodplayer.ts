@@ -95,7 +95,7 @@ export default class VODPlayer {
         comments: HTMLElement | null;
         osd: HTMLElement | null;
         player: HTMLElement | null;
-        playback_text: HTMLElement | null;
+        // playback_text: HTMLElement | null;
     };
 
     /**
@@ -172,6 +172,7 @@ export default class VODPlayer {
     status_bttv_channel = "Waiting...";
     status_bttv_global = "Waiting...";
     status_seventv = "Waiting...";
+    playback_text = "Waiting...";
 
     /**
      * For automation, loads via hash
@@ -255,7 +256,7 @@ export default class VODPlayer {
             // timeline: null,
             osd: null,
             player: null,
-            playback_text: null,
+            // playback_text: null,
         };
 
         this.tickDelay = 50;
@@ -558,7 +559,7 @@ export default class VODPlayer {
             timelineText += " / V: " + this.timeFormat(videoTime);
         }
 
-        if (this.elements.playback_text) this.elements.playback_text.innerHTML = timelineText;
+        this.playback_text = timelineText;
 
         // scroll
         if (!this.niconico && this.elements.comments) {
@@ -1146,11 +1147,11 @@ export default class VODPlayer {
 
         if (this.chatlog_version == "td_v1") {
             // weird format
-
             this.channelName = chatLog.streamer.name;
             this.channelId = chatLog.streamer.id;
             this.videoId = chatLog.comments[0].content_id;
         } else if (this.chatlog_version == "twitch_v2") {
+            // 2019?-
             this.channelName = chatLog.video.user_name;
             this.channelId = chatLog.video.user_id;
             this.videoId = chatLog.video.id;
@@ -1158,6 +1159,7 @@ export default class VODPlayer {
 
             this.setTitle(`${this.channelName}: ${this.videoTitle}`);
         } else {
+            // -2018
             this.channelName = chatLog.video.channel.display_name;
             this.channelId = chatLog.video.channel._id;
             this.videoId = chatLog.video._id;
@@ -1375,7 +1377,7 @@ export default class VODPlayer {
 
         if (cursor) url += `?cursor=${cursor}`;
 
-        if (this.videoCurrentTime > 0) {
+        if (this.videoCurrentTime ?? 0 > 0) {
             url += (cursor ? "&" : "?") + `content_offset_seconds=${this.videoCurrentTime}`;
         }
 
@@ -1641,18 +1643,8 @@ export default class VODPlayer {
     }
 
     get videoCurrentTime() {
-        if (!this.timeStart) return 0;
-        /*
-        if( this.embedPlayer ){
-            return this.embedPlayer.getCurrentTime();
-        }else if( this.elements.video && this.elements.video.src ){
-            return this.elements.video.currentTime;
-        }else{
-            return 0;
-        }
-        */
-
-        return (Date.now() - this.timeStart) / 1000;
+        if (!this.embedPlayer?.getCurrentTime()) return 0;
+        return this.embedPlayer.getCurrentTime();
     }
 
     /*
