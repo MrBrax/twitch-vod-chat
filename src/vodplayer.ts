@@ -7,7 +7,16 @@ import EmbedVideoPlayer from "./embeds/html5";
 import EmbedTwitchPlayer from "./embeds/twitch";
 import EmbedYouTubePlayer from "./embeds/youtube";
 
-import { TwitchComment, TwitchCommentDump, TwitchCommentProxy, TwitchUserBadge, TwitchUserBadgeProxy, VODPlayerSettings } from "./defs";
+import {
+    ChatSource,
+    TwitchComment,
+    TwitchCommentDump,
+    TwitchCommentProxy,
+    TwitchUserBadge,
+    TwitchUserBadgeProxy,
+    VideoSource,
+    VODPlayerSettings,
+} from "./defs";
 import FFZEmoteProvider from "./emoteproviders/ffz";
 import BTTVGlobalEmoteProvider from "./emoteproviders/bttv_global";
 import BTTVChannelEmoteProvider from "./emoteproviders/bttv_channel";
@@ -76,6 +85,10 @@ export default class VODPlayer {
         channel: Record<string, TwitchUserBadge>;
     };
 
+    /**
+     * @todo stop using this
+     * @deprecated
+     */
     elements: {
         viewer: HTMLElement | null;
         video: HTMLElement | null;
@@ -153,12 +166,14 @@ export default class VODPlayer {
     status_bttv_global = "Waiting...";
     status_seventv = "Waiting...";
 
-    chat_source = "";
-    video_source = "";
+    chat_source: ChatSource | null = null;
+    video_source: VideoSource | null = null;
     allCommentsFetched = false;
 
     malformed_comments: number;
     minimal = false;
+    video_id = "";
+    chat_id = "";
 
     // settings: any;
 
@@ -832,11 +847,11 @@ export default class VODPlayer {
 
     /**
      * Load video from input
-     * @param {string} source file_http, twitch, youtube
+     * @param {VideoSource} source
      * @param {HTMLInputElement} input Input element
      * @returns Success
      */
-    loadVideo(source: string, input: HTMLInputElement): boolean {
+    loadVideo(source: VideoSource, input: HTMLInputElement): boolean {
         console.debug("video input", input, input.value, input.files);
 
         if (!input.value && !input.files) {
@@ -862,9 +877,14 @@ export default class VODPlayer {
 
             // this.createHash();
 
+            this.video_id = "";
+
             return true;
         } else if (source == "file_http") {
-            this.loadChatFileFromURL(input.value);
+            this.embedPlayer = new EmbedVideoPlayer(input.value);
+            this.embedPlayer.vodplayer = this;
+            this.embedPlayer.setup();
+            this.video_id = input.value;
             return true;
         } else if (source == "twitch") {
             const twitch_id = input.value.match(/\/videos\/([0-9]+)/);
@@ -875,6 +895,7 @@ export default class VODPlayer {
             this.embedPlayer = new EmbedTwitchPlayer(twitch_id[1]);
             this.embedPlayer.vodplayer = this;
             this.embedPlayer.setup();
+            this.video_id = twitch_id[1];
             return true;
         } else if (source == "youtube") {
             const regex_1 = input.value.match(/v=([A-Za-z0-9]+)/);
@@ -892,6 +913,7 @@ export default class VODPlayer {
             if (this.embedPlayer) {
                 this.embedPlayer.vodplayer = this;
                 this.embedPlayer.setup();
+                this.video_id = youtube_id;
                 return true;
             } else {
                 return false;
@@ -905,11 +927,11 @@ export default class VODPlayer {
 
     /**
      * Load chat from input
-     * @param {string} source file_http, twitch
+     * @param {ChatSource} source
      * @param {HTMLInputElement} input Input element
      * @returns Success
      */
-    loadChat(source: string, input: HTMLInputElement): boolean {
+    async loadChat(source: ChatSource, input: HTMLInputElement): Promise<boolean> {
         console.debug("chat input", input, input.value, input.files);
 
         if (!input.value && !input.files) {
@@ -920,13 +942,31 @@ export default class VODPlayer {
         this.chat_source = source;
 
         if (input.files) {
+            this.debug("load chat file locally");
             const file = input.files[0];
-            const fileURL = URL.createObjectURL(file);
-            this.loadChatFileFromURL(fileURL);
-            return true;
+            let fileURL;
+
+            try {
+                fileURL = URL.createObjectURL(file);
+            } catch (error) {
+                alert("Invalid file selected");
+                return false;
+            }
+
+            const success = await this.loadChatFileFromURL(fileURL);
+            if (success) {
+                this.chat_id = "";
+                return true;
+            }
+            return false;
         } else if (source == "file_http") {
-            this.loadChatFileFromURL(input.value);
-            return true;
+            this.debug("load chat file from http");
+            const success = await this.loadChatFileFromURL(input.value);
+            if (success) {
+                this.chat_id = input.value;
+                return true;
+            }
+            return false;
         } else if (source == "twitch") {
             const twitch_id = input.value.match(/\/videos\/([0-9]+)/);
             if (!twitch_id) {
@@ -934,6 +974,7 @@ export default class VODPlayer {
                 return false;
             }
             this.loadTwitchChat(twitch_id[1]);
+            this.chat_id = twitch_id[1];
             return true;
         }
 
@@ -950,13 +991,22 @@ export default class VODPlayer {
     async loadChatFileFromURL(url: string): Promise<boolean> {
         this.status_comments = `Loading...`;
 
-        const response = await fetch(url);
-        let json: TwitchCommentDump;
+        let response;
+        try {
+            response = await fetch(url);
+        } catch (error) {
+            alert(`HTTP error: ${error}`);
+            console.error("HTTP error", error);
+            this.status_comments = `Error!`;
+            return false;
+        }
 
+        let json: TwitchCommentDump;
         try {
             json = await response.json();
         } catch (error) {
             console.error("loadChatFileFromURL json error", error);
+            this.status_comments = `Error!`;
             return false;
         }
 
@@ -964,6 +1014,7 @@ export default class VODPlayer {
 
         if (!json.comments) {
             console.error("loadChatFileFromURL json has no comments", json);
+            this.status_comments = `Error!`;
             return false;
         }
 
@@ -995,7 +1046,7 @@ export default class VODPlayer {
             } else {
                 alert("Chat log unsupported, it might be too old.");
                 console.error("Chat log unsupported, it might be too old.");
-                this.status_comments = `Error`;
+                this.status_comments = `Error!`;
                 return false;
             }
         } else {
@@ -1404,7 +1455,7 @@ export default class VODPlayer {
 
         // space to play
         document.body.addEventListener("keyup", (ev: KeyboardEvent) => {
-            console.log("keyup", ev.key);
+            // console.log("keyup", ev.key);
             if (this.isReady && this.embedPlayer != null) {
                 const currentTime = this.embedPlayer.getCurrentTime() || 0;
                 if (ev.key == " ") {
@@ -1489,14 +1540,21 @@ export default class VODPlayer {
         console.debug(...text);
     }
 
-    /*
-    createHash() {
+    generateHash() {
         const q = new URLSearchParams();
-        q.append("source", this.video_source);
-        console.log("createHash", q);
-        location.hash = `#${q.toString()}`;
+
+        if (this.video_source) {
+            q.append("source", this.video_source);
+            if (this.video_source == "twitch") q.append("twitch_id", this.video_id);
+            if (this.video_source == "youtube") q.append("youtube_id", this.video_id);
+            if (this.video_source == "file_http") q.append("video_path", this.video_id);
+        }
+
+        if (this.chat_source == "file_http") q.append("chatfile", this.chat_id);
+
+        console.log("generateHash", q);
+        return `#${q.toString()}`;
     }
-    */
 
     get videoPosition(): number {
         if (!this.embedPlayer) return 0;

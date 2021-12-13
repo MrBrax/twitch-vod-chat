@@ -298,6 +298,7 @@
                     <button class="button" @click="apply">Apply timings</button>
                     <button class="button" @click="saveSettings">Save settings</button>
                     <button class="button" @click="resetSettings">Reset settings</button>
+                    <button class="button" @click="generateLink">Generate link</button>
                     <span> Nothing is uploaded, everything runs in your browser. </span>
                 </div>
             </div>
@@ -309,6 +310,7 @@
 import { defineComponent } from "@vue/runtime-core";
 import ChatMessage from "./components/ChatMessage.vue";
 import VideoControls from "./components/VideoControls.vue";
+import { ChatSource, VideoSource } from "./defs";
 
 import EmbedVideoPlayer from "./embeds/html5";
 import EmbedTwitchPlayer from "./embeds/twitch";
@@ -328,8 +330,8 @@ export default defineComponent({
     },
     data(): {
         vp: VODPlayer | null;
-        video_source: string;
-        chat_source: string;
+        video_source: VideoSource;
+        chat_source: ChatSource;
         input_video: string;
         input_chat: string;
         video_height: number;
@@ -350,6 +352,7 @@ export default defineComponent({
         const vodplayer = new VODPlayer();
         this.vp = vodplayer;
 
+        // @todo: stop doing this
         vodplayer.elements.viewer = document.getElementById("viewer");
         vodplayer.elements.player = document.getElementById("player");
         vodplayer.elements.video = document.getElementById("video");
@@ -416,17 +419,18 @@ export default defineComponent({
 
             // automate it
             if (params.source) {
+                const video_source = params.source as VideoSource;
                 console.debug("automate playback");
                 vodplayer.automated = true;
 
                 // load video
-                if (params.source == "youtube") {
+                if (video_source == "youtube") {
                     window.onYouTubeIframeAPIReady = () => {
                         vodplayer.embedPlayer = new EmbedYouTubePlayer(params.youtube_id);
                     };
-                } else if (params.source == "twitch") {
+                } else if (video_source == "twitch") {
                     vodplayer.embedPlayer = new EmbedTwitchPlayer(params.twitch_id);
-                } else if (params.source == "file") {
+                } else if (video_source == "file_http") {
                     vodplayer.embedPlayer = new EmbedVideoPlayer(params.video_path);
                 } else {
                     alert("No video source set");
@@ -439,13 +443,14 @@ export default defineComponent({
                     vodplayer.embedPlayer.setup();
                 }
 
-                // load chat
                 if (params.chatdump && vodplayer.embedPlayer) {
+                    // load chat from api
                     vodplayer.loadTwitchChat(params.chatdump).then((status) => {
                         console.log("auto chat load 1", status);
                         if (params.offset) vodplayer.seek(parseInt(params.offset));
                     });
                 } else if (params.chatfile && vodplayer.embedPlayer) {
+                    // load chat from file
                     vodplayer.embedPlayer.addEventListener("ready", () => {
                         console.debug("player ready, load chat file");
                         vodplayer.loadChatFileFromURL(params.chatfile).then((status) => {
@@ -496,6 +501,10 @@ export default defineComponent({
         resetSettings() {
             if (!this.vp) return;
             this.vp.resetSettings();
+        },
+        generateLink() {
+            if (!this.vp) return;
+            alert(`${location.protocol}//${location.host}${location.pathname}${this.vp.generateHash()}`);
         },
     },
     computed: {

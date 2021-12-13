@@ -208,3 +208,6 @@ export interface VODPlayerSettings {
     fontName: string;
     ultrawide: boolean;
 }
+
+export type VideoSource = "file" | "file_http" | "twitch" | "youtube";
+export type ChatSource = "file" | "file_http" | "twitch";
