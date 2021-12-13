@@ -148,6 +148,10 @@ hr {
 	&.ok {
 		background: #3B5134;
 		border-color: #5D963A;
+		.option-title {
+			background-image: linear-gradient(#445f3b, #34472e);
+			border-color: #43642f;
+		}
 	}
 
 	h2 {

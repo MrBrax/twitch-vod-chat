@@ -162,23 +162,17 @@
                 <div class="option-group">
                     <div class="option-title">Status</div>
                     <div class="option-content">
-                        <strong>Video:</strong>
-                        <span>{{ vp.status_video }}</span
-                        ><br />
-                        <strong>Comments:</strong>
-                        <span>{{ vp.status_comments }}</span
-                        ><br />
-                        <strong>FFZ:</strong>
-                        <span>{{ vp.emotes.ffz.status }}</span
-                        ><br />
-                        <strong>BTTV Channel:</strong>
-                        <span>{{ vp.emotes.bttv_channel.status }}</span
-                        ><br />
-                        <strong>BTTV Global:</strong>
-                        <span>{{ vp.emotes.bttv_global.status }}</span
-                        ><br />
-                        <strong>SevenTV:</strong>
-                        <span>{{ vp.emotes.seventv.status }}</span>
+                        <strong>Video:</strong> <span>{{ vp.status_video }}</span>
+                        <br />
+                        <strong>Comments:</strong> <span>{{ vp.status_comments }}</span>
+                        <br />
+                        <strong>FFZ:</strong> <span>{{ vp.emotes.ffz.status }}</span>
+                        <br />
+                        <strong>BTTV Channel:</strong> <span>{{ vp.emotes.bttv_channel.status }}</span>
+                        <br />
+                        <strong>BTTV Global:</strong> <span>{{ vp.emotes.bttv_global.status }}</span>
+                        <br />
+                        <strong>SevenTV:</strong> <span>{{ vp.emotes.seventv.status }}</span>
                     </div>
                 </div>
             </div>

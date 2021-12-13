@@ -47,6 +47,7 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
         const response = await fetch(`https://api.7tv.app/v2/users/${channelId}/emotes`);
         const json2: Emoticon[] | SevenTVError = await response.json();
 
+        // server error return message
         if ("message" in json2) {
             console.error("failed to load seventv", json2);
             this.status = `Error: ${json2.message}`;
@@ -54,8 +55,8 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
         }
 
         if (json2.length <= 0) {
-            console.error("failed to load seventv", json2);
-            this.status = "Failed to load";
+            console.error("failed to load seventv, no data", json2);
+            this.status = "No emotes";
             return false;
         }
 

@@ -138,12 +138,20 @@ export default class VODPlayer {
 
     interval: number | null; // huh
 
+    /**
+     * The embed player that plays all the videos. Not necessarily a <video> tag,
+     * it can be anything, with functions that delegate events and actions.
+     */
     embedPlayer: EmbedPlayer | null = null;
     // embedPlayerPog: any;
 
     videoLoaded: boolean;
     chatLoaded: boolean;
 
+    /**
+     * Comment queue lays outside the Vue app, adding reactivity to it just makes
+     * it very performance heavy, not good when there are thousands of comments.
+     */
     commentQueue: TwitchCommentProxy[];
     commentLimit: number;
 
@@ -152,7 +160,6 @@ export default class VODPlayer {
     chatlog_version: string | null = null;
 
     fetchChatRunning = false;
-    // onlineOnly: boolean;
 
     settings: VODPlayerSettings = { ...defaultSettings };
 
@@ -166,16 +173,21 @@ export default class VODPlayer {
     status_bttv_global = "Waiting...";
     status_seventv = "Waiting...";
 
+    /**
+     * For automation, loads via hash
+     */
     chat_source: ChatSource | null = null;
     video_source: VideoSource | null = null;
-    allCommentsFetched = false;
-
-    malformed_comments: number;
-    minimal = false;
     video_id = "";
     chat_id = "";
 
-    // settings: any;
+    allCommentsFetched = false;
+    malformed_comments: number;
+
+    /**
+     * Enable minimal UI, removes all settings, showing only the playback controls
+     */
+    minimal = false;
 
     constructor() {
         this.chatLog = null;
@@ -215,7 +227,7 @@ export default class VODPlayer {
             time: "00:00:00",
             username: "braxen",
             usernameColour: "#ff0000",
-            messageFragments: [{ type: "text", data: "welcome to my vod player" }],
+            messageFragments: [{ type: "text", data: "welcome to my vod player! select video and chat below to begin!" }],
         } as TwitchCommentProxy);
 
         this.elements = {
@@ -1013,6 +1025,12 @@ export default class VODPlayer {
         console.debug("Returned JSON for chat");
 
         if (!json.comments) {
+            if ((<any>json).chapters && (<any>json).segments && (<any>json).streamer_name) {
+                alert("Thanks for using TwitchAutomator! Seems like you selected the wrong file though.");
+                console.error("twitchautomator error", json);
+                this.status_comments = `Error!`;
+                return false;
+            }
             console.error("loadChatFileFromURL json has no comments", json);
             this.status_comments = `Error!`;
             return false;
