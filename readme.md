@@ -2,7 +2,8 @@
 
 http://vod.dongers.net/player.html
 
-This link might not be up to date at all times, download the files in the dist folder to be sure.
+I'll try to keep it up to date, but i would recommend cloning and serving the project locally for an up to date version.
+If I figure out how to automatically make zip files of releases I'll do that.
 
 Some other stuff exists on root as well.
 
@@ -49,11 +50,3 @@ Make the browser window fullscreen (F11). It's optimized for a 1920x1080 screen 
 Do a screen/window capture and crop to 1280x720 top left.
 
 Record at a high bitrate.
-
----
-
-One idea i had when making this, is the time scale slider. If you put it on 5 and record at max fps, you can then slow down the footage in your editing software, making the required realtime record time 5 times less.
-
-It seems to sync fine, but the gif emotes won't have the same speed.
-
-Turning down the tick ms is required too.
