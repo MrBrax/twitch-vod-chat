@@ -107,6 +107,7 @@ export default class FFZEmoteProvider extends BaseEmoteProvider {
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
+        if (!this.emotes) return false;
         for (const fSet in this.emotes.sets) {
             for (const fEmo of this.emotes.sets[fSet].emoticons) {
                 if (fEmo.name == word) {

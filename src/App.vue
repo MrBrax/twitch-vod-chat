@@ -305,6 +305,7 @@
 
 <script lang="ts">
 import { defineComponent } from "@vue/runtime-core";
+import { nextTick } from "vue";
 import ChatMessage from "./components/ChatMessage.vue";
 import VideoControls from "./components/VideoControls.vue";
 import { ChatSource, VideoSource } from "./defs";
@@ -343,7 +344,7 @@ export default defineComponent({
             video_height: 720,
         };
     },
-    mounted() {
+    async mounted() {
         console.log("Vod player mounted", this.video_height);
 
         const vodplayer = new VODPlayer();
@@ -359,6 +360,8 @@ export default defineComponent({
         // vodplayer.elements.playback_text = document.getElementById("playback_text");
 
         vodplayer.hooks();
+
+        await nextTick();
 
         window.addEventListener("hashchange", this.processHash);
 

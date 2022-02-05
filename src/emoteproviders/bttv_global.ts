@@ -36,6 +36,7 @@ export default class BTTVGlobalEmoteProvider extends BaseEmoteProvider {
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
+        if (!this.emotes) return false;
         for (const fEmo of this.emotes) {
             if (fEmo.code == word) {
                 // this.debug(`Insert emote "${word}" from BTTV Global into comment #${commentObj.gid}`);

@@ -52,6 +52,7 @@ export default class BTTVChannelEmoteProvider extends BaseEmoteProvider {
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
+        if (!this.emotes) return false;
         if (this.emotes.sharedEmotes) {
             for (const fEmo of this.emotes.sharedEmotes) {
                 if (fEmo.code == word) {

@@ -23,7 +23,7 @@ export default class EmbedVideoPlayer extends EmbedPlayer {
         this.player = document.createElement("video");
         const video_container = document.getElementById("video_container");
         if (!video_container) {
-            console.error("No video container");
+            console.error("No video container (html5)");
             return false;
         }
         video_container.appendChild(this.player);

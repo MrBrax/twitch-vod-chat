@@ -14,7 +14,7 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
         const player_element = document.createElement("div");
         const video_container = document.getElementById("video_container");
         if (!video_container) {
-            console.error("No video container");
+            console.error("No video container (twitch)");
             return false;
         }
         video_container.appendChild(player_element);
