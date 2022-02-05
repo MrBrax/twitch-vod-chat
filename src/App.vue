@@ -37,7 +37,7 @@
                     :data-id="message.gid"
                 ></ChatMessage>
             </div>
-            <video-controls :minimal="1" v-bind:vp="vp" v-if="vp.minimal" />
+            <video-controls :minimal="true" v-bind:vp="vp" v-if="vp.minimal" />
         </div>
 
         <!--
@@ -295,7 +295,7 @@
                     <button class="button" @click="saveSettings">Save settings</button>
                     <button class="button" @click="resetSettings">Reset settings</button>
                     <button class="button" @click="generateLink">Generate link</button>
-                    <button v-if="vp != null" class="button" @click="vp.minimal = true">Minimal mode</button>
+                    <button v-if="vp != null" class="button" @click="vp ? (vp.minimal = true) : ''">Minimal mode</button>
                     <span> Nothing is uploaded, everything runs in your browser. </span>
                 </div>
             </div>
@@ -510,8 +510,8 @@ export default defineComponent({
             // if (!this.vp || !this.vp.embedPlayer || this.vp.embedPlayer.getCurrentTime() == null || !this.vp.vodLength) return 0;
             return currentTime / (this.vp?.vodLength || 0);
         },
-        commentsStyle(): Record<string, string> | null {
-            if (!this.vp) return null;
+        commentsStyle(): Record<string, string> {
+            if (!this.vp) return {};
             return {
                 top: this.vp.settings.chatTop + "%",
                 bottom: this.vp.settings.chatBottom + "%",
@@ -520,8 +520,8 @@ export default defineComponent({
                 fontFamily: this.vp.settings.fontName,
             };
         },
-        commentsClass(): Record<string, boolean> | null {
-            if (!this.vp) return null;
+        commentsClass(): Record<string, boolean> {
+            if (!this.vp) return {};
             return {
                 "align-left": this.vp.settings.chatAlign == "left",
                 "align-right": this.vp.settings.chatAlign == "right",

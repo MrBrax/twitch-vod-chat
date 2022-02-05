@@ -137,6 +137,7 @@ export default class VODPlayer {
     }[];
 
     interval: number | null; // huh
+    // stopTicker: boolean;
 
     /**
      * The embed player that plays all the videos. Not necessarily a <video> tag,
@@ -154,8 +155,6 @@ export default class VODPlayer {
      */
     commentQueue: TwitchCommentProxy[];
     commentLimit: number;
-
-    niconico: boolean;
 
     chatlog_version: string | null = null;
 
@@ -289,8 +288,7 @@ export default class VODPlayer {
         this.twitchClientId = "";
 
         this.interval = null;
-
-        this.niconico = false;
+        // this.stopTicker = false;
 
         this.malformed_comments = 0;
     }
@@ -308,13 +306,6 @@ export default class VODPlayer {
      * Runs in an interval to add messages to chat
      */
     tick() {
-        /*
-        if (!this.timeStart) {
-            throw ('No start time in tick');
-            return false;
-        }
-        */
-
         if (!this.vodLength) {
             throw "No vod length in tick";
             return false;
@@ -324,19 +315,6 @@ export default class VODPlayer {
             throw "No embed player in tick";
             return false;
         }
-
-        // let timeNow = Date.now();
-
-        // let timeRelative = (timeNow - this.timeStart) / 1000;
-
-        // deprecated
-        /*
-        if ((timeRelative * this.timeScale) > this.vodLength + 5) {
-            alert('Stopped playback');
-            clearInterval(this.interval);
-            return;
-        }
-        */
 
         /**
          * Use current time of active playing video
@@ -406,17 +384,11 @@ export default class VODPlayer {
                 continue;
             }
 
-            /*
-            if(this.timeOffset < (comment.content_offset_seconds / this.timeScale)){
-                continue;
-            }
-            */
-
             /**
              * If comment is older than 60 seconds, mark it as displayed in a last ditch effort.
              */
             const commentAge = offsetTime - comment.content_offset_seconds;
-            if (commentAge > 60) {
+            if (commentAge > 60 && !comment.displayed) {
                 // this.debug('skip comment, too old', i);
                 comment.displayed = true;
                 continue;
@@ -484,7 +456,7 @@ export default class VODPlayer {
             for (const f of comment.message.fragments) {
                 // official twitch emote
                 if (f.emoticon && this.settings.emotesEnabled) {
-                    this.debug(`Insert emote "${f.text}" from Twitch into comment #${commentObj.gid}`);
+                    // this.debug(`Insert emote "${f.text}" from Twitch into comment #${commentObj.gid}`);
                     commentObj.messageFragments.push({
                         type: "emote",
                         data: {
@@ -535,59 +507,18 @@ export default class VODPlayer {
                 }
             }
 
-            /*
-            if (this.niconico && this.elements.comments) {
-                const c = this.createLegacyCommentElement(commentObj);
-                this.elements.comments.appendChild(c);
-
-                c.style.top = (Math.random() * 720).toString();
-                c.style.left = (1280).toString();
-                let x = 1280;
-                const s = Math.random() * 5 + 3;
-
-                c.style.fontSize = (Math.random() * 2.5 + 1).toString() + "em";
-
-                const ani = () => {
-                    x -= s;
-                    c.style.left = x.toString();
-                    if (x < -500) {
-                        c.parentElement?.removeChild(c);
-                        return;
-                    }
-                    window.requestAnimationFrame(ani);
-                };
-                window.requestAnimationFrame(ani);
-            } else {
-            */
             this.commentQueue.push(commentObj);
 
             comment.displayed = true;
         }
 
-        // update timeline
-        /*
-        let timelineText = "C: " + this.timeFormat(videoTime * this.timeScale);
-        if (videoTime) timelineText += " / V: " + this.timeFormat(videoTime);
-        this.playback_text = timelineText;
-        */
-
         /**
          * Scroll to bottom of chat window
          * @todo: check why this doesn't work anymore
          */
-        if (!this.niconico && this.elements.comments) {
+        if (this.elements.comments) {
             this.elements.comments.scrollTop = this.elements.comments.scrollHeight;
         }
-
-        // remove old comments
-
-        /*
-        if( this.elements.comments.children.length > 100 ){
-            for( let i = this.elements.comments.children.length; i > 100; i-- ){
-                this.elements.comments.removeChild( this.elements.comments.firstChild );
-            }
-        }
-        */
 
         /**
          * Remove old comments from the queue to not waste drawing
@@ -598,7 +529,17 @@ export default class VODPlayer {
         }
 
         // window.requestAnimationFrame(this.tick.bind(this));
+        return true;
     }
+
+    // async startTickLoop() {
+    //     while (true) {
+    //         const ret = await this.tick();
+    //         if (!ret || this.stopTicker) {
+    //             break;
+    //         }
+    //     }
+    // }
 
     /**
      * @deprecated
@@ -708,10 +649,6 @@ export default class VODPlayer {
 
         this.timeStart = Date.now();
 
-        if (this.niconico && this.elements.comments) {
-            this.elements.comments.classList.add("niconico");
-        }
-
         // this.embedPlayer.seek(0);
         this.embedPlayer.play();
 
@@ -729,9 +666,6 @@ export default class VODPlayer {
 
         // offset
         this.timeStart += this.chatOffset;
-
-        // this.interval = setInterval(this.tick.bind(this), this.tickDelay / this.timeScale);
-        // window.requestAnimationFrame(this.tick.bind(this));
 
         this.play();
 
@@ -785,17 +719,6 @@ export default class VODPlayer {
         }
 
         if (this.embedPlayer) {
-            // let seekedToSeconds = Math.floor(this.vodLength * percent);
-
-            // console.debug("Call seek", percent, seekedToSeconds, this.timeFormat(seekedToSeconds), this.videoCurrentTime);
-
-            // console.debug("Pre seek", this.videoCurrentTime, this.timeStart);
-
-            /*
-            if (this.embedPlayer) this.embedPlayer.seek(seekedToSeconds);
-
-            if (this.elements.video.src) this.elements.video.currentTime = seekedToSeconds;
-            */
             this.embedPlayer.seek(seconds);
 
             // offset chat
@@ -1096,7 +1019,7 @@ export default class VODPlayer {
 
         chatLog = json;
 
-        console.debug("Chat JSON stored in memory");
+        console.debug("Chat JSON stored in memory", chatLog);
 
         this.commentAmount = Object.values(chatLog.comments).length; // speed?
         console.debug(`Comment amount: ${this.commentAmount}`);

@@ -13,9 +13,9 @@
 	max-height: 100%;
 
 	// put all the comments at the bottom, don't know how heavy this is
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-end;
+	// display: flex;
+	// flex-direction: column;
+	// justify-content: flex-end;
 	
 	&.align-left {
 
@@ -61,7 +61,7 @@
 
 	.comment {
 		// min-height: 20px;
-		flex-shrink: 0;
+		// flex-shrink: 0;
 		
 		// broken with vue, no animations supported
 		// animation: slide 0.3s ease-out;
@@ -137,39 +137,6 @@
 		background: #427EBC;
 	}
 	*/
-	
-	&.niconico {
-
-		width: $width;
-		height: $height;
-
-		display: block;
-
-		// position: relative;
-
-		overflow: hidden;
-
-		.comment {
-
-			display: block;
-			width: 800px;
-			overflow: hidden;
-
-			font-size: 2em;
-
-			position: absolute;
-
-			.body { display: inline-block }
-
-			.text { display: inline-block; margin-right: 5px; }
-
-			.name { display: none; }
-			.badges { display: none; }
-
-		}
-
-	}
-
 
 	&.is-overlay {
 		position: absolute;
