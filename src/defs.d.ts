@@ -1,4 +1,47 @@
-declare const Twitch: any;
+/*declare const Twitch: {
+    Player(el: string, opt: any): TwitchPlayer;
+};
+*/
+
+import { YouTubePlayer, Options as YouTubePlayerOptions } from "youtube-player/dist/types";
+
+declare global {
+    interface Window {
+        Twitch: {
+            Player: {
+                new (element: HTMLDivElement, opt: TwitchPlayerOptions): TwitchPlayer;
+                PLAY: "1"; // dunno
+                PAUSE: "2"; // dunno
+                READY: "3"; // dunno
+            };
+        };
+        YT: {
+            Player: {
+                new (element: HTMLDivElement, opt: YouTubePlayerOptions): YouTubePlayer;
+            };
+        };
+        onYouTubeIframeAPIReady();
+    }
+}
+
+interface TwitchPlayer {
+    pause(): void;
+    play(): void;
+    seek(timestamp: number): void;
+    setMuted(muted: boolean): void;
+    getDuration(): number;
+    getCurrentTime(): number;
+    isPaused(): boolean;
+    addEventListener(event: string, callback: () => void): void;
+}
+
+interface TwitchPlayerOptions {
+    width?: string;
+    height?: string;
+    video?: string;
+    autoplay?: boolean;
+    controls?: boolean;
+}
 
 export interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget;
@@ -10,20 +53,41 @@ interface TwitchUserBadgeProxy {
 }
 
 interface TwitchUserBadge {
+    versions: TwitchUserBadgeEntry[];
+    url: string;
+    id: string;
+}
+
+interface TwitchUserBadgeEntry {
+    image_url_1x: string;
+    image_url_2x: string;
+    image_url_3x: string;
+    description: string;
+    title: string;
+    click_action: string;
+    click_url: string;
+    // last_updated: string;
+}
+
+/*
+interface TwitchUserBadge {
 
 }
+*/
 
 export interface TwitchCommentProxy extends TwitchComment {
     time: string;
-    gid: number;
+    gid: string | number;
     messageFragments: {
         type: string;
-        data: {
-            network?: string;
-            url?: string;
-            name?: string;
-            class?: string;
-        } | string;
+        data:
+            | {
+                  network?: string;
+                  url?: string;
+                  name?: string;
+                  class?: string;
+              }
+            | string;
     }[];
     usernameColour: string;
     username: string;
@@ -60,14 +124,19 @@ interface TwitchCommentDump {
         channel: {
             _id: string;
             display_name: string;
-        }
+        };
         /** @deprecated */
         _id: string;
-    }
+    };
+
+    /** @deprecated */
+    streamer: {
+        name: string;
+        id: string; // ?
+    };
 }
 
 interface TwitchComment {
-
     // internal
     displayed: boolean;
 
@@ -75,7 +144,12 @@ interface TwitchComment {
     channel_id: string;
     // commenter: Array;
     content_id: string;
+
+    /**
+     * The offset of the comment being displayed in seconds
+     */
     content_offset_seconds: number;
+
     content_type: string;
     commenter: {
         _id: string;
@@ -96,7 +170,7 @@ interface TwitchComment {
             emoticon: {
                 emoticon_id: string;
                 emoticon_set_id: string;
-            }
+            };
         }[];
         user_badges: {
             _id: string;
@@ -110,3 +184,35 @@ interface TwitchComment {
     state: string;
     updated_at: string;
 }
+
+export interface ChatEmote {
+    network: string;
+    name: string;
+    url: string;
+    class?: string;
+}
+
+export interface VODPlayerSettings {
+    twitchClientId: string;
+    twitchSecret: string;
+    twitchToken: string;
+    emotesEnabled: boolean;
+    timestampsEnabled: boolean;
+    badgesEnabled: boolean;
+    smallEmotes: boolean;
+    showVODComments: boolean;
+    chatTop: number;
+    chatBottom: number;
+    chatWidth: number;
+    chatStroke: boolean;
+    chatStyle: string;
+    chatAlign: string;
+    chatTextAlign: string;
+    chatOverlay: boolean;
+    fontSize: number;
+    fontName: string;
+    ultrawide: boolean;
+}
+
+export type VideoSource = "file" | "file_http" | "twitch" | "youtube";
+export type ChatSource = "file" | "file_http" | "twitch";

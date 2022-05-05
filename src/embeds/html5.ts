@@ -1,7 +1,6 @@
-import EmbedPlayer from './base';
+import EmbedPlayer from "./base";
 
 export default class EmbedVideoPlayer extends EmbedPlayer {
-
     player: HTMLVideoElement | null;
     video_path: string;
     isReady: boolean;
@@ -14,18 +13,17 @@ export default class EmbedVideoPlayer extends EmbedPlayer {
     }
 
     setup() {
+        this.setStatusText("Set up HTML5 video player...");
 
-        this.setStatusText('Set up HTML5 video player...');
-
-        if(!this.vodplayer){
+        if (!this.vodplayer) {
             console.error("No vodplayer assigned");
             return false;
         }
-        
-        this.player = document.createElement('video');
-        let video_container = document.getElementById('video_container');
-        if(!video_container){
-            console.error("No video container");
+
+        this.player = document.createElement("video");
+        const video_container = document.getElementById("video_container");
+        if (!video_container) {
+            console.error("No video container (html5)");
             return false;
         }
         video_container.appendChild(this.player);
@@ -38,63 +36,63 @@ export default class EmbedVideoPlayer extends EmbedPlayer {
         this.player.addEventListener("canplay", () => {
             if (this.isReady || !this.vodplayer) return;
             console.log("html5 video player ready");
-            this.setStatusText('HTML5 video player ready!');
+            this.setStatusText("HTML5 video player ready!");
             this.vodplayer.videoLoaded = true;
-            if (this.callbacks['ready']) {
-                this.callbacks['ready']();
-            }
+            this.emit("ready", true);
+            // if (this.callbacks['ready']) {
+            //     this.callbacks['ready']();
+            // }
             this.isReady = true;
         });
 
         this.player.addEventListener("play", () => {
             this.callPause(false);
-            this.emit("play");
+            this.emit("play", true);
         });
 
         this.player.addEventListener("pause", () => {
             this.callPause(true);
-            this.emit("pause");
+            this.emit("pause", true);
         });
 
-        this.player.addEventListener("seeked", (ev) => {
+        this.player.addEventListener("seeked", (ev: Event) => {
             /*
             if (this.callbacks['seeked']) {
                 this.callbacks['seeked']();
             }*/
+            console.debug("html5 player seeked", ev);
             this.emit("seeked", this.getCurrentTime());
         });
-
     }
 
     play() {
-        if(!this.player) return;
+        if (!this.player) return;
         this.player.play();
     }
 
     pause() {
-        if(!this.player) return false;
+        if (!this.player) return false;
         this.player.pause();
         return true;
     }
 
     seek(seconds: number) {
-        if(!this.player) return;
+        if (!this.player) return;
         this.player.currentTime = seconds;
     }
 
     getDuration() {
-        if(!this.player) return 0;
+        if (!this.player) return 0;
         return this.player.duration;
     }
 
     getCurrentTime() {
-        if(!this.player) return 0;
+        if (!this.player) return 0;
         return this.player.currentTime;
     }
 
     get isPaused() {
-        if(!this.player) return false;
+        if (!this.player) return false;
         return this.player.paused;
     }
-
 }

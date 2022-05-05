@@ -1,0 +1,66 @@
+
+.button {
+
+	font-family: inherit;
+
+	background: #555;
+	border: 1px solid #252525;
+	color: #ccc;
+	padding: 4px 10px;
+	
+	text-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+	box-shadow: inset 0 -1px 2px rgba(0, 0, 0, .4);
+
+	// border-radius: 3px;
+
+	&:not(:disabled):hover {
+		background: #666;
+		// border-color: #999;
+		color: #fff;
+		cursor: pointer;
+	}
+
+	&:disabled {
+		color: #777;
+		cursor: not-allowed;
+	}
+
+	&.is-small {
+		font-size: 0.9em;
+		padding: 2px 8px;
+	}
+
+	&.color-green {
+		background: #2a974f;
+	}
+
+	&.is-flashing {
+		animation: 1s infinite flashing ease-in-out;
+	}
+
+	&.is-submit {
+		color: #eee;
+		// border-color: #222;
+		background: #1d912d;
+		&:hover {
+			background-color: lighten(#1d912d, 5%);
+		}
+	}
+
+}
+
+.button-group {
+	display: flex;
+	flex-direction: row;
+	margin-bottom: 2px;
+	
+	.button {
+		flex-grow: 1;
+	}
+
+}
+
+.input-range {
+	height: 18px;
+	vertical-align: -2px;
+}
