@@ -223,7 +223,7 @@ import "./style/player.scss";
 
 // import VODPlayer from "./vodplayer";
 import VODPlayer from "./components/VODPlayer.vue";
-import Dashboard from "./components/Dashboard.vue";
+// import Dashboard from "./components/Dashboard.vue";
 import { useStore } from "./store";
 import { Fonts } from "./value_defs";
 
@@ -235,13 +235,13 @@ export default defineComponent({
         ChatMessage,
         VideoControls,
         VODPlayer,
-        Dashboard
+        // Dashboard
     },
     setup() {
         const store = useStore();
-        const dashboard = ref<InstanceType<typeof Dashboard>>();
+        // const dashboard = ref<InstanceType<typeof Dashboard>>();
         const vodplayer = ref<InstanceType<typeof VODPlayer>>();
-        return { store, dashboard, vodplayer, fonts: Fonts };
+        return { store, /* dashboard, */ vodplayer, fonts: Fonts };
     },
     data(): {
         // vp: VODPlayer | undefined;
@@ -413,23 +413,58 @@ export default defineComponent({
             if (!this.vp) return;
             this.vp.alignText(dir);
         },
+        */
         apply() {
-            if (!this.vp) return;
-            this.vp.applyTimings();
+            if (!this.vodplayer) return;
+            this.vodplayer.applyTimings();
         },
         saveSettings() {
-            if (!this.vp) return;
-            this.vp.saveSettings();
+            if (!this.store) return;
+            this.store.saveSettings();
         },
         resetSettings() {
-            if (!this.vp) return;
-            this.vp.resetSettings();
+            if (!this.store) return;
+            this.store.resetSettings();
         },
         generateLink() {
-            if (!this.vp) return;
-            alert(`${location.protocol}//${location.host}${location.pathname}${this.vp.generateHash()}`);
+            if (!this.vodplayer) return;
+            alert(`${location.protocol}//${location.host}${location.pathname}${this.vodplayer.generateHash()}`);
         },
-        */
+        async fetchTwitchToken(): Promise<string | boolean> {
+            if (!this.store.settings.twitchClientId || !this.store.settings.twitchSecret) {
+                alert("Missing either Twitch client id or secret");
+                return false;
+            }
+
+            return fetch(
+                `https://id.twitch.tv/oauth2/token?client_id=${this.store.settings.twitchClientId}&client_secret=${this.store.settings.twitchSecret}&grant_type=client_credentials`,
+                {
+                    method: "POST",
+                    mode: "cors",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            )
+                .then((resp) => {
+                    return resp.json();
+                })
+                .then((json) => {
+                    if (json.message) {
+                        alert(json.message);
+                    }
+
+                    if (json.access_token) {
+                        this.store.settings.twitchToken = json.access_token;
+                        this.saveSettings();
+                        return json.access_token;
+                    }
+                })
+                .catch((reason) => {
+                    console.error("tac error", reason);
+                    return false;
+                });
+        }
     },
     computed: {
         /*
@@ -460,10 +495,10 @@ export default defineComponent({
                 "is-overlay": this.store.settings.chatOverlay,
             };
         },
+        */
         twitchApiRequired(): boolean {
             return this.video_source == "twitch" || this.chat_source == "twitch";
         },
-        */
     },
     /*
 	watch: {

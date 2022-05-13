@@ -1,25 +1,29 @@
 <template>
     <div
         id="viewer"
+        ref="viewer"
         :class="{
             'viewer-container': true,
             ultrawide: store.settings.ultrawide,
         }"
     >
         <div ref="player" id="player">
-            <div v-show="videoLoaded" id="video_container">
+            <div id="video_container" v-if="videoLoaded">
                 <VideoPlayerHTML5
                     v-if="video_source === 'file' || video_source === 'file_http'"
-                    :url="videoId"
-                />            
+                    :url="videoLoadSource"
+                    ref="embedPlayer"
+                    @pause="isPaused = true; isPlaying = false"
+                    @play="isPaused = false; isPlaying = true"
+                />
             </div>
-
-            <div v-if="!videoLoaded" class="meme-bg">
-                <div v-if="!videoLoaded" class="meme">
+            <div v-else class="meme-bg">
+                <div class="meme">
                     <img src="https://i.imgur.com/YmMUr7z.gif" rel="noreferrer" />
                 </div>
             </div>
 
+            <!--
             <div v-if="store.settings.chatOverlay" id="comments" :class="commentsClass" :style="commentsStyle">
                 <chat-message
                     v-for="message in commentQueue"
@@ -28,8 +32,10 @@
                     :data-id="message.gid"
                 ></chat-message>
             </div>
+            -->
+            <ChatBox :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
 
-            <div id="osd">SYNC NOT STARTED</div>
+            <!--<div id="osd">SYNC NOT STARTED</div>-->
         </div>
         <div v-if="!store.settings.chatOverlay" id="comments" ref="comments" :class="commentsClass" :style="commentsStyle">
             <chat-message
@@ -58,12 +64,14 @@
         :is-playing="isPlaying"
         :is-paused="isPaused"
         @start-playback="startPlayback"
+        @toggle-pause="togglePause"
+        @fullscreen="fullscreen"
     />
 
 </template>
 
 <script lang="ts">
-import { defineComponent } from "@vue/runtime-core";
+import { defineComponent, ref } from "@vue/runtime-core";
 import ChatMessage from "@/components/ChatMessage.vue";
 import VideoControls from "@/components/VideoControls.vue";
 import { useStore } from "@/store";
@@ -79,6 +87,7 @@ import EmbedTwitchPlayer from "@/embeds/twitch";
 import EmbedYouTubePlayer from "@/embeds/youtube";
 import EmbedPlayer from "@/embeds/base";
 import VideoPlayerHTML5 from "./players/VideoPlayerHTML5.vue";
+import ChatBox from "./ChatBox.vue";
 
 let chatLog: TwitchCommentDump | undefined; // decouple from vue for performance
 
@@ -88,7 +97,8 @@ export default defineComponent({
     name: "VODPlayer",
     setup() {
         const store = useStore();
-        return { store };
+        const embedPlayer = ref<InstanceType<typeof VideoPlayerHTML5>>();
+        return { store, embedPlayer };
     },
     // props: {
     //     dashboard: {
@@ -100,7 +110,7 @@ export default defineComponent({
         automated: Boolean,
     },
     data(): {
-        videoLoaded: boolean;
+        // videoLoaded: boolean;
         videoPosition: number;
         videoCurrentTime: number;
         videoDuration: number;
@@ -118,7 +128,7 @@ export default defineComponent({
         isPlaying: boolean;
         isPaused: boolean;
         isReady: boolean;
-        embedPlayer: AnyEmbedPlayer | null; // TODO: remove
+        // embedPlayer: AnyEmbedPlayer | null; // TODO: remove
         emotes: Record<string, BaseEmoteProvider>;
         badges: {
             global: Record<string, TwitchUserBadge>;
@@ -141,8 +151,12 @@ export default defineComponent({
         chatlog_version: string;
 
         channelId: string;
-        videoId: string;
+        videoLoadSource: string;
         videoTitle: string;
+
+        vod_id: string;
+
+        chatLoadSource: string;
 
         lastCommentOffset: number;
 
@@ -161,15 +175,11 @@ export default defineComponent({
 
         malformed_comments: number;
 
-        videoConfig: {
-            url: string;
-            width: number;
-            height: number;
-        } | undefined;
+        previousTick: number;
 
     } {
         return {
-            videoLoaded: false,
+            // videoLoaded: false,
             videoPosition: 0,
             videoCurrentTime: 0,
             videoDuration: 0,
@@ -182,14 +192,14 @@ export default defineComponent({
             isPlaying: false,
             isPaused: false,
             isReady: false,
-            embedPlayer: null,
+            // embedPlayer: null,
             emotes: {},
             badges: {
                 global: {},
                 channel: {},
             },
             tickDelay: 0,
-            commentLimit: 0,
+            commentLimit: 50,
             archiveLength: undefined,
             channelName: "",
             status_video: "",
@@ -198,14 +208,19 @@ export default defineComponent({
             commentAmount: 0,
 
             chat_source: null,
+            chat_id: "",
+            chatLoadSource: "",
+
             video_source: null,
             video_id: "",
-            chat_id: "",
+            videoLoadSource: "",
+
+            vod_id: "",
 
             chatlog_version: "",
 
             channelId: "",
-            videoId: "",
+
             videoTitle: "",
 
             lastCommentOffset: 0,
@@ -220,7 +235,7 @@ export default defineComponent({
 
             malformed_comments: 0,
 
-            videoConfig: undefined,
+            previousTick: 0,
         };
     },
     mounted() {
@@ -277,7 +292,6 @@ export default defineComponent({
             this.archiveLength = undefined;
             this.channelName = "";
 
-            
         },
 
         loadVideo(source: VideoSource, input: HTMLInputElement): boolean {
@@ -310,7 +324,8 @@ export default defineComponent({
                 this.video_id = "";
                 */
 
-                this.video_id = fileURL;
+                this.video_id = "";
+                this.videoLoadSource = fileURL;
 
                 return true;
             } else if (source == "file_http") {
@@ -323,6 +338,7 @@ export default defineComponent({
                 */
 
                 this.video_id = input.value;
+                this.videoLoadSource = input.value;
 
                 return true;
             } else if (source == "twitch") {
@@ -331,10 +347,12 @@ export default defineComponent({
                     alert("invalid twitch vod link");
                     return false;
                 }
-                this.embedPlayer = new EmbedTwitchPlayer(twitch_id[1]);
+                // this.embedPlayer = new EmbedTwitchPlayer(twitch_id[1]);
                 // this.embedPlayer.vodplayer = this;
-                this.embedPlayer.setup();
+                // this.embedPlayer.setup();
                 this.video_id = twitch_id[1];
+                this.videoLoadSource = twitch_id[1];
+                this.vod_id = twitch_id[1];
                 return true;
             } else if (source == "youtube") {
                 const regex_1 = input.value.match(/v=([A-Za-z0-9]+)/);
@@ -348,6 +366,7 @@ export default defineComponent({
                     return false;
                 }
 
+                /*
                 this.embedPlayer = new EmbedYouTubePlayer(youtube_id);
                 if (this.embedPlayer) {
                     // this.embedPlayer.vodplayer = this;
@@ -357,6 +376,10 @@ export default defineComponent({
                 } else {
                     return false;
                 }
+                */
+
+                this.video_id = youtube_id;
+                this.videoLoadSource = youtube_id;
             }
 
             console.error("unhandled video input");
@@ -390,6 +413,7 @@ export default defineComponent({
                 if (success) {
                     console.log("loading chat from file success");
                     this.chat_id = "";
+                    this.chatLoadSource = fileURL;
                     return true;
                 }
                 return false;
@@ -398,6 +422,7 @@ export default defineComponent({
                 const success = await this.loadChatFileFromURL(input.value);
                 if (success) {
                     this.chat_id = input.value;
+                    this.chatLoadSource = input.value;
                     return true;
                 }
                 return false;
@@ -409,6 +434,7 @@ export default defineComponent({
                 }
                 this.loadTwitchChat(twitch_id[1]);
                 this.chat_id = twitch_id[1];
+                this.chatLoadSource = input.value;
                 return true;
             }
 
@@ -531,12 +557,12 @@ export default defineComponent({
                 // weird format
                 this.channelName = chatLog.streamer.name;
                 this.channelId = chatLog.streamer.id;
-                this.videoId = chatLog.comments[0].content_id;
+                this.vod_id = chatLog.comments[0].content_id;
             } else if (this.chatlog_version == "twitch_v2") {
                 // 2019?-
                 this.channelName = chatLog.video.user_name;
                 this.channelId = chatLog.video.user_id;
-                this.videoId = chatLog.video.id;
+                this.vod_id = chatLog.video.id;
                 this.videoTitle = chatLog.video.title;
 
                 // this.setTitle(`${this.channelName}: ${this.videoTitle}`);
@@ -544,7 +570,7 @@ export default defineComponent({
                 // -2018
                 this.channelName = chatLog.video.channel.display_name;
                 this.channelId = chatLog.video.channel._id;
-                this.videoId = chatLog.video._id;
+                this.vod_id = chatLog.video._id;
             }
 
             this.fetchBadges();
@@ -582,7 +608,7 @@ export default defineComponent({
         async loadTwitchChat(videoId: string) {
             console.debug("load twitch chat", this);
 
-            this.videoId = videoId;
+            this.videoLoadSource = videoId;
 
             return this.fetchVideoInfo().then((json) => {
                 if (json.error) {
@@ -684,7 +710,7 @@ export default defineComponent({
          * @returns {Object} Video JSON
          */
         async fetchVideoInfo(): Promise<any> {
-            return fetch(`https://api.twitch.tv/helix/videos?id=${this.videoId}`, {
+            return fetch(`https://api.twitch.tv/helix/videos?id=${this.videoLoadSource}`, {
                 headers: {
                     "Client-ID": this.store.settings.twitchClientId,
                     Authorization: "Bearer " + this.store.settings.twitchToken,
@@ -799,7 +825,7 @@ export default defineComponent({
 
         async fetchChatFragment(start: number | null, cursor: string | null = null) {
             // unsupported by twitch
-            let url = `https://api.twitch.tv/kraken/videos/${this.videoId}/comments`;
+            let url = `https://api.twitch.tv/kraken/videos/${this.videoLoadSource}/comments`;
 
             // if(start) url += '?content_offset_seconds=' + start;
 
@@ -831,7 +857,7 @@ export default defineComponent({
          * Start playing the video and chat. Can't run twice.
          * @returns {boolean} If started
          */
-        startPlayback(): boolean {
+        async startPlayback(): Promise<boolean> {
             if (this.isPlaying) {
                 alert("Already playing");
                 return false;
@@ -839,8 +865,8 @@ export default defineComponent({
 
             console.debug("Started playback");
 
-            if (!this.chatLoaded && !this.videoLoaded) {
-                alert("Neither chat nor video loaded, please do that first!");
+            if (!this.videoLoaded) {
+                alert("No video loaded");
                 return false;
             }
 
@@ -850,10 +876,12 @@ export default defineComponent({
             }
 
             if (!this.embedPlayer) {
+                console.error("No embed player", this.embedPlayer, this);
                 alert("No embed player has been created, can't play.");
                 return false;
             }
 
+            /*
             this.embedPlayer.addEventListener("play", () => {
                 console.log("custom event play");
             });
@@ -865,6 +893,7 @@ export default defineComponent({
             this.embedPlayer.addEventListener("seeked", (seconds: number) => {
                 console.log(`custom event seeked: ${seconds}`);
             });
+            */
 
             // clear comment queue, this will be populated and cleaned over time
             this.commentQueue = [];
@@ -872,7 +901,7 @@ export default defineComponent({
             this.timeStart = Date.now();
 
             // this.embedPlayer.seek(0);
-            this.embedPlayer.play();
+            await this.embedPlayer.play();
 
             const offsetInput = <HTMLInputElement>document.getElementById("optionOffset");
             if (offsetInput) {
@@ -891,6 +920,7 @@ export default defineComponent({
 
             this.play();
 
+            // FIXME: vue
             const button_start = <HTMLInputElement>document.getElementById("buttonStart");
 
             if (button_start) button_start.disabled = true;
@@ -940,6 +970,7 @@ export default defineComponent({
                 console.debug("clear interval");
                 clearInterval(this.interval);
                 this.interval = setInterval(this.tick.bind(this), this.tickDelay);
+                console.debug(`Interval set to ${this.tickDelay}`);
             }
         },
 
@@ -959,13 +990,16 @@ export default defineComponent({
                 throw new Error("No chat log in tick");
             }
 
+            // const tickStart = Date.now();
+            // console.debug("Tick executed", tickStart);
+
             /**
              * Use current time of active playing video
              */
             const videoTime = await this.embedPlayer.getCurrentTime();
             const offsetTime = (videoTime ?? 0) + this.chatOffset;
 
-            if (videoTime === null) {
+            if (videoTime === undefined) {
                 return false;
             }
 
@@ -977,14 +1011,14 @@ export default defineComponent({
                 return false;
             }
 
-            if (chatLog.comments.length == 0) {
+            if (this.commentAmount == 0) {
                 console.error("No comments to display");
             }
 
             /**
              * Loop through all comments to insert into queue
              */
-            for (let i = 0; i < chatLog.comments.length; i++) {
+            for (let i = 0; i < this.commentAmount; i++) {
                 const comment: TwitchComment = chatLog.comments[i];
 
                 /**
@@ -1104,7 +1138,7 @@ export default defineComponent({
                             type: "emote",
                             data: {
                                 network: "twitch",
-                                // name: f.emoticon.text, // @todo: fix
+                                name: f.text, // @todo: fix
                                 url: `https://static-cdn.jtvnw.net/emoticons/v1/${f.emoticon.emoticon_id}/1.0`,
                             },
                         });
@@ -1172,8 +1206,35 @@ export default defineComponent({
                 // console.debug( 'Comments overflowing, delete', this.commentQueue.length, this.commentQueue.length - this.commentLimit );
             }
 
+            // console.debug("Tick finished", Date.now() - tickStart, "Previous tick", Date.now() - this.previousTick);
+
+            // this.previousTick = Date.now();
+
             // window.requestAnimationFrame(this.tick.bind(this));
             return true;
+        },
+
+        fullscreen() {
+            const viewer = this.$refs.viewer as HTMLElement;
+            if (viewer){
+                viewer.requestFullscreen();
+            }
+        },
+
+        generateHash() {
+            const q = new URLSearchParams();
+
+            if (this.video_source) {
+                q.append("source", this.video_source);
+                if (this.video_source == "twitch") q.append("twitch_id", this.video_id);
+                if (this.video_source == "youtube") q.append("youtube_id", this.video_id);
+                if (this.video_source == "file_http") q.append("video_path", this.video_id);
+            }
+
+            if (this.chat_source == "file_http") q.append("chatfile", this.chat_id);
+
+            console.log("generateHash", q);
+            return `#${q.toString()}`;
         }
 
     },
@@ -1198,11 +1259,15 @@ export default defineComponent({
                 "is-overlay": this.store.settings.chatOverlay,
             };
         },
+        videoLoaded() {
+            return this.video_source !== null && this.videoLoadSource !== '';
+        }
     },
     components: {
-        ChatMessage,
-        VideoControls,
-        VideoPlayerHTML5
-    },
+    ChatMessage,
+    VideoControls,
+    VideoPlayerHTML5,
+    ChatBox
+},
 });
 </script>

@@ -75,20 +75,20 @@ interface TwitchUserBadge {
 }
 */
 
+export interface TextMessageFragment {
+    type: "text";
+    data: string;
+};
+
+export interface EmoteMessageFragment {
+    type: "emote";
+    data: ChatEmote;
+}
+
 export interface TwitchCommentProxy extends TwitchComment {
     time: string;
     gid: string | number;
-    messageFragments: {
-        type: string;
-        data:
-            | {
-                  network?: string;
-                  url?: string;
-                  name?: string;
-                  class?: string;
-              }
-            | string;
-    }[];
+    messageFragments: Array<TextMessageFragment | EmoteMessageFragment>;
     usernameColour: string;
     username: string;
     badges: TwitchUserBadgeProxy[];
