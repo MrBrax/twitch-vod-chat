@@ -24,6 +24,14 @@
                     @play="isPaused = false; isPlaying = true"
                     @ready="$emit('ready')"
                 />
+                <VideoPlayerYouTube
+                    v-if="video_source === 'youtube'"
+                    :id="videoLoadSource"
+                    ref="embedPlayer"
+                    @pause="isPaused = true; isPlaying = false"
+                    @play="isPaused = false; isPlaying = true"
+                    @ready="$emit('ready')"
+                />
             </div>
             <div v-else class="meme-bg">
                 <div class="meme">
@@ -69,6 +77,8 @@
         </div>
     </div>
 
+    {{ videoLoadSource }}
+
     <video-controls
         :is-ready="isReady"
         :is-playing="isPlaying"
@@ -80,6 +90,7 @@
         :video-position="videoPosition"
         :video-current-time="videoCurrentTime"
         :minimal-show="minimal_show"
+        @seek="seek"
     />
 
 </template>
@@ -97,6 +108,7 @@ import FFZEmoteProvider from "@/emoteproviders/ffz";
 import SevenTVEmoteProvider from "@/emoteproviders/seventv";
 import VideoPlayerHTML5 from "./players/VideoPlayerHTML5.vue";
 import VideoPlayerTwitch from "./players/VideoPlayerTwitch.vue";
+import VideoPlayerYouTube from "./players/VideoPlayerYouTube.vue";
 import ChatBox from "./ChatBox.vue";
 
 let chatLog: TwitchCommentDump | undefined; // decouple from vue for performance
@@ -268,6 +280,9 @@ export default defineComponent({
             });
         }
     },
+    unmounted() {
+        if (this.interval) clearInterval(this.interval);
+    },
     methods: {
         setupVodPlayer() {
             chatLog = undefined;
@@ -401,8 +416,8 @@ export default defineComponent({
 
                 return true;
             } else if (source == "youtube") {
-                const regex_1 = input.value.match(/v=([A-Za-z0-9]+)/);
-                const regex_2 = input.value.match(/\.be\/([A-Za-z0-9]+)/);
+                const regex_1 = input.value.match(/v=([A-Za-z0-9-_]+)/);
+                const regex_2 = input.value.match(/\.be\/([A-Za-z0-9-_]+)/);
                 let youtube_id;
                 if (regex_1) youtube_id = regex_1[1];
                 if (regex_2) youtube_id = regex_2[1];
@@ -429,9 +444,11 @@ export default defineComponent({
 
                 this.status_video = "YouTube video loaded";
 
+                return true;
+
             }
 
-            console.error("unhandled video input");
+            console.error("unhandled video input", source, input.files, input.value);
 
             this.status_video = "Unhandled video source";
 
@@ -1338,7 +1355,8 @@ export default defineComponent({
         VideoControls,
         VideoPlayerHTML5,
         ChatBox,
-        VideoPlayerTwitch
+        VideoPlayerTwitch,
+        VideoPlayerYouTube
     },
     watch: {
         chat_source() {

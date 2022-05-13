@@ -14,10 +14,8 @@
                         <select class="fullsize" v-model="video_source">
                             <option value="file">Local video file</option>
                             <option value="file_http">Hosted video file</option>
-                            <!-- // FIXME: add back these
                             <option value="youtube">YouTube</option>
                             <option value="twitch">Twitch VOD</option>
-                            -->
                         </select>
                         <hr />
                         <div v-if="video_source == 'file'">
