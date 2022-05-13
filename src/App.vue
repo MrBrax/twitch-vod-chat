@@ -1,73 +1,11 @@
 <template>
     <div>
-        <VODPlayer ref="vodplayer" />
-        <Dashboard v-if="!store.minimal" ref="dashboard" :vodplayer="vodplayer" />
-        <!--
-        <div
-            id="viewer"
-            :class="{
-                'viewer-container': true,
-                ultrawide: vp.settings.ultrawide,
-            }"
-        >
-            <div ref="player" id="player">
-                <div v-show="vp.videoLoaded" id="video_container"></div>
+        <VODPlayer ref="vodplayer" :minimal="minimal" :automated="automated" />
+        <!--<Dashboard v-if="!store.minimal" ref="dashboard" />-->
 
-                <div v-if="!vp.videoLoaded" class="meme-bg">
-                    <div v-if="!vp.videoLoaded" class="meme">
-                        <img src="https://i.imgur.com/YmMUr7z.gif" rel="noreferrer" />
-                    </div>
-                </div>
-
-                <div v-if="vp.settings.chatOverlay" id="comments" v-bind:class="commentsClass" v-bind:style="commentsStyle">
-                    <ChatMessage
-                        v-for="message in vp.commentQueue"
-                        v-bind:message="message"
-                        v-bind:vp="vp"
-                        v-bind:key="message.gid"
-                        :data-id="message.gid"
-                    ></ChatMessage>
-                </div>
-
-                <div id="osd">SYNC NOT STARTED</div>
-            </div>
-            <div v-if="!vp.settings.chatOverlay" id="comments" v-bind:class="commentsClass" v-bind:style="commentsStyle">
-                <ChatMessage
-                    v-for="message in vp.commentQueue"
-                    v-bind:message="message"
-                    v-bind:vp="vp"
-                    v-bind:key="message.gid"
-                    :data-id="message.gid"
-                ></ChatMessage>
-            </div>
-            <video-controls :minimal="true" v-bind:vp="vp" v-if="vp.minimal" />
-        </div>
-        -->
-
-        <!--
-		<div v-if="vp.videoChapters && vp.vodLength" id="timeline-markers">
-			<div
-				class="timeline-marker"
-				v-for="(marker, id) in vp.videoChapters"
-				v-bind:key="id"
-				v-bind:style="{ left: ( ( marker.time / (vp.vodLength ?? 0) ) * 100 ) + '%' }">
-				{{ marker.label }}
-			</div>
-		</div>
-		-->
-
-        <!--
-		<div id="playback_info">
-			
-		</div>
-		-->
-
-        <!--
-        <video-controls v-bind:vp="vp" v-if="!vp.minimal" />
-
-        <div id="controls" v-if="!vp.minimal">
+        <div id="controls" v-if="vodplayer && !minimal">
             <div class="option-row">
-                <div v-if="!vp.automated" v-bind:class="{ 'option-group': true, ok: vp.videoLoaded }" class="option-group">
+                <div v-if="!automated" v-bind:class="{ 'option-group': true, ok: vodplayer.videoLoaded }" class="option-group">
                     <div class="option-title">Video</div>
                     <div class="option-content">
                         <select class="fullsize" v-model="video_source">
@@ -106,7 +44,7 @@
                     </div>
                 </div>
 
-                <div v-if="!vp.automated" v-bind:class="{ 'option-group': true, ok: vp.chatLoaded }" class="option-group">
+                <div v-if="!automated" v-bind:class="{ 'option-group': true, ok: vodplayer.chatLoaded }" class="option-group">
                     <div class="option-title">Chat</div>
                     <div class="option-content">
                         <select class="fullsize" v-model="chat_source">
@@ -140,15 +78,15 @@
                     <div class="option-title">Twitch API</div>
                     <div class="option-content">
                         <label>
-                            <input type="password" placeholder="Client ID" v-model="vp.settings.twitchClientId" />
+                            <input type="password" placeholder="Client ID" v-model="store.settings.twitchClientId" />
                             Client ID
                         </label>
                         <label>
-                            <input type="password" placeholder="Secret" v-model="vp.settings.twitchSecret" />
+                            <input type="password" placeholder="Secret" v-model="store.settings.twitchSecret" />
                             Secret
                         </label>
                         <br />
-                        <span class="is-error">{{ vp.settings.twitchToken ? "Has token" : "No token" }}</span>
+                        <span class="is-error">{{ store.settings.twitchToken ? "Has token" : "No token" }}</span>
                         <br />
                         <button class="button" @click="saveSettings">Save</button>
                         <button class="button" @click="fetchTwitchToken">Fetch Twitch token</button>
@@ -158,30 +96,30 @@
                 <div class="option-group">
                     <div class="option-title">Status</div>
                     <div class="option-content">
-                        <strong>Video:</strong> <span>{{ vp.status_video }}</span>
+                        <strong>Video:</strong> <span>{{ vodplayer.status_video }}</span>
                         <br />
-                        <strong>Comments:</strong> <span>{{ vp.status_comments }}</span>
+                        <strong>Comments:</strong> <span>{{ vodplayer.status_comments }}</span>
                         <br />
-                        <strong>FFZ:</strong> <span>{{ vp.emotes.ffz.status }}</span>
+                        <strong>FFZ:</strong> <span>{{ vodplayer.emotes.ffz.status }}</span>
                         <br />
-                        <strong>BTTV Channel:</strong> <span>{{ vp.emotes.bttv_channel.status }}</span>
+                        <strong>BTTV Channel:</strong> <span>{{ vodplayer.emotes.bttv_channel.status }}</span>
                         <br />
-                        <strong>BTTV Global:</strong> <span>{{ vp.emotes.bttv_global.status }}</span>
+                        <strong>BTTV Global:</strong> <span>{{ vodplayer.emotes.bttv_global.status }}</span>
                         <br />
-                        <strong>SevenTV:</strong> <span>{{ vp.emotes.seventv.status }}</span>
+                        <strong>SevenTV:</strong> <span>{{ vodplayer.emotes.seventv.status }}</span>
                     </div>
                 </div>
             </div>
 
             <div class="option-row">
-                <div v-if="!vp.automated" class="option-group">
+                <div v-if="!automated" class="option-group">
                     <div class="option-title">Chat offset in seconds</div>
                     <div class="option-content">
                         <p class="help-text">
                             Offset from the video, if recording started too late. It will be set automatically based on how long the chat dump is and the video
                             length, remember to set it to 0 if you want it that way.
                         </p>
-                        <input name="chatOffset" v-model="vp.chatOffset" />
+                        <input name="chatOffset" v-model="vodplayer.chatOffset" />
                     </div>
                 </div>
 
@@ -189,73 +127,73 @@
                     <div class="option-title">Chat location</div>
                     <div class="option-content">
                         <div>
-                            <label><input type="checkbox" name="comments-overlay" v-model="vp.settings.chatOverlay" /> Overlay</label>
-                            <label><input type="checkbox" name="ultrawide" v-model="vp.settings.ultrawide" /> Ultrawide</label>
+                            <label><input type="checkbox" name="comments-overlay" v-model="store.settings.chatOverlay" /> Overlay</label>
+                            <label><input type="checkbox" name="ultrawide" v-model="store.settings.ultrawide" /> Ultrawide</label>
                         </div>
 
                         <div>
                             Chat align:
-                            <label><input type="radio" name="comments-align" v-model="vp.settings.chatAlign" /> Left</label>
-                            <label><input type="radio" name="comments-align" v-model="vp.settings.chatAlign" /> Right</label>
+                            <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" /> Left</label>
+                            <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" /> Right</label>
                         </div>
 
                         <div>
                             Text align:
-                            <label><input type="radio" name="comments-textalign" v-model="vp.settings.chatTextAlign" /> Left</label>
-                            <label><input type="radio" name="comments-textalign" v-model="vp.settings.chatTextAlign" /> Right</label>
+                            <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" /> Left</label>
+                            <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" /> Right</label>
                         </div>
 
                         <hr />
 
-                        <label><input class="input-range" type="range" min="0" max="100" v-model="vp.settings.chatTop" /> Top</label>
+                        <label><input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatTop" /> Top</label>
                         <label
-                            ><input class="input-range" type="range" min="0" max="100" v-model="vp.settings.chatBottom" style="direction: ltr" /> Bottom</label
+                            ><input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatBottom" style="direction: ltr" /> Bottom</label
                         >
-                        <label><input class="input-range" type="range" min="0" max="100" v-model="vp.settings.chatWidth" /> Width</label>
+                        <label><input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatWidth" /> Width</label>
                     </div>
                 </div>
 
                 <div class="option-group">
                     <div class="option-title">Chat style</div>
                     <div class="option-content">
-                        <select v-model="vp.settings.chatStyle">
+                        <select v-model="store.settings.chatStyle">
                             <option value="has-gradient">Gradient</option>
                             <option value="has-fill40">Fill 40%</option>
                             <option value="has-fill80">Fill 80%</option>
                             <option value="">None</option>
                         </select>
-                        <select v-model="vp.settings.fontName">
-                            <option v-for="(v, k) in vp.fonts" :key="k" :value="k" :style="{ fontFamily: k }">
+                        <select v-model="store.settings.fontName">
+                            <option v-for="(v, k) in fonts" :key="k" :value="k" :style="{ fontFamily: k }">
                                 {{ v }}
                             </option>
                         </select>
                         <table>
                             <tr>
                                 <td>
-                                    <label><input type="checkbox" checked="checked" v-model="vp.settings.chatStroke" /> Stroke + shadow</label>
+                                    <label><input type="checkbox" checked="checked" v-model="store.settings.chatStroke" /> Stroke + shadow</label>
                                 </td>
                                 <td>
-                                    <label><input type="checkbox" checked="checked" v-model="vp.settings.emotesEnabled" /> Emotes</label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label><input type="checkbox" checked="checked" v-model="vp.settings.timestampsEnabled" /> Timestamps</label>
-                                </td>
-                                <td>
-                                    <label><input type="checkbox" checked="checked" v-model="vp.settings.badgesEnabled" /> Badges</label>
+                                    <label><input type="checkbox" checked="checked" v-model="store.settings.emotesEnabled" /> Emotes</label>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <label><input type="checkbox" checked="checked" v-model="vp.settings.smallEmotes" /> Small emotes</label>
+                                    <label><input type="checkbox" checked="checked" v-model="store.settings.timestampsEnabled" /> Timestamps</label>
                                 </td>
                                 <td>
-                                    <label><input type="checkbox" checked="checked" v-model="vp.settings.showVODComments" /> VOD comments</label>
+                                    <label><input type="checkbox" checked="checked" v-model="store.settings.badgesEnabled" /> Badges</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label><input type="checkbox" checked="checked" v-model="store.settings.smallEmotes" /> Small emotes</label>
+                                </td>
+                                <td>
+                                    <label><input type="checkbox" checked="checked" v-model="store.settings.showVODComments" /> VOD comments</label>
                                 </td>
                             </tr>
                         </table>
-                        <label><input type="range" min="10" max="42" v-model="vp.settings.fontSize" /> Font size</label>
+                        <label><input type="range" min="10" max="42" v-model="store.settings.fontSize" /> Font size</label>
                     </div>
                 </div>
             </div>
@@ -266,12 +204,11 @@
                     <button class="button" @click="saveSettings">Save settings</button>
                     <button class="button" @click="resetSettings">Reset settings</button>
                     <button class="button" @click="generateLink">Generate link</button>
-                    <button v-if="vp != null" class="button" @click="vp ? (vp.minimal = true) : ''">Minimal mode</button>
+                    <button class="button" @click="minimal = true">Minimal mode</button>
                     <span> Nothing is uploaded, everything runs in your browser. </span>
                 </div>
             </div>
         </div>
-        -->
     </div>
 </template>
 
@@ -288,6 +225,7 @@ import "./style/player.scss";
 import VODPlayer from "./components/VODPlayer.vue";
 import Dashboard from "./components/Dashboard.vue";
 import { useStore } from "./store";
+import { Fonts } from "./value_defs";
 
 console.log("app.vue init");
 
@@ -303,10 +241,12 @@ export default defineComponent({
         const store = useStore();
         const dashboard = ref<InstanceType<typeof Dashboard>>();
         const vodplayer = ref<InstanceType<typeof VODPlayer>>();
-        return { store, dashboard, vodplayer };
+        return { store, dashboard, vodplayer, fonts: Fonts };
     },
     data(): {
         // vp: VODPlayer | undefined;
+        minimal: boolean;
+        automated: boolean;
         video_source: VideoSource;
         chat_source: ChatSource;
         input_video: string;
@@ -315,7 +255,8 @@ export default defineComponent({
         // eslint-disable-next-line indent
     } {
         return {
-            // vp: undefined,
+            minimal: false,
+            automated: false,
             video_source: "file",
             chat_source: "file",
             input_video: "",
@@ -444,20 +385,22 @@ export default defineComponent({
                 }
             }
         },
+        */
         submitVideo(event: Event) {
-            if (!this.vp) return;
+            if (!this.vodplayer) return;
             console.log(this.$refs);
-            this.vp.loadVideo(this.video_source, this.$refs.video_input as HTMLInputElement);
+            this.vodplayer.loadVideo(this.video_source, this.$refs.video_input as HTMLInputElement);
             event.preventDefault();
             return false;
         },
         submitChat(event: Event) {
-            if (!this.vp) return;
+            if (!this.vodplayer) return;
             console.log(this.$refs);
-            this.vp.loadChat(this.chat_source, this.$refs.chat_input as HTMLInputElement);
+            this.vodplayer.loadChat(this.chat_source, this.$refs.chat_input as HTMLInputElement);
             event.preventDefault();
             return false;
         },
+        /*
         fetchTwitchToken() {
             if (!this.vp) return;
             this.vp.fetchTwitchToken();
@@ -498,23 +441,23 @@ export default defineComponent({
         commentsStyle(): Record<string, string> {
             if (!this.vp) return {};
             return {
-                top: this.vp.settings.chatTop + "%",
-                bottom: this.vp.settings.chatBottom + "%",
-                width: this.vp.settings.chatWidth + "%",
-                fontSize: this.vp.settings.fontSize + "px",
-                fontFamily: this.vp.settings.fontName,
+                top: this.store.settings.chatTop + "%",
+                bottom: this.store.settings.chatBottom + "%",
+                width: this.store.settings.chatWidth + "%",
+                fontSize: this.store.settings.fontSize + "px",
+                fontFamily: this.store.settings.fontName,
             };
         },
         commentsClass(): Record<string, boolean> {
             if (!this.vp) return {};
             return {
-                "align-left": this.vp.settings.chatAlign == "left",
-                "align-right": this.vp.settings.chatAlign == "right",
-                "text-left": this.vp.settings.chatTextAlign == "left",
-                "text-right": this.vp.settings.chatTextAlign == "right",
-                [this.vp.settings.chatStyle]: true,
-                "has-stroke": this.vp.settings.chatStroke,
-                "is-overlay": this.vp.settings.chatOverlay,
+                "align-left": this.store.settings.chatAlign == "left",
+                "align-right": this.store.settings.chatAlign == "right",
+                "text-left": this.store.settings.chatTextAlign == "left",
+                "text-right": this.store.settings.chatTextAlign == "right",
+                [this.store.settings.chatStyle]: true,
+                "has-stroke": this.store.settings.chatStroke,
+                "is-overlay": this.store.settings.chatOverlay,
             };
         },
         twitchApiRequired(): boolean {

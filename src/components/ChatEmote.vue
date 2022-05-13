@@ -3,6 +3,7 @@
 </template>
 
 <script lang="ts">
+import { useStore } from "@/store";
 import VODPlayer from "@/vodplayer";
 import { defineComponent } from "@vue/runtime-core";
 import { ChatEmote } from "../defs";
@@ -10,16 +11,19 @@ import { ChatEmote } from "../defs";
 export default defineComponent({
     name: "ChatEmote",
     props: {
-        vp: Object as () => VODPlayer,
         emote: Object as () => ChatEmote,
+    },
+    setup() {
+        const store = useStore();
+        return { store };
     },
     computed: {
         classObject(): Record<string, boolean> | null {
-            if (!this.emote || !this.vp) return null;
+            if (!this.emote) return null;
             let c = {
                 emote: true,
                 ["network-" + this.emote.network]: true,
-                "is-small": this.vp.settings.smallEmotes,
+                "is-small": this.store.settings.smallEmotes,
             };
             if (this.emote.class !== undefined) c[this.emote.class] = true;
             return c;

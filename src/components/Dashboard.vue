@@ -218,7 +218,7 @@ export default defineComponent({
     emits: ["update"],
     props: {
         vodplayer: {
-            type: Object as () => typeof VODPlayer,
+            type: Object as () => Ref<typeof VODPlayer>,
         }
     },
     setup() {

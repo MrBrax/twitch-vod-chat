@@ -41,7 +41,7 @@ interface SevenTVError {
 export default class SevenTVEmoteProvider extends BaseEmoteProvider {
     declare emotes: Emoticon[];
 
-    async fetchEmotes(channelId: string | number) {
+    async fetchEmotes(channelId: string | number): Promise<boolean> {
         console.log("Fetching seventv");
 
         const response = await fetch(`https://api.7tv.app/v2/users/${channelId}/emotes`);
