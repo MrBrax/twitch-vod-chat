@@ -19,7 +19,6 @@
 import ChatEmote from "./ChatEmote.vue";
 import ChatBadge from "./ChatBadge.vue";
 import { TwitchCommentProxy } from "../defs";
-import VODPlayer from "@/vodplayer";
 import { useStore } from "@/store";
 import { defineComponent } from "vue";
 

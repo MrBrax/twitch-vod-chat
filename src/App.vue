@@ -2,6 +2,7 @@
     <div>
         <VODPlayer
             ref="vodplayer"
+            @ready="playerReady"
         />
         <!--<Dashboard v-if="!store.minimal" ref="dashboard" />-->
 
@@ -266,26 +267,9 @@ export default defineComponent({
     },
     async mounted() {
         console.log("Vod player mounted", this.video_height);
-
-        // const vodplayer = new VODPlayer();
-        // this.vp = vodplayer;
-
-        // @todo: stop doing this
-        // vodplayer.elements.viewer = document.getElementById("viewer");
-        // vodplayer.elements.player = document.getElementById("player");
-        // vodplayer.elements.video = document.getElementById("video");
-        // vodplayer.elements.comments = document.getElementById("comments");
-        // vodplayer.elements.osd = document.getElementById("osd");
-        // vodplayer.elements.timeline = document.getElementById('timeline-text');
-        // vodplayer.elements.playback_text = document.getElementById("playback_text");
-
-        // vodplayer.hooks();
-
         await nextTick();
-
-        // window.addEventListener("hashchange", this.processHash);
-
-        // this.processHash();
+        window.addEventListener("hashchange", this.processHash);
+        this.processHash();
     },
     methods: {
         processHash(ev?: Event) {
@@ -342,6 +326,7 @@ export default defineComponent({
                 const video_source = params.source as VideoSource;
                 console.debug("automate playback");
                 this.store.automated = true;
+                this.video_source = video_source;
 
                 // load video
                 if (video_source == "youtube") {
@@ -351,16 +336,19 @@ export default defineComponent({
                     vodplayer.video_source = "youtube";
                     vodplayer.video_id = params.youtube_id;
                     vodplayer.videoLoadSource = params.youtube_id;
+                    this.input_video = params.youtube_id;
                 } else if (video_source == "twitch") {
                     // vodplayer.embedPlayer = new EmbedTwitchPlayer(params.twitch_id);
                     vodplayer.video_source = "twitch";
                     vodplayer.video_id = params.twitch_id;
                     vodplayer.videoLoadSource = params.twitch_id;
+                    this.input_video = params.twitch_id;
                 } else if (video_source == "file_http") {
                     // vodplayer.embedPlayer = new EmbedVideoPlayer(params.video_path);
                     vodplayer.video_source = "file_http";
                     vodplayer.video_id = params.video_path;
                     vodplayer.videoLoadSource = params.video_path;
+                    this.input_video = params.video_path;
                 } else {
                     alert("No video source set");
                     return false;
@@ -372,14 +360,27 @@ export default defineComponent({
                 //     vodplayer.embedPlayer.setup();
                 // }
 
-                if (params.chatdump && vodplayer.embedPlayer) {
+                if (params.chatdump) {
                     // load chat from api
+                    this.chat_source = "twitch";
+                    this.input_chat = params.chatdump;
+
+                    /*
                     vodplayer.loadTwitchChat(params.chatdump).then((status) => {
                         console.log("auto chat load 1", status);
                         if (params.offset) vodplayer.seek(parseInt(params.offset));
                     });
-                } else if (params.chatfile && vodplayer.embedPlayer) {
+                    */
+
+                } else if (params.chatfile) {
                     // load chat from file
+                    this.chat_source = "file_http";
+                    this.input_chat = params.chatfile;
+
+                    vodplayer.chat_source = "file_http";
+                    vodplayer.chatLoadSource = params.chatfile;
+
+                    /*
                     vodplayer.embedPlayer.addEventListener("ready", () => {
                         console.debug("player ready, load chat file");
                         vodplayer.loadChatFileFromURL(params.chatfile).then((status) => {
@@ -387,6 +388,7 @@ export default defineComponent({
                             if (params.offset) vodplayer.seek(parseInt(params.offset));
                         });
                     });
+                    */
 
                 } else {
                     alert("No chat source set");
@@ -409,10 +411,6 @@ export default defineComponent({
             return false;
         },
         /*
-        fetchTwitchToken() {
-            if (!this.vp) return;
-            this.vp.fetchTwitchToken();
-        },
         alignChat(dir: string) {
             if (!this.vp) return;
             this.vp.alignChat(dir);
@@ -472,7 +470,11 @@ export default defineComponent({
                     console.error("tac error", reason);
                     return false;
                 });
-        }
+        },
+        playerReady() {
+            if (!this.vodplayer) return;
+
+        },
     },
     computed: {
         /*
@@ -508,15 +510,13 @@ export default defineComponent({
             return this.video_source == "twitch" || this.chat_source == "twitch";
         },
     },
-    /*
 	watch: {
-		video_height(newVal, oldVal): void {
-			console.log(newVal);
-			this.$refs.player.style.width = "auto";
-			this.$refs.player.style.height = `${newVal}px`;
-			this.$refs.app.style.width = `auto`;
-		}
+		video_source() {
+            console.log("video_source", this.video_source, this.input_video);
+        },
+        chat_source() {
+            console.log("chat_source", this.chat_source, this.input_chat);
+        },
 	},
-	*/
 });
 </script>

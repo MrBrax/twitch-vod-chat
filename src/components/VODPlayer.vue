@@ -22,6 +22,7 @@
                     ref="embedPlayer"
                     @pause="isPaused = true; isPlaying = false"
                     @play="isPaused = false; isPlaying = true"
+                    @ready="$emit('ready')"
                 />
             </div>
             <div v-else class="meme-bg">
@@ -69,13 +70,16 @@
     </div>
 
     <video-controls
-        v-if="!store.minimal"
         :is-ready="isReady"
         :is-playing="isPlaying"
         :is-paused="isPaused"
         @start-playback="startPlayback"
         @toggle-pause="togglePause"
         @fullscreen="fullscreen"
+        :video-duration="vodLength"
+        :video-position="videoPosition"
+        :video-current-time="videoCurrentTime"
+        :minimal-show="minimal_show"
     />
 
 </template>
@@ -91,21 +95,17 @@ import BTTVChannelEmoteProvider from "@/emoteproviders/bttv_channel";
 import BTTVGlobalEmoteProvider from "@/emoteproviders/bttv_global";
 import FFZEmoteProvider from "@/emoteproviders/ffz";
 import SevenTVEmoteProvider from "@/emoteproviders/seventv";
-import DashboardVue from "./Dashboard.vue";
-import EmbedVideoPlayer from "@/embeds/html5";
-import EmbedTwitchPlayer from "@/embeds/twitch";
-import EmbedYouTubePlayer from "@/embeds/youtube";
-import EmbedPlayer from "@/embeds/base";
 import VideoPlayerHTML5 from "./players/VideoPlayerHTML5.vue";
-import ChatBox from "./ChatBox.vue";
 import VideoPlayerTwitch from "./players/VideoPlayerTwitch.vue";
+import ChatBox from "./ChatBox.vue";
 
 let chatLog: TwitchCommentDump | undefined; // decouple from vue for performance
 
-type AnyEmbedPlayer = EmbedPlayer | EmbedTwitchPlayer | EmbedYouTubePlayer | EmbedVideoPlayer;
+// type AnyEmbedPlayer = EmbedPlayer | EmbedTwitchPlayer | EmbedYouTubePlayer | EmbedVideoPlayer;
 
 export default defineComponent({
     name: "VODPlayer",
+    emits: ["ready"],
     setup() {
         const store = useStore();
         const embedPlayer = ref<InstanceType<typeof VideoPlayerHTML5>>();
@@ -187,6 +187,8 @@ export default defineComponent({
 
         shownComments: number;
 
+        minimal_show: boolean;
+
     } {
         return {
             // videoLoaded: false,
@@ -248,10 +250,23 @@ export default defineComponent({
             previousTick: 0,
 
             shownComments: 0,
+
+            minimal_show: false,
         };
     },
     mounted() {
-        this.setupVodPlayer();    
+        this.setupVodPlayer();
+
+        const viewerDiv = this.$refs.viewer as HTMLDivElement;
+        if (viewerDiv) {
+            viewerDiv.addEventListener("mousemove", (ev) => {
+                if (ev.clientY > viewerDiv.clientHeight - viewerDiv.clientHeight / 4) {
+                    this.minimal_show = true;
+                } else {
+                    this.minimal_show = false;
+                }
+            });
+        }
     },
     methods: {
         setupVodPlayer() {
@@ -272,16 +287,26 @@ export default defineComponent({
             this.commentQueue = [];
 
             this.commentQueue.push({
+                gid: "test1",
                 time: "00:00:00",
                 username: "braxen",
                 usernameColour: "#ff0000",
                 messageFragments: [{ type: "text", data: "welcome to my vod player! select video and chat below to begin!" }],
             } as TwitchCommentProxy);
 
+            this.commentQueue.push({
+                gid: "test1",
+                time: "00:00:00",
+                username: "braxen",
+                usernameColour: "#fff000",
+                messageFragments: [{ type: "text", data: "now rebuilt in vue!" }],
+            } as TwitchCommentProxy);
+
             /**
              * Test comment
              */
             this.commentQueue.push({
+                gid: "test2",
                 time: "00:00:00",
                 username: "helper",
                 usernameColour: "#ffff00",
@@ -1030,6 +1055,11 @@ export default defineComponent({
                 return false;
             }
 
+            // FIXME: better solution
+            this.videoCurrentTime = videoTime;
+            this.videoDuration = await this.embedPlayer.getDuration() ?? 0;
+            this.videoPosition = videoTime / this.videoDuration;
+
             /**
              * If video has ended, pause (stop) the chat playback
              */
@@ -1304,11 +1334,22 @@ export default defineComponent({
         }
     },
     components: {
-    ChatMessage,
-    VideoControls,
-    VideoPlayerHTML5,
-    ChatBox,
-    VideoPlayerTwitch
-},
+        ChatMessage,
+        VideoControls,
+        VideoPlayerHTML5,
+        ChatBox,
+        VideoPlayerTwitch
+    },
+    watch: {
+        chat_source() {
+            console.log("chat_source on vodplayer changed", this.chat_source);
+        },
+        chatLoadSource() {
+            console.log("chatLoadSource on vodplayer changed", this.chatLoadSource);
+            if (this.chatLoadSource !== '' && this.chat_source === 'file_http') {
+                this.loadChatFileFromURL(this.chatLoadSource);
+            }
+        }
+    },
 });
 </script>

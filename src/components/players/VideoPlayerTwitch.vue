@@ -35,33 +35,10 @@ export default defineComponent({
         id(newId) {
             // this.videoUrl = newUrl;
             console.debug("VideoPlayerTwitch: id changed to", newId);
+            this.setupPlayer();
         }
     },
     mounted() {
-        // console.debug("VideoPlayerHTML5: mounted");
-
-        /*
-        const video = this.$refs.video as HTMLVideoElement;
-        video.addEventListener("canplay", () => {
-            // console.debug("VideoPlayerHTML5: canplay");
-            this.$emit("ready");
-        });
-
-        video.addEventListener("play", () => {
-            // console.debug("VideoPlayerHTML5: play");
-            this.$emit("play");
-        });
-
-        video.addEventListener("pause", () => {
-            // console.debug("VideoPlayerHTML5: pause");
-            this.$emit("pause");
-        });
-
-        video.addEventListener("seeked", async () => {
-            // console.debug("VideoPlayerHTML5: seeked");
-            this.$emit("seeked", await this.getCurrentTime());
-        });
-        */
 
     },
     methods: {
@@ -92,9 +69,6 @@ export default defineComponent({
                     this.twitchPlayer.pause();
                 }, 500);
 
-                // if (this.callbacks['ready']) {
-                //     this.callbacks['ready']();
-                // }
                 this.$emit("ready");
             });
 
@@ -109,12 +83,10 @@ export default defineComponent({
                     return;
                 }
                 */
-                // this.callPause(false);
                 this.$emit("play");
             });
 
             this.twitchPlayer.addEventListener(window.Twitch.Player.PAUSE, () => {
-                // this.callPause(true);
                 this.$emit("pause");
             });
 

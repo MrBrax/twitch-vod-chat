@@ -4,7 +4,6 @@
 
 <script lang="ts">
 import { useStore } from "@/store";
-import VODPlayer from "@/vodplayer";
 import { defineComponent } from "@vue/runtime-core";
 import { ChatEmote } from "../defs";
 

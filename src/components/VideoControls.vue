@@ -1,29 +1,31 @@
 <template>
-    <div :class="{ 'video-controls': true, minimal: store.minimal }">
-        <div id="timeline" ref="timeline" @click="seek" v-if="videoPosition">
-            <div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: videoPosition * 100 + '%' }"></div>
-            <!--<div id="timeline-auto">{{ vp.videoCurrentTime }}</div>-->
-        </div>
+    <transition name="fade">
+        <div :class="{ 'video-controls': true, minimal: store.minimal }" v-if="!store.minimal || minimalShow">
+            <div id="timeline" ref="timeline" @click="seek" v-if="videoPosition">
+                <div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: videoPosition * 100 + '%' }"></div>
+                <!--<div id="timeline-auto">{{ vp.videoCurrentTime }}</div>-->
+            </div>
 
-        <div class="video-controls-buttons">
-            <div class="video-controls-buttons-group" v-if="!isReady">
-                <button class="pb-button is-submit" @click="$emit('startPlayback')" v-if="!isPlaying">Start playback</button>
+            <div class="video-controls-buttons">
+                <div class="video-controls-buttons-group" v-if="!isReady">
+                    <button class="pb-button is-submit" @click="$emit('startPlayback')" v-if="!isPlaying">Start playback</button>
+                </div>
+                <div class="video-controls-buttons-group" v-else>
+                    <button class="pb-button" @click="$emit('togglePause')">
+                        {{ isPaused ? "▶" : "⏸" }}
+                    </button>
+                    <button class="pb-button" @click="$emit('fullscreen')">Fullscreen</button>
+                    <button class="pb-button" @click="$emit('resetChat')">Reset chat</button>
+                </div>
+                <div class="video-controls-buttons-group" v-if="store.minimal">
+                    <label><input type="checkbox" name="comments-overlay" v-model="store.settings.chatOverlay" /> Overlay</label>
+                    <label><input type="checkbox" name="ultrawide" v-model="store.settings.ultrawide" /> Ultrawide</label>
+                    <label><input type="checkbox" name="minimal" v-model="store.minimal" /> Minimal</label>
+                </div>
+                <!--<div class="video-controls-text">{{ vp.playback_text }}</div>-->
             </div>
-            <div class="video-controls-buttons-group" v-else>
-                <button class="pb-button" @click="$emit('togglePause')">
-                    {{ isPaused ? "▶" : "⏸" }}
-                </button>
-                <button class="pb-button" @click="$emit('fullscreen')">Fullscreen</button>
-                <button class="pb-button" @click="$emit('resetChat')">Reset chat</button>
-            </div>
-            <div class="video-controls-buttons-group" v-if="store.minimal">
-                <label><input type="checkbox" name="comments-overlay" v-model="store.settings.chatOverlay" /> Overlay</label>
-                <label><input type="checkbox" name="ultrawide" v-model="store.settings.ultrawide" /> Ultrawide</label>
-                <label><input type="checkbox" name="minimal" v-model="store.minimal" /> Minimal</label>
-            </div>
-            <!--<div class="video-controls-text">{{ vp.playback_text }}</div>-->
         </div>
-    </div>
+    </transition>
 </template>
 
 <script lang="ts">
@@ -36,9 +38,11 @@ export default defineComponent({
     props: {
         videoPosition: Number,
         videoDuration: Number,
+        videoCurrentTime: Number,
         isPlaying: Boolean,
         isPaused: Boolean,
         isReady: Boolean,
+        minimalShow: Boolean,
     },
     setup() {
         const store = useStore();
