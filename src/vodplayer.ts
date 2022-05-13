@@ -23,6 +23,8 @@ import BTTVChannelEmoteProvider from "./emoteproviders/bttv_channel";
 import SevenTVEmoteProvider from "./emoteproviders/seventv";
 import BaseEmoteProvider from "./emoteproviders/base";
 
+type AnyEmbedPlayer = EmbedPlayer | EmbedTwitchPlayer | EmbedYouTubePlayer | EmbedVideoPlayer;
+
 // decouple for vue performance
 let chatLog: TwitchCommentDump;
 
@@ -143,7 +145,7 @@ export default class VODPlayer {
      * The embed player that plays all the videos. Not necessarily a <video> tag,
      * it can be anything, with functions that delegate events and actions.
      */
-    embedPlayer: EmbedPlayer | null = null;
+    embedPlayer: AnyEmbedPlayer | undefined = undefined;
     // embedPlayerPog: any;
 
     videoLoaded: boolean;
@@ -206,7 +208,7 @@ export default class VODPlayer {
             channel: {},
         };
 
-        this.embedPlayer = null;
+        this.embedPlayer = undefined;
 
         this.resetSettings();
 
@@ -305,7 +307,7 @@ export default class VODPlayer {
     /**
      * Runs in an interval to add messages to chat
      */
-    tick() {
+    async tick() {
         if (!this.vodLength) {
             throw "No vod length in tick";
             return false;
@@ -319,8 +321,8 @@ export default class VODPlayer {
         /**
          * Use current time of active playing video
          */
-        const videoTime = this.embedPlayer.getCurrentTime();
-        const offsetTime = (this.embedPlayer.getCurrentTime() ?? 0) + this.chatOffset;
+        const videoTime = await this.embedPlayer.getCurrentTime();
+        const offsetTime = (videoTime ?? 0) + this.chatOffset;
 
         if (videoTime === null) {
             return false;
@@ -699,9 +701,9 @@ export default class VODPlayer {
         this.malformed_comments = 0;
     }
 
-    togglePause() {
+    async togglePause() {
         if (!this.embedPlayer) return;
-        if (this.embedPlayer.isPaused) {
+        if (await this.embedPlayer.isPaused()) {
             this.play();
         } else {
             this.pause();
@@ -820,9 +822,13 @@ export default class VODPlayer {
      * Request fullscreen in modern browsers
      */
     fullscreen() {
-        const element = this.elements.viewer;
+        // const element = this.elements.viewer;
+        const element = document.getElementById("player");
 
-        if (!element) return false;
+        if (!element){
+            console.error("No element to fullscreen");
+            return false;
+        }
 
         if (element.requestFullscreen) {
             element.requestFullscreen();
@@ -1068,7 +1074,7 @@ export default class VODPlayer {
         console.debug(`VOD length: ${this.vodLength}`);
 
         if (this.embedPlayer) {
-            this.archiveLength = this.embedPlayer.getDuration();
+            this.archiveLength = await this.embedPlayer.getDuration();
             console.debug(`embedPlayer length: ${this.archiveLength}`);
         } else {
             console.error("No embed player to set archive length from");
@@ -1451,10 +1457,10 @@ export default class VODPlayer {
         */
 
         // space to play
-        document.body.addEventListener("keyup", (ev: KeyboardEvent) => {
+        document.body.addEventListener("keyup", async (ev: KeyboardEvent) => {
             // console.log("keyup", ev.key);
             if (this.isReady && this.embedPlayer != null) {
-                const currentTime = this.embedPlayer.getCurrentTime() || 0;
+                const currentTime = await this.embedPlayer.getCurrentTime() || 0;
                 if (ev.key == " ") {
                     console.log("Try to pause video from space");
                     this.togglePause();
@@ -1533,7 +1539,7 @@ export default class VODPlayer {
     }
 
     debug(...text: unknown[]): void {
-        if (process.env.NODE_ENV !== "development") return;
+        if (import.meta.env.MODE !== "development") return;
         console.debug(...text);
     }
 
@@ -1553,11 +1559,11 @@ export default class VODPlayer {
         return `#${q.toString()}`;
     }
 
-    get videoPosition(): number {
+    async videoPosition(): Promise<number> {
         if (!this.embedPlayer) return 0;
 
-        const currentTime = this.embedPlayer.getCurrentTime();
-        const duration = this.embedPlayer.getDuration();
+        const currentTime = await this.embedPlayer.getCurrentTime();
+        const duration = await this.embedPlayer.getDuration();
 
         if (currentTime === null || duration === null) return 0;
 
