@@ -1,5 +1,5 @@
 <template>
-    <div :class="{ 'video-controls': true, minimal: minimal }">
+    <div :class="{ 'video-controls': true, minimal: store.minimal }">
         <div id="timeline" ref="timeline" @click="seek" v-if="videoPosition">
             <div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: videoPosition * 100 + '%' }"></div>
             <!--<div id="timeline-auto">{{ vp.videoCurrentTime }}</div>-->
@@ -16,10 +16,10 @@
                 <button class="pb-button" @click="$emit('fullscreen')">Fullscreen</button>
                 <button class="pb-button" @click="$emit('resetChat')">Reset chat</button>
             </div>
-            <div class="video-controls-buttons-group" v-if="minimal">
+            <div class="video-controls-buttons-group" v-if="store.minimal">
                 <label><input type="checkbox" name="comments-overlay" v-model="store.settings.chatOverlay" /> Overlay</label>
                 <label><input type="checkbox" name="ultrawide" v-model="store.settings.ultrawide" /> Ultrawide</label>
-                <label><input type="checkbox" name="minimal" @click="$emit('toggleMinimal')" /> Minimal</label>
+                <label><input type="checkbox" name="minimal" v-model="store.minimal" /> Minimal</label>
             </div>
             <!--<div class="video-controls-text">{{ vp.playback_text }}</div>-->
         </div>
@@ -34,7 +34,6 @@ export default defineComponent({
     name: "VideoControls",
     emits: ["startPlayback", "togglePause", "fullscreen", "resetChat", "toggleMinimal", "seek"],
     props: {
-        minimal: Boolean,
         videoPosition: Number,
         videoDuration: Number,
         isPlaying: Boolean,

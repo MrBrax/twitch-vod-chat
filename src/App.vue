@@ -1,18 +1,22 @@
 <template>
     <div>
-        <VODPlayer ref="vodplayer" :minimal="minimal" :automated="automated" />
+        <VODPlayer
+            ref="vodplayer"
+        />
         <!--<Dashboard v-if="!store.minimal" ref="dashboard" />-->
 
-        <div id="controls" v-if="vodplayer && !minimal">
+        <div id="controls" v-if="vodplayer && !store.minimal">
             <div class="option-row">
-                <div v-if="!automated" v-bind:class="{ 'option-group': true, ok: vodplayer.videoLoaded }" class="option-group">
+                <div v-if="!store.automated" v-bind:class="{ 'option-group': true, ok: vodplayer.videoLoaded }" class="option-group">
                     <div class="option-title">Video</div>
                     <div class="option-content">
                         <select class="fullsize" v-model="video_source">
                             <option value="file">Local video file</option>
                             <option value="file_http">Hosted video file</option>
+                            <!-- // FIXME: add back these
                             <option value="youtube">YouTube</option>
                             <option value="twitch">Twitch VOD</option>
+                            -->
                         </select>
                         <hr />
                         <div v-if="video_source == 'file'">
@@ -44,7 +48,7 @@
                     </div>
                 </div>
 
-                <div v-if="!automated" v-bind:class="{ 'option-group': true, ok: vodplayer.chatLoaded }" class="option-group">
+                <div v-if="!store.automated" v-bind:class="{ 'option-group': true, ok: vodplayer.chatLoaded }" class="option-group">
                     <div class="option-title">Chat</div>
                     <div class="option-content">
                         <select class="fullsize" v-model="chat_source">
@@ -112,7 +116,7 @@
             </div>
 
             <div class="option-row">
-                <div v-if="!automated" class="option-group">
+                <div v-if="!store.automated" class="option-group">
                     <div class="option-title">Chat offset in seconds</div>
                     <div class="option-content">
                         <p class="help-text">
@@ -204,7 +208,7 @@
                     <button class="button" @click="saveSettings">Save settings</button>
                     <button class="button" @click="resetSettings">Reset settings</button>
                     <button class="button" @click="generateLink">Generate link</button>
-                    <button class="button" @click="minimal = true">Minimal mode</button>
+                    <button class="button" @click="store.minimal = true">Minimal mode</button>
                     <span> Nothing is uploaded, everything runs in your browser. </span>
                 </div>
             </div>
@@ -245,8 +249,6 @@ export default defineComponent({
     },
     data(): {
         // vp: VODPlayer | undefined;
-        minimal: boolean;
-        automated: boolean;
         video_source: VideoSource;
         chat_source: ChatSource;
         input_video: string;
@@ -255,8 +257,6 @@ export default defineComponent({
         // eslint-disable-next-line indent
     } {
         return {
-            minimal: false,
-            automated: false,
             video_source: "file",
             chat_source: "file",
             input_video: "",
@@ -288,11 +288,10 @@ export default defineComponent({
         // this.processHash();
     },
     methods: {
-        /*
         processHash(ev?: Event) {
             console.debug("Process hash", window.location.hash, ev);
 
-            const vodplayer = this.vp;
+            const vodplayer = this.vodplayer;
             if (!vodplayer) return;
 
             const query = window.location.hash;
@@ -304,24 +303,24 @@ export default defineComponent({
 
             // twitch client id
             if (params.tci) {
-                vodplayer.settings.twitchClientId = params.tci;
+                this.store.settings.twitchClientId = params.tci;
             }
 
             // twitch secret
             if (params.ts) {
-                vodplayer.settings.twitchSecret = params.ts;
+                this.store.settings.twitchSecret = params.ts;
             }
 
             // token
             if (params.tk) {
-                vodplayer.settings.twitchToken = params.tk;
+                this.store.settings.twitchToken = params.tk;
             }
 
             if (params.offset) {
                 vodplayer.chatOffset = parseInt(params.offset);
             }
 
-            vodplayer.minimal = params.minimal !== undefined && parseInt(params.minimal) > 0;
+            this.store.minimal = params.minimal !== undefined && parseInt(params.minimal) > 0;
 
             if (params.chapters) {
                 vodplayer.videoChapters = [];
@@ -342,27 +341,36 @@ export default defineComponent({
             if (params.source) {
                 const video_source = params.source as VideoSource;
                 console.debug("automate playback");
-                vodplayer.automated = true;
+                this.store.automated = true;
 
                 // load video
                 if (video_source == "youtube") {
-                    window.onYouTubeIframeAPIReady = () => {
-                        vodplayer.embedPlayer = new EmbedYouTubePlayer(params.youtube_id);
-                    };
+                    // window.onYouTubeIframeAPIReady = () => {
+                    //     vodplayer.embedPlayer = new EmbedYouTubePlayer(params.youtube_id);
+                    // };
+                    vodplayer.video_source = "youtube";
+                    vodplayer.video_id = params.youtube_id;
+                    vodplayer.videoLoadSource = params.youtube_id;
                 } else if (video_source == "twitch") {
-                    vodplayer.embedPlayer = new EmbedTwitchPlayer(params.twitch_id);
+                    // vodplayer.embedPlayer = new EmbedTwitchPlayer(params.twitch_id);
+                    vodplayer.video_source = "twitch";
+                    vodplayer.video_id = params.twitch_id;
+                    vodplayer.videoLoadSource = params.twitch_id;
                 } else if (video_source == "file_http") {
-                    vodplayer.embedPlayer = new EmbedVideoPlayer(params.video_path);
+                    // vodplayer.embedPlayer = new EmbedVideoPlayer(params.video_path);
+                    vodplayer.video_source = "file_http";
+                    vodplayer.video_id = params.video_path;
+                    vodplayer.videoLoadSource = params.video_path;
                 } else {
                     alert("No video source set");
                     return false;
                 }
 
                 // set up embed player
-                if (vodplayer.embedPlayer) {
-                    vodplayer.embedPlayer.vodplayer = vodplayer;
-                    vodplayer.embedPlayer.setup();
-                }
+                // if (vodplayer.embedPlayer) {
+                //     vodplayer.embedPlayer.vodplayer = vodplayer;
+                //     vodplayer.embedPlayer.setup();
+                // }
 
                 if (params.chatdump && vodplayer.embedPlayer) {
                     // load chat from api
@@ -379,13 +387,13 @@ export default defineComponent({
                             if (params.offset) vodplayer.seek(parseInt(params.offset));
                         });
                     });
+
                 } else {
                     alert("No chat source set");
                     return false;
                 }
             }
         },
-        */
         submitVideo(event: Event) {
             if (!this.vodplayer) return;
             console.log(this.$refs);

@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 
 interface StoreType {
     minimal: boolean;
+    automated: boolean;
     settings: VODPlayerSettings;
 }
 
@@ -32,6 +33,7 @@ export const useStore = defineStore("twitchVodChat", {
     state: function (): StoreType {
         return {
             minimal: false,
+            automated: false,
             settings: { ...defaultSettings },
         };
     },

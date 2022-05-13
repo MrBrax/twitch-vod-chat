@@ -26,3 +26,13 @@
 		transform: translate(0px, 0px);
 	}
 }
+
+.comment-enter-active {
+  transition: all 0.2s ease;
+  max-height: 1000px;
+}
+.comment-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+  // max-height: 0px;
+}

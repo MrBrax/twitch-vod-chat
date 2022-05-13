@@ -1,12 +1,12 @@
 <template>
-    <div id="comments" v-if="commentQueue" :class="commentsClass" :style="commentsStyle">
+    <TransitionGroup name="comment" tag="div" id="comments" ref="comments" v-if="commentQueue" :class="commentsClass" :style="commentsStyle">
         <ChatMessage
             v-for="message in commentQueue"
             v-bind:message="message"
             v-bind:key="message.gid"
             :data-id="message.gid"
         />
-    </div>
+    </TransitionGroup>
 </template>
 
 <script lang="ts">
@@ -27,11 +27,13 @@ export default defineComponent({
     components: {
         ChatMessage,
     },
-    watch: {
-        commentQueue(newQueue) {
+    methods: {
+        scrollToBottom() {
             const comments = this.$refs.comments as HTMLDivElement;
             if (comments) {
                 comments.scrollTop = comments.scrollHeight;
+            } else {
+                console.error("No comments element found");
             }
         },
     },

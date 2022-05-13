@@ -16,6 +16,13 @@
                     @pause="isPaused = true; isPlaying = false"
                     @play="isPaused = false; isPlaying = true"
                 />
+                <VideoPlayerTwitch
+                    v-if="video_source === 'twitch'"
+                    :id="videoLoadSource"
+                    ref="embedPlayer"
+                    @pause="isPaused = true; isPlaying = false"
+                    @play="isPaused = false; isPlaying = true"
+                />
             </div>
             <div v-else class="meme-bg">
                 <div class="meme">
@@ -33,10 +40,11 @@
                 ></chat-message>
             </div>
             -->
-            <ChatBox :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
+            <ChatBox v-if="store.settings.chatOverlay" ref="chatbox" :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
 
             <!--<div id="osd">SYNC NOT STARTED</div>-->
         </div>
+        <!--
         <div v-if="!store.settings.chatOverlay" id="comments" ref="comments" :class="commentsClass" :style="commentsStyle">
             <chat-message
                 v-for="message in commentQueue"
@@ -45,6 +53,8 @@
                 :data-id="message.gid"
             ></chat-message>
         </div>
+        -->
+        <ChatBox v-if="!store.settings.chatOverlay" ref="chatbox" :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
         <!--<video-controls :minimal="true" v-if="store.minimal" />-->
     </div>
 
@@ -71,7 +81,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "@vue/runtime-core";
+import { defineComponent, nextTick, ref } from "@vue/runtime-core";
 import ChatMessage from "@/components/ChatMessage.vue";
 import VideoControls from "@/components/VideoControls.vue";
 import { useStore } from "@/store";
@@ -88,6 +98,7 @@ import EmbedYouTubePlayer from "@/embeds/youtube";
 import EmbedPlayer from "@/embeds/base";
 import VideoPlayerHTML5 from "./players/VideoPlayerHTML5.vue";
 import ChatBox from "./ChatBox.vue";
+import VideoPlayerTwitch from "./players/VideoPlayerTwitch.vue";
 
 let chatLog: TwitchCommentDump | undefined; // decouple from vue for performance
 
@@ -98,17 +109,14 @@ export default defineComponent({
     setup() {
         const store = useStore();
         const embedPlayer = ref<InstanceType<typeof VideoPlayerHTML5>>();
-        return { store, embedPlayer };
+        const chatbox = ref<InstanceType<typeof ChatBox>>();
+        return { store, embedPlayer, chatbox };
     },
     // props: {
     //     dashboard: {
     //         type: DashboardVue,
     //     },
     // },
-    props: {
-        minimal: Boolean,
-        automated: Boolean,
-    },
     data(): {
         // videoLoaded: boolean;
         videoPosition: number;
@@ -177,6 +185,8 @@ export default defineComponent({
 
         previousTick: number;
 
+        shownComments: number;
+
     } {
         return {
             // videoLoaded: false,
@@ -202,8 +212,8 @@ export default defineComponent({
             commentLimit: 50,
             archiveLength: undefined,
             channelName: "",
-            status_video: "",
-            status_comments: "",
+            status_video: "Waiting...",
+            status_comments: "Waiting...",
 
             commentAmount: 0,
 
@@ -236,6 +246,8 @@ export default defineComponent({
             malformed_comments: 0,
 
             previousTick: 0,
+
+            shownComments: 0,
         };
     },
     mounted() {
@@ -284,13 +296,15 @@ export default defineComponent({
                 ],
             } as TwitchCommentProxy);
 
-            this.tickDelay = 50;
+            this.tickDelay = 100; // 50 default
             // this.timeScale = 1;
             this.commentLimit = 50;
 
             this.vodLength = undefined;
             this.archiveLength = undefined;
             this.channelName = "";
+
+            this.shownComments = 0;
 
         },
 
@@ -303,6 +317,8 @@ export default defineComponent({
             }
 
             this.video_source = source;
+
+            this.status_video = "Loading...";
 
             if (input.files) {
                 const file = input.files[0];
@@ -326,6 +342,8 @@ export default defineComponent({
 
                 this.video_id = "";
                 this.videoLoadSource = fileURL;
+
+                this.status_video = "Local video loaded";
 
                 return true;
             } else if (source == "file_http") {
@@ -353,6 +371,9 @@ export default defineComponent({
                 this.video_id = twitch_id[1];
                 this.videoLoadSource = twitch_id[1];
                 this.vod_id = twitch_id[1];
+
+                this.status_video = "Twitch video loaded";
+
                 return true;
             } else if (source == "youtube") {
                 const regex_1 = input.value.match(/v=([A-Za-z0-9]+)/);
@@ -380,9 +401,14 @@ export default defineComponent({
 
                 this.video_id = youtube_id;
                 this.videoLoadSource = youtube_id;
+
+                this.status_video = "YouTube video loaded";
+
             }
 
             console.error("unhandled video input");
+
+            this.status_video = "Unhandled video source";
 
             return false;
         },
@@ -922,12 +948,7 @@ export default defineComponent({
 
             // FIXME: vue
             const button_start = <HTMLInputElement>document.getElementById("buttonStart");
-
             if (button_start) button_start.disabled = true;
-            if (!this.automated) {
-                // (<HTMLInputElement>document.getElementById('inputVideo')).disabled = true;
-                // (<HTMLInputElement>document.getElementById('inputChat')).disabled = true;
-            }
 
             this.isPlaying = true;
 
@@ -936,19 +957,25 @@ export default defineComponent({
             return true;
         },
 
-        play() {
+        async play() {
             if (!this.embedPlayer) return;
             console.log("Play executed");
             this.interval = setInterval(this.tick.bind(this), this.tickDelay);
-            this.embedPlayer.play();
+            await this.embedPlayer.play();
         },
 
-        pause() {
+        async pause() {
             if (!this.embedPlayer) return;
             console.log("Pause executed");
             if (this.interval) clearInterval(this.interval);
-            this.embedPlayer.pause();
+            await this.embedPlayer.pause();
             this.malformed_comments = 0;
+        },
+
+        async seek(seconds: number) {
+            if (!this.embedPlayer) return;
+            console.log("Seek executed");
+            await this.embedPlayer.seek(seconds);
         },
 
         async togglePause() {
@@ -1018,7 +1045,7 @@ export default defineComponent({
             /**
              * Loop through all comments to insert into queue
              */
-            for (let i = 0; i < this.commentAmount; i++) {
+            for (let i = this.shownComments; i < this.commentAmount - this.shownComments; i++) {
                 const comment: TwitchComment = chatLog.comments[i];
 
                 /**
@@ -1042,6 +1069,11 @@ export default defineComponent({
                 if (comment.displayed) {
                     // console.debug(`skip comment, already displayed: ${i}`);
                     continue;
+                }
+
+                if (comment.content_offset_seconds > offsetTime + 30) {
+                    // console.debug(`skip comment, too far away: ${i}, ${comment.content_offset_seconds} (offset: ${offsetTime+30})`);
+                    break; // stop looping
                 }
 
                 /**
@@ -1190,15 +1222,6 @@ export default defineComponent({
             }
 
             /**
-             * Scroll to bottom of chat window
-             * @todo: check why this doesn't work anymore
-             */
-            const commentsDiv = this.$refs.comments as HTMLElement;
-            if (commentsDiv) {
-                commentsDiv.scrollTop = commentsDiv.scrollHeight;
-            }
-
-            /**
              * Remove old comments from the queue to not waste drawing
              */
             if (this.commentQueue.length >= this.commentLimit) {
@@ -1206,11 +1229,28 @@ export default defineComponent({
                 // console.debug( 'Comments overflowing, delete', this.commentQueue.length, this.commentQueue.length - this.commentLimit );
             }
 
+            /**
+             * Scroll to bottom of chat window
+             * @todo: check why this doesn't work anymore
+             */
+            // const commentsDiv = this.$refs.comments as HTMLElement;
+            // if (commentsDiv) {
+            //     commentsDiv.scrollTop = commentsDiv.scrollHeight;
+            // }
+            if (this.chatbox) {
+                setTimeout(() => {
+                    if (this.chatbox) this.chatbox.scrollToBottom();
+                }, 10);
+            }
+
             // console.debug("Tick finished", Date.now() - tickStart, "Previous tick", Date.now() - this.previousTick);
 
             // this.previousTick = Date.now();
 
             // window.requestAnimationFrame(this.tick.bind(this));
+
+            this.shownComments++;
+
             return true;
         },
 
@@ -1259,7 +1299,7 @@ export default defineComponent({
                 "is-overlay": this.store.settings.chatOverlay,
             };
         },
-        videoLoaded() {
+        videoLoaded(): boolean {
             return this.video_source !== null && this.videoLoadSource !== '';
         }
     },
@@ -1267,7 +1307,8 @@ export default defineComponent({
     ChatMessage,
     VideoControls,
     VideoPlayerHTML5,
-    ChatBox
+    ChatBox,
+    VideoPlayerTwitch
 },
 });
 </script>

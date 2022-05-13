@@ -10,9 +10,19 @@ declare global {
         Twitch: {
             Player: {
                 new (element: HTMLDivElement, opt: TwitchPlayerOptions): TwitchPlayer;
-                PLAY: "1"; // dunno
-                PAUSE: "2"; // dunno
-                READY: "3"; // dunno
+                // PLAY: "1"; // dunno
+                // PAUSE: "2"; // dunno
+                // READY: "3"; // dunno
+                CAPTIONS: "captions";
+                ENDED: "ended";
+                PAUSE: "pause";
+                PLAY: "play";
+                PLAYBACK_BLOCKED: "playbackBlocked";
+                PLAYING: "playing";
+                OFFLINE: "offline";
+                ONLINE: "online";
+                READY: "ready";
+                SEEK: "seek";
             };
         };
         YT: {

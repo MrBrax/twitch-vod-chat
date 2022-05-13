@@ -102,6 +102,14 @@ export default defineComponent({
             // console.debug("VideoPlayerHTML5: getCurrentTime");
             return this.video.currentTime;
         },
+        async seek(time: number): Promise<void> {
+            if (!this.video) {
+                console.error("VideoPlayerHTML5: video is not ready");
+                return;
+            }
+            // console.debug("VideoPlayerHTML5: seek");
+            this.video.currentTime = time;
+        },
     }
 });
 </script>
