@@ -10,9 +10,19 @@ declare global {
         Twitch: {
             Player: {
                 new (element: HTMLDivElement, opt: TwitchPlayerOptions): TwitchPlayer;
-                PLAY: "1"; // dunno
-                PAUSE: "2"; // dunno
-                READY: "3"; // dunno
+                // PLAY: "1"; // dunno
+                // PAUSE: "2"; // dunno
+                // READY: "3"; // dunno
+                CAPTIONS: "captions";
+                ENDED: "ended";
+                PAUSE: "pause";
+                PLAY: "play";
+                PLAYBACK_BLOCKED: "playbackBlocked";
+                PLAYING: "playing";
+                OFFLINE: "offline";
+                ONLINE: "online";
+                READY: "ready";
+                SEEK: "seek";
             };
         };
         YT: {
@@ -75,20 +85,20 @@ interface TwitchUserBadge {
 }
 */
 
+export interface TextMessageFragment {
+    type: "text";
+    data: string;
+};
+
+export interface EmoteMessageFragment {
+    type: "emote";
+    data: ChatEmote;
+}
+
 export interface TwitchCommentProxy extends TwitchComment {
     time: string;
     gid: string | number;
-    messageFragments: {
-        type: string;
-        data:
-            | {
-                  network?: string;
-                  url?: string;
-                  name?: string;
-                  class?: string;
-              }
-            | string;
-    }[];
+    messageFragments: Array<TextMessageFragment | EmoteMessageFragment>;
     usernameColour: string;
     username: string;
     badges: TwitchUserBadgeProxy[];

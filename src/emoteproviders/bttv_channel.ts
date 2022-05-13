@@ -33,7 +33,7 @@ interface BTTVChannelEmoteData {
 export default class BTTVChannelEmoteProvider extends BaseEmoteProvider {
     declare emotes: BTTVChannelEmoteData;
 
-    async fetchEmotes(channelId: string | number) {
+    async fetchEmotes(channelId: string | number): Promise<boolean> {
         console.log("Fetching BTTV Channel");
 
         const response = await fetch(`https://api.betterttv.net/3/cached/users/twitch/${channelId}`);
@@ -42,13 +42,15 @@ export default class BTTVChannelEmoteProvider extends BaseEmoteProvider {
         if (!json2 || json2.channelEmotes.length == 0) {
             console.error("failed to load bttvchannel", json2);
             this.status = "Failed to load";
-            return;
+            return false;
         }
 
         this.emotes = json2;
 
         console.log("bttvchannel", this.emotes);
         this.status = `OK! (${this.emotes.channelEmotes.length} channel, ${this.emotes.sharedEmotes.length} shared)`;
+
+        return true;
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {

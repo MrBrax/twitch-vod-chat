@@ -5,9 +5,9 @@ export default class BaseEmoteProvider {
     emotes: unknown;
     status = "Waiting...";
 
-    fetchEmotes(channelId: string | number) {
+    async fetchEmotes(channelId: string | number): Promise<boolean> {
         console.debug(channelId);
-        throw "Not implemented";
+        throw new Error("Not implemented");
     }
 
     getEmotes() {
@@ -22,6 +22,6 @@ export default class BaseEmoteProvider {
      */
     parseComment(word: string, commentObj: TwitchCommentProxy): boolean {
         console.debug(word, commentObj);
-        throw "Not implemented";
+        throw new Error("Not implemented");
     }
 }

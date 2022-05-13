@@ -87,7 +87,7 @@ interface FFZEmoteData {
 export default class FFZEmoteProvider extends BaseEmoteProvider {
     declare emotes: FFZEmoteData;
 
-    async fetchEmotes(channelId: string | number) {
+    async fetchEmotes(channelId: string | number): Promise<boolean> {
         console.log("Fetching FFZ");
 
         const response = await fetch(`https://api.frankerfacez.com/v1/room/id/${channelId}`);
@@ -96,7 +96,7 @@ export default class FFZEmoteProvider extends BaseEmoteProvider {
         if (!json2.sets) {
             console.error("failed to load ffz", json2);
             this.status = "Failed to load";
-            return;
+            return false;
         }
 
         this.emotes = json2;
@@ -104,6 +104,8 @@ export default class FFZEmoteProvider extends BaseEmoteProvider {
         console.log("ffz", this.emotes);
         const amount = Object.values(this.emotes.sets).reduce((count, row) => count + Object.keys(row.emoticons).length, 0);
         this.status = `OK! (${Object.keys(this.emotes.sets).length} sets, ${amount} emotes)`;
+
+        return true;
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {

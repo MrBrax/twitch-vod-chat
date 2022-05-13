@@ -463,7 +463,7 @@ export default class VODPlayer {
                         type: "emote",
                         data: {
                             network: "twitch",
-                            // name: f.emoticon.text, // @todo: fix
+                            name: f.text, // @todo: fix
                             url: `https://static-cdn.jtvnw.net/emoticons/v1/${f.emoticon.emoticon_id}/1.0`,
                         },
                     });

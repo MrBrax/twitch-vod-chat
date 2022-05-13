@@ -17,7 +17,7 @@ interface BTTVGlobalEmoteData {
 export default class BTTVGlobalEmoteProvider extends BaseEmoteProvider {
     declare emotes: Emoticon[];
 
-    async fetchEmotes(channelId: string | number) {
+    async fetchEmotes(channelId: string | number): Promise<boolean> {
         console.log("Fetching BTTV Global", channelId);
 
         const response = await fetch(`https://api.betterttv.net/3/cached/emotes/global`);
@@ -26,13 +26,15 @@ export default class BTTVGlobalEmoteProvider extends BaseEmoteProvider {
         if (!json2 || json2.length == 0) {
             console.error("failed to load bttvglobal", json2);
             this.status = "Failed to load";
-            return;
+            return false;
         }
 
         this.emotes = json2;
 
         console.log("bttvglobal", this.emotes);
         this.status = `OK! (${this.emotes.length} emotes)`;
+
+        return true;
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {

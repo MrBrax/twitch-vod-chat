@@ -41,6 +41,7 @@ hr {
 }
 
 #app {
+	position: relative;
 	width: $width;
 	@if $center {
 		margin: 0 auto;
