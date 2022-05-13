@@ -56,12 +56,12 @@ export default class EmbedPlayer {
         alert(`no seek implemented (${seconds})`);
     }
 
-    getDuration(): number | null {
+    async getDuration(): Promise<number | null> {
         alert("no duration implemented");
         return 0;
     }
 
-    getCurrentTime(): number | null {
+    async getCurrentTime(): Promise<number | null> {
         alert("no current time implemented");
         return 0;
     }
@@ -80,7 +80,10 @@ export default class EmbedPlayer {
         this.vodplayer.status_video = text;
     }
 
-    get isPaused(): boolean | undefined {
+    // get isPaused(): boolean | undefined {
+    //     return false;
+    // }
+    async isPaused(): Promise<boolean | undefined> {
         return false;
     }
 }

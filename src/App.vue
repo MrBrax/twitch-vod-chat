@@ -327,7 +327,7 @@ export default defineComponent({
         VideoControls,
     },
     data(): {
-        vp: VODPlayer | null;
+        vp: VODPlayer | undefined;
         video_source: VideoSource;
         chat_source: ChatSource;
         input_video: string;
@@ -336,7 +336,7 @@ export default defineComponent({
         // eslint-disable-next-line indent
     } {
         return {
-            vp: null,
+            vp: undefined,
             video_source: "file",
             chat_source: "file",
             input_video: "",
@@ -508,8 +508,8 @@ export default defineComponent({
         },
     },
     computed: {
-        videoPosition(): number {
-            const currentTime = this.vp?.embedPlayer?.getCurrentTime() || 0;
+        async videoPosition(): Promise<number> {
+            const currentTime = await this.vp?.embedPlayer?.getCurrentTime() || 0;
             // if (!this.vp || !this.vp.embedPlayer || this.vp.embedPlayer.getCurrentTime() == null || !this.vp.vodLength) return 0;
             return currentTime / (this.vp?.vodLength || 0);
         },

@@ -91,23 +91,23 @@ export default class EmbedYouTubePlayer extends EmbedPlayer {
         return true;
     }
 
-    seek(seconds: number) {
+    seek(seconds: number): void {
         if (!this.player) return;
         this.player.seekTo(seconds, false);
     }
 
-    getDuration() {
+    async getDuration(): Promise<number | null> {
         if (!this.isReady || !this.player) return null;
-        return this.player.getDuration();
+        return await this.player.getDuration();
     }
 
-    getCurrentTime() {
+    async getCurrentTime(): Promise<number | null> {
         if (!this.isReady || !this.player) return null;
-        return this.player.getCurrentTime();
+        return await this.player.getCurrentTime();
     }
 
-    get isPaused() {
+    async isPaused(): Promise<boolean | undefined> {
         if (!this.isReady || !this.player) return undefined;
-        return this.player.getPlayerState() == 2;
+        return await this.player.getPlayerState() == 2;
     }
 }

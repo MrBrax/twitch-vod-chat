@@ -123,17 +123,17 @@ export default class EmbedTwitchPlayer extends EmbedPlayer {
         this.player.seek(seconds);
     }
 
-    getDuration() {
+    async getDuration(): Promise<number | null> {
         if (!this.player) return null;
         return this.player.getDuration();
     }
 
-    getCurrentTime() {
+    async getCurrentTime(): Promise<number | null> {
         if (!this.player) return null;
         return this.player.getCurrentTime();
     }
 
-    get isPaused() {
+    async isPaused(): Promise<boolean> {
         if (!this.player) return false;
         return this.player.isPaused();
     }

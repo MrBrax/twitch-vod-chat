@@ -43,17 +43,20 @@ export default defineComponent({
     },
     methods: {
         fullscreen() {
-            if (!this.vp) return;
+            if (!this.vp) {
+                console.error("No vodplayer");
+                return;
+            }
             this.vp.fullscreen();
         },
-        seek(ev: MouseEvent) {
+        async seek(ev: MouseEvent) {
             if (!this.vp) return;
             if (!this.vp.embedPlayer) {
                 console.error("trying to seek from gui with no embed player");
                 return false;
             }
             const timeline = this.$refs.timeline as HTMLDivElement;
-            let duration = this.vp.embedPlayer.getDuration() || 0;
+            let duration = await this.vp.embedPlayer.getDuration() || 0;
             let rect = timeline.getBoundingClientRect(); // @todo: what
             let percent = (ev.clientX - rect.left) / timeline.clientWidth;
             let seconds = Math.round(duration * percent);

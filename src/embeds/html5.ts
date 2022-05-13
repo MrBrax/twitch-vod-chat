@@ -81,17 +81,17 @@ export default class EmbedVideoPlayer extends EmbedPlayer {
         this.player.currentTime = seconds;
     }
 
-    getDuration() {
+    async getDuration(): Promise<number> {
         if (!this.player) return 0;
         return this.player.duration;
     }
 
-    getCurrentTime() {
+    async getCurrentTime(): Promise<number> {
         if (!this.player) return 0;
         return this.player.currentTime;
     }
 
-    get isPaused() {
+    async isPaused(): Promise<boolean> {
         if (!this.player) return false;
         return this.player.paused;
     }
