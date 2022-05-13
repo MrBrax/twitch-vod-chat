@@ -1,5 +1,8 @@
 <template>
-    <div ref="app" id="app" v-if="vp">
+    <div>
+        <VODPlayer ref="vodplayer" />
+        <Dashboard v-if="!store.minimal" ref="dashboard" :vodplayer="vodplayer" />
+        <!--
         <div
             id="viewer"
             :class="{
@@ -39,6 +42,7 @@
             </div>
             <video-controls :minimal="true" v-bind:vp="vp" v-if="vp.minimal" />
         </div>
+        -->
 
         <!--
 		<div v-if="vp.videoChapters && vp.vodLength" id="timeline-markers">
@@ -58,6 +62,7 @@
 		</div>
 		-->
 
+        <!--
         <video-controls v-bind:vp="vp" v-if="!vp.minimal" />
 
         <div id="controls" v-if="!vp.minimal">
@@ -98,15 +103,6 @@
                         </div>
                         <hr />
                         <button class="button is-submit" @click="submitVideo">Submit</button>
-                        <!--
-						<select v-model="video_height">
-							<option value="480">480p</option>
-							<option value="720">720p</option>
-							<option value="1080">1080p</option>
-							<option value="1440">1440p</option>
-							<option value="2160">2160p</option>
-						</select>
-						-->
                     </div>
                 </div>
 
@@ -189,18 +185,6 @@
                     </div>
                 </div>
 
-                <!--
-                <div class="option-group">
-                    <div class="option-title">Update frequency in ms</div>
-                    <div class="option-content">
-                        <p class="help-text">
-                            The lower the smoother. 16.67 - 60fps, 33.33 - 30fps. Missed ticks shouldn't matter, as the parser is dependent on system time.
-                        </p>
-                        <input name="tickDelay" v-model="vp.tickDelay" />
-                    </div>
-                </div>
-                -->
-
                 <div class="option-group">
                     <div class="option-title">Chat location</div>
                     <div class="option-content">
@@ -244,19 +228,6 @@
                             <option v-for="(v, k) in vp.fonts" :key="k" :value="k" :style="{ fontFamily: k }">
                                 {{ v }}
                             </option>
-                            <!--
-							<option value="Inter">Inter (Twitch)</option>
-							<option>Arial</option>
-							<option>Helvetica</option>
-							<option>Open Sans</option>
-							<option>Roboto</option>
-							<option>Segoe UI</option>
-							<option>Verdana</option>
-							<optgroup label="Fixed width">
-								<option>Consolas</option>
-								<option>monospace</option>
-							</optgroup>
-							-->
                         </select>
                         <table>
                             <tr>
@@ -300,23 +271,23 @@
                 </div>
             </div>
         </div>
+        -->
     </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "@vue/runtime-core";
+import { defineComponent, ref } from "@vue/runtime-core";
 import { nextTick } from "vue";
 import ChatMessage from "./components/ChatMessage.vue";
 import VideoControls from "./components/VideoControls.vue";
 import { ChatSource, VideoSource } from "./defs";
 
-import EmbedVideoPlayer from "./embeds/html5";
-import EmbedTwitchPlayer from "./embeds/twitch";
-import EmbedYouTubePlayer from "./embeds/youtube";
-
 import "./style/player.scss";
 
-import VODPlayer from "./vodplayer";
+// import VODPlayer from "./vodplayer";
+import VODPlayer from "./components/VODPlayer.vue";
+import Dashboard from "./components/Dashboard.vue";
+import { useStore } from "./store";
 
 console.log("app.vue init");
 
@@ -325,9 +296,17 @@ export default defineComponent({
     components: {
         ChatMessage,
         VideoControls,
+        VODPlayer,
+        Dashboard
+    },
+    setup() {
+        const store = useStore();
+        const dashboard = ref<InstanceType<typeof Dashboard>>();
+        const vodplayer = ref<InstanceType<typeof VODPlayer>>();
+        return { store, dashboard, vodplayer };
     },
     data(): {
-        vp: VODPlayer | undefined;
+        // vp: VODPlayer | undefined;
         video_source: VideoSource;
         chat_source: ChatSource;
         input_video: string;
@@ -336,7 +315,7 @@ export default defineComponent({
         // eslint-disable-next-line indent
     } {
         return {
-            vp: undefined,
+            // vp: undefined,
             video_source: "file",
             chat_source: "file",
             input_video: "",
@@ -347,27 +326,28 @@ export default defineComponent({
     async mounted() {
         console.log("Vod player mounted", this.video_height);
 
-        const vodplayer = new VODPlayer();
-        this.vp = vodplayer;
+        // const vodplayer = new VODPlayer();
+        // this.vp = vodplayer;
 
         // @todo: stop doing this
-        vodplayer.elements.viewer = document.getElementById("viewer");
-        vodplayer.elements.player = document.getElementById("player");
-        vodplayer.elements.video = document.getElementById("video");
-        vodplayer.elements.comments = document.getElementById("comments");
+        // vodplayer.elements.viewer = document.getElementById("viewer");
+        // vodplayer.elements.player = document.getElementById("player");
+        // vodplayer.elements.video = document.getElementById("video");
+        // vodplayer.elements.comments = document.getElementById("comments");
         // vodplayer.elements.osd = document.getElementById("osd");
         // vodplayer.elements.timeline = document.getElementById('timeline-text');
         // vodplayer.elements.playback_text = document.getElementById("playback_text");
 
-        vodplayer.hooks();
+        // vodplayer.hooks();
 
         await nextTick();
 
-        window.addEventListener("hashchange", this.processHash);
+        // window.addEventListener("hashchange", this.processHash);
 
-        this.processHash();
+        // this.processHash();
     },
     methods: {
+        /*
         processHash(ev?: Event) {
             console.debug("Process hash", window.location.hash, ev);
 
@@ -506,8 +486,10 @@ export default defineComponent({
             if (!this.vp) return;
             alert(`${location.protocol}//${location.host}${location.pathname}${this.vp.generateHash()}`);
         },
+        */
     },
     computed: {
+        /*
         async videoPosition(): Promise<number> {
             const currentTime = await this.vp?.embedPlayer?.getCurrentTime() || 0;
             // if (!this.vp || !this.vp.embedPlayer || this.vp.embedPlayer.getCurrentTime() == null || !this.vp.vodLength) return 0;
@@ -538,6 +520,7 @@ export default defineComponent({
         twitchApiRequired(): boolean {
             return this.video_source == "twitch" || this.chat_source == "twitch";
         },
+        */
     },
     /*
 	watch: {
