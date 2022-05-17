@@ -60,6 +60,9 @@ hr {
 			width: 31% !important;
 		}
 	}
+	&.chat-side-left {
+		flex-direction: row-reverse;
+	}
 }
 
 
