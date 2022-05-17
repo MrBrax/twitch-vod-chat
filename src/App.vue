@@ -137,25 +137,37 @@
                             <label><input type="checkbox" name="ultrawide" v-model="store.settings.ultrawide" /> Ultrawide</label>
                         </div>
 
-                        <div>
-                            Chat align:
+                        <div class="control">
+                            <span>Chat align:</span>
                             <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" value="left" /> Left</label>
                             <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" value="right" /> Right</label>
                         </div>
 
-                        <div>
-                            Text align:
+                        <div class="control">
+                            <span>Text align:</span>
                             <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" value="left" /> Left</label>
                             <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" value="right" /> Right</label>
                         </div>
 
                         <hr />
-
-                        <label><input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatTop" /> Top</label>
-                        <label
-                            ><input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatBottom" style="direction: ltr" /> Bottom</label
-                        >
-                        <label><input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatWidth" /> Width</label>
+                        <div class="control">
+                            <label class="label label-range">
+                                <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatTop" />
+                                <span>Top ({{ store.settings.chatTop }}%)</span>
+                            </label>
+                        </div>
+                        <div class="control">
+                            <label class="label label-range">
+                                <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatBottom" style="direction: ltr" />
+                                <span>Bottom ({{ store.settings.chatBottom }}%)</span>
+                            </label>
+                        </div>
+                        <div class="control">
+                            <label class="label label-range">
+                                <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatWidth" />
+                                <span>Width ({{ store.settings.chatWidth }}%)</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -503,6 +515,16 @@ export default defineComponent({
         },
         chat_source() {
             console.log("chat_source", this.chat_source, this.input_chat);
+        },
+        "store.settings.ultrawide"(newVal) {
+            if (newVal) {
+                this.store.settings.chatOverlay = false;
+            }
+        },
+        "store.settings.chatOverlay"(newVal) {
+            if (newVal) {
+                this.store.settings.ultrawide = false;
+            }
         },
 	},
 });

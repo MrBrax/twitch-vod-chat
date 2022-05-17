@@ -1367,10 +1367,10 @@ export default defineComponent({
     computed: {
         commentsStyle(): Record<string, string> {
             return {
-                top: this.store.settings.chatTop + "%",
-                bottom: this.store.settings.chatBottom + "%",
-                width: this.store.settings.chatWidth + "%",
-                fontSize: this.store.settings.fontSize + "px",
+                top: `${this.store.settings.chatTop}%`,
+                bottom: `${this.store.settings.chatBottom}%`,
+                width: `${this.store.settings.chatWidth}%`,
+                fontSize: `${this.store.settings.fontSize}px`,
                 fontFamily: this.store.settings.fontName,
             };
         },
