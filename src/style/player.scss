@@ -1,6 +1,6 @@
 // player dimensions, hardcoded for now
 $width: 1280px;
-$height: 720px;
+// $height: 720px;
 $center: true;
 
 @import url('https://fonts.googleapis.com/css2?family=Inter&family=Open+Sans&display=swap');
@@ -40,11 +40,14 @@ hr {
 	background-color: #444;
 }
 
-#app {
+.app-main {
 	position: relative;
 	width: $width;
 	@if $center {
 		margin: 0 auto;
+	}
+	&.unlocked {
+		width: auto;
 	}
 }
 

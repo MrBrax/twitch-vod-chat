@@ -1,5 +1,8 @@
 <template>
-    <div>
+    <div :class="{
+        'app-main': true,
+        'unlocked': store.unlockedWidth,
+    }">
         <VODPlayer
             ref="vodplayer"
             @ready="playerReady"
@@ -173,30 +176,38 @@
                         <table>
                             <tr>
                                 <td>
-                                    <label><input type="checkbox" checked="checked" v-model="store.settings.chatStroke" /> Stroke + shadow</label>
+                                    <label><input type="checkbox" v-model="store.settings.chatStroke" /> Stroke + shadow</label>
                                 </td>
                                 <td>
-                                    <label><input type="checkbox" checked="checked" v-model="store.settings.emotesEnabled" /> Emotes</label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label><input type="checkbox" checked="checked" v-model="store.settings.timestampsEnabled" /> Timestamps</label>
-                                </td>
-                                <td>
-                                    <label><input type="checkbox" checked="checked" v-model="store.settings.badgesEnabled" /> Badges</label>
+                                    <label><input type="checkbox" v-model="store.settings.emotesEnabled" /> Emotes</label>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <label><input type="checkbox" checked="checked" v-model="store.settings.smallEmotes" /> Small emotes</label>
+                                    <label><input type="checkbox" v-model="store.settings.timestampsEnabled" /> Timestamps</label>
                                 </td>
                                 <td>
-                                    <label><input type="checkbox" checked="checked" v-model="store.settings.showVODComments" /> VOD comments</label>
+                                    <label><input type="checkbox" v-model="store.settings.badgesEnabled" /> Badges</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label><input type="checkbox" v-model="store.settings.smallEmotes" /> Small emotes</label>
+                                </td>
+                                <td>
+                                    <label><input type="checkbox" v-model="store.settings.showVODComments" /> VOD comments</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label><input type="checkbox" v-model="store.settings.chatTransition" /> Transitions</label>
+                                </td>
+                                <td>
+                                    <label><input type="checkbox" v-model="store.settings.chatSelectable" /> Selectable</label>
                                 </td>
                             </tr>
                         </table>
-                        <label><input type="range" min="10" max="42" v-model="store.settings.fontSize" /> Font size</label>
+                        <label><input type="range" min="10" max="42" v-model="store.settings.fontSize" /> Font size ({{ store.settings.fontSize }}px)</label>
                     </div>
                 </div>
             </div>
@@ -207,7 +218,14 @@
                     <button class="button" @click="saveSettings">Save settings</button>
                     <button class="button" @click="resetSettings">Reset settings</button>
                     <button class="button" @click="generateLink">Generate link</button>
-                    <button class="button" @click="store.minimal = true">Minimal mode</button>
+                    <button class="button" @click="store.minimal = true">
+                        <span class="icon">{{ store.minimal ? '✓' : '✗' }}</span>
+                        <span>Minimal mode</span>
+                    </button>
+                    <button class="button" @click="store.unlockedWidth = !store.unlockedWidth">
+                        <span class="icon">{{ store.unlockedWidth ? '✓' : '✗' }}</span>
+                        <span>Unlocked width</span>
+                    </button>
                     <span> Nothing is uploaded, everything runs in your browser. </span>
                 </div>
             </div>
@@ -475,35 +493,6 @@ export default defineComponent({
         },
     },
     computed: {
-        /*
-        async videoPosition(): Promise<number> {
-            const currentTime = await this.vp?.embedPlayer?.getCurrentTime() || 0;
-            // if (!this.vp || !this.vp.embedPlayer || this.vp.embedPlayer.getCurrentTime() == null || !this.vp.vodLength) return 0;
-            return currentTime / (this.vp?.vodLength || 0);
-        },
-        commentsStyle(): Record<string, string> {
-            if (!this.vp) return {};
-            return {
-                top: this.store.settings.chatTop + "%",
-                bottom: this.store.settings.chatBottom + "%",
-                width: this.store.settings.chatWidth + "%",
-                fontSize: this.store.settings.fontSize + "px",
-                fontFamily: this.store.settings.fontName,
-            };
-        },
-        commentsClass(): Record<string, boolean> {
-            if (!this.vp) return {};
-            return {
-                "align-left": this.store.settings.chatAlign == "left",
-                "align-right": this.store.settings.chatAlign == "right",
-                "text-left": this.store.settings.chatTextAlign == "left",
-                "text-right": this.store.settings.chatTextAlign == "right",
-                [this.store.settings.chatStyle]: true,
-                "has-stroke": this.store.settings.chatStroke,
-                "is-overlay": this.store.settings.chatOverlay,
-            };
-        },
-        */
         twitchApiRequired(): boolean {
             return this.video_source == "twitch" || this.chat_source == "twitch";
         },
