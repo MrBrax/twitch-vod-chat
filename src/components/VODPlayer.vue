@@ -5,6 +5,7 @@
         :class="{
             'viewer-container': true,
             ultrawide: store.settings.ultrawide,
+            ['chat-side-' + store.settings.chatAlign]: true,
         }"
     >
         <div ref="player" id="player">

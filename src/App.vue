@@ -136,14 +136,14 @@
 
                         <div>
                             Chat align:
-                            <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" /> Left</label>
-                            <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" /> Right</label>
+                            <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" value="left" /> Left</label>
+                            <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" value="right" /> Right</label>
                         </div>
 
                         <div>
                             Text align:
-                            <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" /> Left</label>
-                            <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" /> Right</label>
+                            <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" value="left" /> Left</label>
+                            <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" value="right" /> Right</label>
                         </div>
 
                         <hr />
