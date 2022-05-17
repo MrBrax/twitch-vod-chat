@@ -202,6 +202,8 @@ export default defineComponent({
 
         minimal_show: boolean;
 
+        demo: boolean;
+
     } {
         return {
             // videoLoaded: false,
@@ -265,6 +267,8 @@ export default defineComponent({
             shownComments: 0,
 
             minimal_show: false,
+
+            demo: true,
         };
     },
     mounted() {
@@ -347,10 +351,40 @@ export default defineComponent({
 
             this.shownComments = 0;
 
+            this.playerDemo();
+
+        },
+
+        playerDemo() {
+            if (!this.demo) return;
+
+            const lorem = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla ea dolor maxime voluptatem eaque ratione quasi, officia quam eos cum fuga expedita quo rem itaque delectus tenetur dolorem earum tempore!";
+            
+            const randomPhrase = lorem.split(" ").slice(0, Math.floor(Math.random() * lorem.split(" ").length)).join(" ");
+            const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+
+            this.commentQueue.push({
+                gid: "test1",
+                time: "00:00:00",
+                username: "braxen",
+                usernameColour: randomColor,
+                messageFragments: [{ type: "text", data: randomPhrase }],
+            } as TwitchCommentProxy);
+
+            // limit to 50 comments
+            if (this.commentQueue.length > this.commentLimit) {
+                this.commentQueue.shift();
+            }
+
+            setTimeout(() => {
+                this.playerDemo();
+            }, Math.floor(Math.random() * 5000));
         },
 
         loadVideo(source: VideoSource, input: HTMLInputElement): boolean {
             console.debug("video input", input, input.value, input.files);
+
+            this.demo = false;
 
             if (!input.value && !input.files) {
                 alert("No video selected");
@@ -458,6 +492,8 @@ export default defineComponent({
 
         async loadChat(source: ChatSource, input: HTMLInputElement): Promise<boolean> {
             console.debug("chat input", input, input.value, input.files);
+
+            this.demo = false;
 
             if (!input.value && !input.files) {
                 alert("No chat selected");
@@ -950,6 +986,8 @@ export default defineComponent({
                 return false;
             }
 
+            this.demo = false;
+
             /*
             this.embedPlayer.addEventListener("play", () => {
                 console.log("custom event play");
@@ -1345,6 +1383,7 @@ export default defineComponent({
                 [this.store.settings.chatStyle]: true,
                 "has-stroke": this.store.settings.chatStroke,
                 "is-overlay": this.store.settings.chatOverlay,
+                "selectable": this.store.settings.chatSelectable,
             };
         },
         videoLoaded(): boolean {

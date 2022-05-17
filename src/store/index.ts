@@ -4,10 +4,11 @@ import { defineStore } from "pinia";
 interface StoreType {
     minimal: boolean;
     automated: boolean;
+    unlockedWidth: boolean;
     settings: VODPlayerSettings;
 }
 
-const defaultSettings = {
+const defaultSettings: VODPlayerSettings = {
     twitchClientId: "",
     twitchSecret: "",
     twitchToken: "",
@@ -27,6 +28,8 @@ const defaultSettings = {
     fontSize: 12,
     fontName: "Inter",
     ultrawide: false,
+    chatSelectable: false,
+    chatTransition: true
 };
 
 export const useStore = defineStore("twitchVodChat", {
@@ -34,6 +37,7 @@ export const useStore = defineStore("twitchVodChat", {
         return {
             minimal: false,
             automated: false,
+            unlockedWidth: false,
             settings: { ...defaultSettings },
         };
     },

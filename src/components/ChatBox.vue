@@ -1,5 +1,5 @@
 <template>
-    <TransitionGroup name="comment" tag="div" id="comments" ref="comments" v-if="commentQueue" :class="commentsClass" :style="commentsStyle">
+    <TransitionGroup :name="store.settings.chatTransition ? 'comment' : ''" tag="div" id="comments" ref="comments" v-if="commentQueue" :class="commentsClass" :style="commentsStyle">
         <ChatMessage
             v-for="message in commentQueue"
             v-bind:message="message"
@@ -19,6 +19,10 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
     name: "ChatBox",
+    setup() {
+        const store = useStore();
+        return { store };
+    },
     props: {
         commentsClass: Object as () => Record<string, boolean>,
         commentsStyle: Object as () => Record<string, string>,

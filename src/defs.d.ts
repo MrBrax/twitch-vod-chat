@@ -222,6 +222,8 @@ export interface VODPlayerSettings {
     fontSize: number;
     fontName: string;
     ultrawide: boolean;
+    chatSelectable: boolean;
+    chatTransition: boolean;
 }
 
 export type VideoSource = "file" | "file_http" | "twitch" | "youtube";
