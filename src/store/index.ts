@@ -29,7 +29,9 @@ const defaultSettings: VODPlayerSettings = {
     fontName: "Inter",
     ultrawide: false,
     chatSelectable: false,
-    chatTransition: true
+    chatTransition: true,
+    chatPositionX: 0,
+    chatPositionY: 0,
 };
 
 export const useStore = defineStore("twitchVodChat", {

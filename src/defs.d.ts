@@ -224,6 +224,8 @@ export interface VODPlayerSettings {
     ultrawide: boolean;
     chatSelectable: boolean;
     chatTransition: boolean;
+    chatPositionX: number;
+    chatPositionY: number;
 }
 
 export type VideoSource = "file" | "file_http" | "twitch" | "youtube";

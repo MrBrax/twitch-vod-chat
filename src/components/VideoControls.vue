@@ -60,6 +60,7 @@ export default defineComponent({
             let rect = timeline.getBoundingClientRect(); // @todo: what
             let percent = (ev.clientX - rect.left) / timeline.clientWidth;
             let seconds = Math.round(duration * percent);
+            console.debug("seek", duration, percent, seconds);
             this.$emit('seek', seconds);
         },
     },

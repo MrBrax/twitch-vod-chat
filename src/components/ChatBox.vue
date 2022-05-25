@@ -1,5 +1,13 @@
 <template>
-    <TransitionGroup :name="store.settings.chatTransition ? 'comment' : ''" tag="div" id="comments" ref="comments" v-if="commentQueue" :class="commentsClass" :style="commentsStyle">
+    <TransitionGroup
+        :name="store.settings.chatTransition ? 'comment' : ''"
+        tag="div"
+        id="comments"
+        ref="comments"
+        v-if="commentQueue"
+        :class="commentsClass"
+        :style="commentsStyle"
+    >
         <ChatMessage
             v-for="message in commentQueue"
             v-bind:message="message"
@@ -28,6 +36,11 @@ export default defineComponent({
         commentsStyle: Object as () => Record<string, string>,
         commentQueue: Array as () => Array<TwitchCommentProxy>,
     },
+    data() {
+        return {
+            isDragging: false,
+        };
+    },
     components: {
         ChatMessage,
     },
@@ -40,6 +53,25 @@ export default defineComponent({
                 console.error("No comments element found");
             }
         },
+        /*
+        mouseDown(event: MouseEvent) {
+            this.isDragging = true;
+        },
+        mouseUp(event: MouseEvent) {
+            this.isDragging = false;
+        },
+        mouseMove(event: MouseEvent) {
+            if (this.isDragging) {
+                const comments = this.$el as HTMLDivElement;
+                const rect = comments.getBoundingClientRect();
+                const offset_y = event.clientY - rect.top;
+                const offset_x = event.clientX - rect.left;
+                this.store.settings.chatPositionX = offset_x;
+                this.store.settings.chatPositionY = offset_y;
+                console.log(`Chat position: ${offset_x}, ${offset_y}`);
+            }
+        },
+        */
     },
 });
 </script>
