@@ -40,7 +40,7 @@ export default defineComponent({
         // console.debug("VideoPlayerHTML5: mounted");
 
         const video = this.$refs.video as HTMLVideoElement;
-        video.addEventListener("canplay", () => {
+        video.addEventListener("loadedmetadata", () => {
             // console.debug("VideoPlayerHTML5: canplay");
             this.$emit("ready");
         });

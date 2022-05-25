@@ -16,6 +16,7 @@
                     ref="embedPlayer"
                     @pause="isPaused = true; isPlaying = false"
                     @play="isPaused = false; isPlaying = true"
+                    @ready="$emit('ready')"
                 />
                 <VideoPlayerTwitch
                     v-if="video_source === 'twitch'"
@@ -78,8 +79,6 @@
         </div>
     </div>
 
-    {{ videoLoadSource }}
-
     <video-controls
         :is-ready="isReady"
         :is-playing="isPlaying"
@@ -87,7 +86,8 @@
         @start-playback="startPlayback"
         @toggle-pause="togglePause"
         @fullscreen="fullscreen"
-        :video-duration="vodLength"
+        @reset-chat="resetChat"
+        :video-duration="videoDuration"
         :video-position="videoPosition"
         :video-current-time="videoCurrentTime"
         :minimal-show="minimal_show"
@@ -589,6 +589,17 @@ export default defineComponent({
                 console.error("loadChatFileFromURL json has no comments", json);
                 this.status_comments = `Error!`;
                 return false;
+            }
+
+            let tmp_id = 1;
+            json.comments.forEach((comment: TwitchComment) => {
+                if (!comment._id) {
+                    comment._id = `tmp-id-${tmp_id}`;
+                    tmp_id++;
+                }
+            });
+            if (tmp_id > 1) {
+                console.warn("loadChatFileFromURL: comments have no id");
             }
 
             chatLog = json;
@@ -1134,6 +1145,12 @@ export default defineComponent({
             for (let i = this.shownComments; i < this.commentAmount - this.shownComments; i++) {
                 const comment: TwitchComment = chatLog.comments[i];
 
+                if (this.malformed_comments > 100) {
+                    this.pause();
+                    alert("Too many malformed comments, something is wrong with the chat log.");
+                    return false;
+                }
+
                 /**
                  * Skip malformed comments, abort completely if too many found.
                  * Usually a case of formats changing.
@@ -1141,11 +1158,6 @@ export default defineComponent({
                 if (comment.content_offset_seconds === undefined || comment.content_offset_seconds < 0) {
                     console.error("Malformed comment", comment);
                     this.malformed_comments++;
-                    if (this.malformed_comments > 100) {
-                        this.pause();
-                        alert("Too many malformed comments, something is wrong with the chat log.");
-                        return false;
-                    }
                     continue;
                 }
 
@@ -1198,7 +1210,8 @@ export default defineComponent({
                 const commentObj = {} as TwitchCommentProxy;
 
                 if (!comment._id) {
-                    console.warn(`No id on comment #${i} @ (${comment.content_offset_seconds})`);
+                    console.warn(`No id on comment #${i} @ (${comment.content_offset_seconds})`, comment);
+                    this.malformed_comments++;
                 }
 
                 commentObj.gid = comment._id ?? `tmp${i}`;
@@ -1361,6 +1374,26 @@ export default defineComponent({
 
             console.log("generateHash", q);
             return `#${q.toString()}`;
+        },
+
+        resetChat(): void {
+            if (!chatLog) return;
+            console.debug("Reset chat");
+
+            // if (this.elements.comments) this.elements.comments.innerHTML = "";
+
+            console.debug(`Resetting queue, still ${this.commentQueue.length} comments.`);
+            this.commentQueue = [];
+
+            if (this.commentAmount) {
+                console.debug(`Reset ${this.commentAmount} comments`);
+                for (let i = 0; i < this.commentAmount; i++) {
+                    const comment = chatLog.comments[i];
+                    comment.displayed = false;
+                }
+            } else {
+                console.debug(`No comment queue`);
+            }
         }
 
     },
