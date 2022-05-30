@@ -106,6 +106,8 @@
                         <br />
                         <strong>Comments:</strong> <span>{{ vodplayer.status_comments }}</span>
                         <br />
+                        <strong>Delay:</strong> <span>{{ vodplayer.chatOffset }}</span>
+                        <br />
                         <strong>FFZ:</strong> <span>{{ vodplayer.emotes.ffz.status }}</span>
                         <br />
                         <strong>BTTV Channel:</strong> <span>{{ vodplayer.emotes.bttv_channel.status }}</span>
@@ -118,7 +120,7 @@
             </div>
 
             <div class="option-row">
-                <div v-if="!store.automated" class="option-group">
+                <div class="option-group">
                     <div class="option-title">Chat offset in seconds</div>
                     <div class="option-content">
                         <p class="help-text">
@@ -237,6 +239,10 @@
                     <button class="button" @click="store.unlockedWidth = !store.unlockedWidth">
                         <span class="icon">{{ store.unlockedWidth ? '✓' : '✗' }}</span>
                         <span>Unlocked width</span>
+                    </button>
+                    <button class="button" @click="store.automated = !store.automated" v-if="store.automated">
+                        <span class="icon">{{ store.automated ? '✓' : '✗' }}</span>
+                        <span>Automated</span>
                     </button>
                     <span> Nothing is uploaded, everything runs in your browser. </span>
                 </div>

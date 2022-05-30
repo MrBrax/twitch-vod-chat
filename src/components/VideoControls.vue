@@ -2,13 +2,15 @@
     <transition name="fade">
         <div :class="{ 'video-controls': true, minimal: store.minimal }" v-if="!store.minimal || minimalShow">
             <div id="timeline" ref="timeline" @click="seek" v-if="videoPosition">
-                <div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: videoPosition * 100 + '%' }"></div>
+                <div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: videoPosition * 100 + '%' }">
+                    <div class="timeline-seekbar-time">{{ formattedVideoTime }}</div>
+                </div>
                 <!--<div id="timeline-auto">{{ vp.videoCurrentTime }}</div>-->
             </div>
 
             <div class="video-controls-buttons">
                 <div class="video-controls-buttons-group" v-if="!isReady">
-                    <button class="pb-button is-submit" @click="$emit('startPlayback')" v-if="!isPlaying">Start playback</button>
+                    <button class="pb-button is-submit" @click="$emit('startPlayback')" v-if="!isPlaying" :disabled="!canStartPlayback">Start playback</button>
                 </div>
                 <div class="video-controls-buttons-group" v-else>
                     <button class="pb-button" @click="$emit('togglePause')">
@@ -43,6 +45,7 @@ export default defineComponent({
         isPaused: Boolean,
         isReady: Boolean,
         minimalShow: Boolean,
+        canStartPlayback: Boolean,
     },
     setup() {
         const store = useStore();
@@ -62,6 +65,18 @@ export default defineComponent({
             let seconds = Math.round(duration * percent);
             console.debug("seek", duration, percent, seconds);
             this.$emit('seek', seconds);
+        },
+    },
+    computed: {
+        formattedVideoTime(): string {
+            if (!this.videoCurrentTime) return "";
+            const hours = Math.floor(this.videoCurrentTime / 3600);
+            const minutes = Math.floor((this.videoCurrentTime % 3600) / 60);
+            const seconds = Math.floor(this.videoCurrentTime % 60);
+            const _hours = hours < 10 ? "0" + hours : hours;
+            const _minutes = minutes < 10 ? "0" + minutes : minutes;
+            const _seconds = seconds < 10 ? "0" + seconds : seconds;
+            return `${_hours}:${_minutes}:${_seconds}`;
         },
     },
 });

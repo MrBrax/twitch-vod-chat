@@ -214,6 +214,19 @@ hr {
 	width: 50%;
 	background: linear-gradient(#ad2020, #622);
 	height: 24px;
+	transition: width .5s ease;
+}
+
+.timeline-seekbar-time {
+	text-align: right;
+	color: #fff;
+	font-size: 90%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding-right: 4px;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
 }
 
 #timeline-markers {
@@ -292,6 +305,15 @@ hr {
 	&.is-submit {
 		background-color: #219c21;
 	}
+	&:disabled {
+		background-color: #6f6f6f;
+		color: #acacac;
+		border-color: #444;
+		cursor: not-allowed;
+		&:hover {
+			background-color: #6f6f6f;
+		}
+	}
 }
 
 .control {
@@ -339,3 +361,11 @@ p {
 	padding: 0;
 }
 */
+
+.debug {
+	display: none;
+	font-size: 80%;
+	color: #fff;
+	background-color: #980c0c;
+	padding: 1em;
+}
