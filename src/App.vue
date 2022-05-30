@@ -507,7 +507,11 @@ export default defineComponent({
         },
         playerReady() {
             if (!this.vodplayer) return;
-
+            this.vodplayer.embedPlayer?.getDuration().then((duration) => {
+                if (!this.vodplayer) return;
+                console.debug("player ready", duration);
+                this.vodplayer.status_video = `Ready, ${duration} seconds`;
+            });
         },
     },
     computed: {
