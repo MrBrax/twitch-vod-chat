@@ -120,7 +120,7 @@
             </div>
 
             <div class="option-row">
-                <div v-if="!store.automated" class="option-group">
+                <div class="option-group">
                     <div class="option-title">Chat offset in seconds</div>
                     <div class="option-content">
                         <p class="help-text">

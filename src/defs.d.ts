@@ -148,6 +148,10 @@ interface TwitchCommentDump {
 
 interface TwitchComment {
     // internal
+
+    /**
+     * @deprecated
+     */
     displayed: boolean;
 
     _id: string;

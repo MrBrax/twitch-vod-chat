@@ -41,22 +41,22 @@ export default defineComponent({
 
         const video = this.$refs.video as HTMLVideoElement;
         video.addEventListener("loadedmetadata", () => {
-            // console.debug("VideoPlayerHTML5: canplay");
+            console.debug("VideoPlayerHTML5: canplay");
             this.$emit("ready");
         });
 
         video.addEventListener("play", () => {
-            // console.debug("VideoPlayerHTML5: play");
+            console.debug("VideoPlayerHTML5: play");
             this.$emit("play");
         });
 
         video.addEventListener("pause", () => {
-            // console.debug("VideoPlayerHTML5: pause");
+            console.debug("VideoPlayerHTML5: pause");
             this.$emit("pause");
         });
 
         video.addEventListener("seeked", async () => {
-            // console.debug("VideoPlayerHTML5: seeked");
+            console.debug("VideoPlayerHTML5: seeked");
             this.$emit("seeked", await this.getCurrentTime());
         });
 

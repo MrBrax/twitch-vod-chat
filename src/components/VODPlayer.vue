@@ -44,32 +44,10 @@
                 </div>
             </div>
 
-            <!--
-            <div v-if="store.settings.chatOverlay" id="comments" :class="commentsClass" :style="commentsStyle">
-                <chat-message
-                    v-for="message in commentQueue"
-                    v-bind:message="message"
-                    v-bind:key="message.gid"
-                    :data-id="message.gid"
-                ></chat-message>
-            </div>
-            -->
             <ChatBox v-if="store.settings.chatOverlay" ref="chatbox" :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
-
             <!--<div id="osd">SYNC NOT STARTED</div>-->
         </div>
-        <!--
-        <div v-if="!store.settings.chatOverlay" id="comments" ref="comments" :class="commentsClass" :style="commentsStyle">
-            <chat-message
-                v-for="message in commentQueue"
-                v-bind:message="message"
-                v-bind:key="message.gid"
-                :data-id="message.gid"
-            ></chat-message>
-        </div>
-        -->
         <ChatBox v-if="!store.settings.chatOverlay" ref="chatbox" :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
-        <!--<video-controls :minimal="true" v-if="store.minimal" />-->
     </div>
 
     <div v-if="videoChapters && vodLength" id="timeline-markers">
@@ -80,6 +58,12 @@
             v-bind:style="{ left: ( ( marker.time / (vodLength ?? 0) ) * 100 ) + '%' }">
             {{ marker.label }}
         </div>
+    </div>
+
+    <div class="debug">
+        Comment queue: {{ commentQueue.length }}<br />
+        Comment amount: {{ commentAmount }}<br />
+        Shown comments: {{ shownComments }}<br />
     </div>
 
     <video-controls
@@ -95,6 +79,7 @@
         :video-current-time="videoCurrentTime"
         :minimal-show="minimal_show"
         @seek="seek"
+        :can-start-playback="canStartPlayback"
     />
 
 </template>
@@ -207,6 +192,8 @@ export default defineComponent({
 
         demo: boolean;
 
+        viewedComments: Record<string, boolean>;
+
     } {
         return {
             // videoLoaded: false,
@@ -272,6 +259,8 @@ export default defineComponent({
             minimal_show: false,
 
             demo: true,
+
+            viewedComments: {},
         };
     },
     mounted() {
@@ -289,7 +278,7 @@ export default defineComponent({
         }
     },
     unmounted() {
-        if (this.interval) clearInterval(this.interval);
+        this.stopTicker();
     },
     methods: {
         setupVodPlayer() {
@@ -1054,33 +1043,42 @@ export default defineComponent({
             return true;
         },
 
+        startTicker() {
+            this.interval = setInterval(this.tick.bind(this), this.tickDelay);
+        },
+
+        stopTicker() {
+            if (this.interval) clearInterval(this.interval);
+        },
+
         async play() {
             if (!this.embedPlayer) return;
             console.log("Play executed");
-            this.interval = setInterval(this.tick.bind(this), this.tickDelay);
+            this.startTicker();
             await this.embedPlayer.play();
         },
 
         async pause() {
             if (!this.embedPlayer) return;
             console.log("Pause executed");
-            if (this.interval) clearInterval(this.interval);
+            this.stopTicker();
             await this.embedPlayer.pause();
             this.malformed_comments = 0;
         },
 
-        async seek(seconds: number) {
+        async seek(seconds: number): Promise<void> {
             if (!this.embedPlayer) return;
-            console.log("Seek executed");
+            console.debug("Custom timeline seek executed");
             await this.embedPlayer.seek(seconds);
         },
 
-        async seeked(seconds: number) {
+        async seeked(seconds: number): Promise<void> {
             if (!this.embedPlayer) return;
-            console.log("Seeked event executed");
+            console.debug("Seeked event executed");
+            await this.resetChat();
         },
 
-        async togglePause() {
+        async togglePause(): Promise<void> {
             if (!this.embedPlayer) return;
             if (await this.embedPlayer.isPaused()) {
                 this.play();
@@ -1096,9 +1094,8 @@ export default defineComponent({
             console.debug("Applying options");
             console.log(`TickDelay: ${this.tickDelay}`);
             if (this.interval) {
-                console.debug("clear interval");
-                clearInterval(this.interval);
-                this.interval = setInterval(this.tick.bind(this), this.tickDelay);
+                this.stopTicker();
+                this.startTicker();
                 console.debug(`Interval set to ${this.tickDelay}`);
             }
         },
@@ -1149,10 +1146,14 @@ export default defineComponent({
                 console.error("No comments to display");
             }
 
+            if (this.shownComments > this.commentAmount) {
+                console.debug(`More comments than shown (${this.shownComments}/${this.commentAmount})`);
+            }
+
             /**
              * Loop through all comments to insert into queue
              */
-            for (let i = this.shownComments; i < this.commentAmount - this.shownComments; i++) {
+            for (let i = this.shownComments; i < this.commentAmount; i++) {
                 const comment: TwitchComment = chatLog.comments[i];
 
                 if (this.malformed_comments > 100) {
@@ -1174,7 +1175,7 @@ export default defineComponent({
                 /**
                  * Skip already displayed comments
                  */
-                if (comment.displayed) {
+                if (this.viewedComments[comment._id]) {
                     // console.debug(`skip comment, already displayed: ${i}`);
                     continue;
                 }
@@ -1207,7 +1208,8 @@ export default defineComponent({
                 const commentAge = offsetTime - comment.content_offset_seconds;
                 if (commentAge > 60 && !comment.displayed) {
                     // console.debug('skip comment, too old', i);
-                    comment.displayed = true;
+                    // comment.displayed = true;
+                    this.viewedComments[comment._id] = true;
                     continue;
                 }
 
@@ -1327,7 +1329,10 @@ export default defineComponent({
 
                 this.commentQueue.push(commentObj);
 
-                comment.displayed = true;
+                // comment.displayed = true;
+                this.viewedComments[comment._id] = true;
+
+                this.shownComments++;
             }
 
             /**
@@ -1337,6 +1342,10 @@ export default defineComponent({
                 this.commentQueue.splice(0, this.commentQueue.length - this.commentLimit);
                 // console.debug( 'Comments overflowing, delete', this.commentQueue.length, this.commentQueue.length - this.commentLimit );
             }
+
+            // if (Object.keys(this.viewedComments).length > this.commentLimit * 10) {
+            //     this.viewedComments = {};
+            // }
 
             /**
              * Scroll to bottom of chat window
@@ -1358,7 +1367,7 @@ export default defineComponent({
 
             // window.requestAnimationFrame(this.tick.bind(this));
 
-            this.shownComments++;
+            // this.shownComments++;
 
             return true;
         },
@@ -1386,15 +1395,44 @@ export default defineComponent({
             return `#${q.toString()}`;
         },
 
-        resetChat(): void {
+        async resetChat(): Promise<void> {
             if (!chatLog) return;
+            if (!this.embedPlayer) return;
             console.debug("Reset chat");
 
             // if (this.elements.comments) this.elements.comments.innerHTML = "";
 
+            this.stopTicker();
+
             console.debug(`Resetting queue, still ${this.commentQueue.length} comments.`);
             this.commentQueue = [];
 
+            console.debug(`Resetting viewed comments, ${this.shownComments} comments.`);
+            this.viewedComments = {};
+            this.shownComments = 0;
+
+            const currentTime = await this.embedPlayer.getCurrentTime();
+            if (!currentTime) return;
+
+            console.debug(`Resetting chat, current time: ${currentTime}`);
+            /*
+            for (let i = 0; i < this.commentAmount; i++) {
+                if (chatLog.comments[i].content_offset_seconds < currentTime) continue;
+                this.shownComments = i;
+                break;
+                // this.viewedComments[comment._id] = true;
+            }
+            */
+            const lastComment = chatLog.comments.findIndex((c) => c.content_offset_seconds >= currentTime);
+            if (lastComment > 0) {
+                this.shownComments = lastComment;
+            }
+
+            console.debug(`At ${currentTime} seconds, ${this.shownComments} comments viewed.`);
+
+            this.startTicker();
+
+            /*
             if (this.commentAmount) {
                 console.debug(`Reset ${this.commentAmount} comments`);
                 for (let i = 0; i < this.commentAmount; i++) {
@@ -1404,6 +1442,7 @@ export default defineComponent({
             } else {
                 console.debug(`No comment queue`);
             }
+            */
         }
 
     },
@@ -1431,7 +1470,13 @@ export default defineComponent({
         },
         videoLoaded(): boolean {
             return this.video_source !== null && this.videoLoadSource !== '';
-        }
+        },
+        canStartPlayback(): boolean {
+            return this.videoLoaded && this.chatLoaded;
+        },
+        // shownComments(): number {
+        //     return Object.keys(this.viewedComments).length;
+        // },
     },
     components: {
         ChatMessage,
