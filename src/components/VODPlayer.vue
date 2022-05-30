@@ -16,6 +16,7 @@
                     ref="embedPlayer"
                     @pause="isPaused = true; isPlaying = false"
                     @play="isPaused = false; isPlaying = true"
+                    @seeked="seeked"
                 />
                 <VideoPlayerTwitch
                     v-if="video_source === 'twitch'"
@@ -24,6 +25,7 @@
                     @pause="isPaused = true; isPlaying = false"
                     @play="isPaused = false; isPlaying = true"
                     @ready="$emit('ready')"
+                    @seeked="seeked"
                 />
                 <VideoPlayerYouTube
                     v-if="video_source === 'youtube'"
@@ -32,6 +34,7 @@
                     @pause="isPaused = true; isPlaying = false"
                     @play="isPaused = false; isPlaying = true"
                     @ready="$emit('ready')"
+                    @seeked="seeked"
                 />
             </div>
             <div v-else class="meme-bg">
@@ -556,6 +559,8 @@ export default defineComponent({
         async loadChatFileFromURL(url: string): Promise<boolean> {
             this.status_comments = `Loading...`;
 
+            await nextTick();
+
             let response;
             console.debug(`Load chat from url: ${url}`);
             try {
@@ -1057,6 +1062,11 @@ export default defineComponent({
             if (!this.embedPlayer) return;
             console.log("Seek executed");
             await this.embedPlayer.seek(seconds);
+        },
+
+        async seeked(seconds: number) {
+            if (!this.embedPlayer) return;
+            console.log("Seeked event executed");
         },
 
         async togglePause() {
