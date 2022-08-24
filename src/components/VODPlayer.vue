@@ -1296,7 +1296,7 @@ export default defineComponent({
                             let found_emote = false;
 
                             for (const provider in this.emotes) {
-                                if (this.emotes[provider].parseComment(word, commentObj)) {
+                                if (this.emotes[provider] && this.emotes[provider].parseComment && this.emotes[provider].parseComment(word, commentObj)) {
                                     found_emote = true;
                                 }
                             }
