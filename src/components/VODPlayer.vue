@@ -574,7 +574,7 @@ export default defineComponent({
             console.debug("Returned JSON for chat");
 
             if (!json.comments) {
-                if ((<any>json).chapters && (<any>json).segments && (<any>json).streamer_name) {
+                if ((json as any).chapters && (json as any).segments && (json as any).streamer_name) {
                     alert("Thanks for using TwitchAutomator! Seems like you selected the wrong file though.");
                     console.error("twitchautomator error", json);
                     this.status_comments = `Error!`;
@@ -1015,8 +1015,8 @@ export default defineComponent({
             // this.embedPlayer.seek(0);
             await this.embedPlayer.play();
 
-            const offsetInput = <HTMLInputElement>document.getElementById("optionOffset");
-            if (offsetInput) {
+            const offsetInput = document.getElementById("optionOffset");
+            if (offsetInput && offsetInput instanceof HTMLInputElement) {
                 console.debug(`Offset: ${offsetInput.value}`);
             }
 
@@ -1033,8 +1033,8 @@ export default defineComponent({
             this.play();
 
             // FIXME: vue
-            const button_start = <HTMLInputElement>document.getElementById("buttonStart");
-            if (button_start) button_start.disabled = true;
+            const button_start = document.getElementById("buttonStart");
+            if (button_start && button_start instanceof HTMLInputElement) button_start.disabled = true;
 
             this.isPlaying = true;
 
@@ -1295,9 +1295,11 @@ export default defineComponent({
                         for (const word of fragWords) {
                             let found_emote = false;
 
-                            for (const provider in this.emotes) {
-                                if (this.emotes[provider] && this.emotes[provider].parseComment && this.emotes[provider].parseComment(word, commentObj)) {
-                                    found_emote = true;
+                            if (this.emotes) {
+                                for (const provider in this.emotes) {
+                                    if (this.emotes[provider] && this.emotes[provider].parseComment && this.emotes[provider].parseComment(word, commentObj)) {
+                                        found_emote = true;
+                                    }
                                 }
                             }
 
