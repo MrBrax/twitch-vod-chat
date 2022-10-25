@@ -40,7 +40,7 @@
             </div>
             <div v-else class="meme-bg">
                 <div class="meme">
-                    <img src="https://i.imgur.com/YmMUr7z.gif" rel="noreferrer" />
+                    <!--<img src="https://i.imgur.com/YmMUr7z.gif" rel="noreferrer" />-->
                 </div>
             </div>
 

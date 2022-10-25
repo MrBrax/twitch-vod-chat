@@ -22,3 +22,11 @@ pnpm-debug.log*
 *.sln
 *.sw?
 .env.staging
+
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
