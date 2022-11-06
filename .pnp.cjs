@@ -28,6 +28,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         [null, {\
           "packageLocation": "./",\
           "packageDependencies": [\
+            ["@rollup/plugin-typescript", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:9.0.2"],\
             ["@types/youtube-player", "npm:5.5.6"],\
             ["@typescript-eslint/eslint-plugin", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:5.41.0"],\
             ["@typescript-eslint/parser", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:5.41.0"],\
@@ -42,6 +43,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["pinia", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:2.0.23"],\
             ["prettier", "npm:2.7.1"],\
             ["sass", "npm:1.55.0"],\
+            ["tslib", "npm:2.4.1"],\
             ["typescript", "patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=701156"],\
             ["vite", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:3.2.2"],\
             ["vue", "npm:3.2.41"],\
@@ -218,11 +220,77 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@rollup/plugin-typescript", [\
+        ["npm:9.0.2", {\
+          "packageLocation": "./.yarn/cache/@rollup-plugin-typescript-npm-9.0.2-603a009030-0b3a15e740.zip/node_modules/@rollup/plugin-typescript/",\
+          "packageDependencies": [\
+            ["@rollup/plugin-typescript", "npm:9.0.2"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:9.0.2", {\
+          "packageLocation": "./.yarn/__virtual__/@rollup-plugin-typescript-virtual-e90d298514/0/cache/@rollup-plugin-typescript-npm-9.0.2-603a009030-0b3a15e740.zip/node_modules/@rollup/plugin-typescript/",\
+          "packageDependencies": [\
+            ["@rollup/plugin-typescript", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:9.0.2"],\
+            ["@rollup/pluginutils", "virtual:e90d298514cb2cd0bf3cc1d6ad8db261e7521e5781dba127f246448d9b12bf9d9349b168b9f24b2a096864dbb8558f86a2a5a727980bc7dccce00d3d2a233ee6#npm:5.0.2"],\
+            ["@types/rollup", null],\
+            ["@types/tslib", null],\
+            ["@types/typescript", null],\
+            ["resolve", "patch:resolve@npm%3A1.22.1#~builtin<compat/resolve>::version=1.22.1&hash=07638b"],\
+            ["rollup", null],\
+            ["tslib", "npm:2.4.1"],\
+            ["typescript", "patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=701156"]\
+          ],\
+          "packagePeers": [\
+            "@types/rollup",\
+            "@types/tslib",\
+            "@types/typescript",\
+            "rollup",\
+            "tslib",\
+            "typescript"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@rollup/pluginutils", [\
+        ["npm:5.0.2", {\
+          "packageLocation": "./.yarn/cache/@rollup-pluginutils-npm-5.0.2-6aa9d0ddd4-edea15e543.zip/node_modules/@rollup/pluginutils/",\
+          "packageDependencies": [\
+            ["@rollup/pluginutils", "npm:5.0.2"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:e90d298514cb2cd0bf3cc1d6ad8db261e7521e5781dba127f246448d9b12bf9d9349b168b9f24b2a096864dbb8558f86a2a5a727980bc7dccce00d3d2a233ee6#npm:5.0.2", {\
+          "packageLocation": "./.yarn/__virtual__/@rollup-pluginutils-virtual-2344b7c4aa/0/cache/@rollup-pluginutils-npm-5.0.2-6aa9d0ddd4-edea15e543.zip/node_modules/@rollup/pluginutils/",\
+          "packageDependencies": [\
+            ["@rollup/pluginutils", "virtual:e90d298514cb2cd0bf3cc1d6ad8db261e7521e5781dba127f246448d9b12bf9d9349b168b9f24b2a096864dbb8558f86a2a5a727980bc7dccce00d3d2a233ee6#npm:5.0.2"],\
+            ["@types/estree", "npm:1.0.0"],\
+            ["@types/rollup", null],\
+            ["estree-walker", "npm:2.0.2"],\
+            ["picomatch", "npm:2.3.1"],\
+            ["rollup", null]\
+          ],\
+          "packagePeers": [\
+            "@types/rollup",\
+            "rollup"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@tootallnate/once", [\
         ["npm:2.0.0", {\
           "packageLocation": "./.yarn/cache/@tootallnate-once-npm-2.0.0-e36cf4f140-ad87447820.zip/node_modules/@tootallnate/once/",\
           "packageDependencies": [\
             ["@tootallnate/once", "npm:2.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@types/estree", [\
+        ["npm:1.0.0", {\
+          "packageLocation": "./.yarn/cache/@types-estree-npm-1.0.0-eddde5b631-910d97fb70.zip/node_modules/@types/estree/",\
+          "packageDependencies": [\
+            ["@types/estree", "npm:1.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -3350,6 +3418,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["tslib", "npm:2.4.0"]\
           ],\
           "linkType": "HARD"\
+        }],\
+        ["npm:2.4.1", {\
+          "packageLocation": "./.yarn/cache/tslib-npm-2.4.1-36f0ed04db-19480d6e03.zip/node_modules/tslib/",\
+          "packageDependencies": [\
+            ["tslib", "npm:2.4.1"]\
+          ],\
+          "linkType": "HARD"\
         }]\
       ]],\
       ["tsutils", [\
@@ -3394,6 +3469,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./",\
           "packageDependencies": [\
             ["twitch-vod-chat", "workspace:."],\
+            ["@rollup/plugin-typescript", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:9.0.2"],\
             ["@types/youtube-player", "npm:5.5.6"],\
             ["@typescript-eslint/eslint-plugin", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:5.41.0"],\
             ["@typescript-eslint/parser", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:5.41.0"],\
@@ -3408,6 +3484,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["pinia", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:2.0.23"],\
             ["prettier", "npm:2.7.1"],\
             ["sass", "npm:1.55.0"],\
+            ["tslib", "npm:2.4.1"],\
             ["typescript", "patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=701156"],\
             ["vite", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:3.2.2"],\
             ["vue", "npm:3.2.41"],\
