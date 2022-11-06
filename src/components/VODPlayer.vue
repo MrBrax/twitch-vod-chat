@@ -1044,11 +1044,11 @@ export default defineComponent({
         },
 
         startTicker() {
-            this.interval = setInterval(this.tick.bind(this), this.tickDelay);
+            this.interval = window.setInterval(this.tick.bind(this), this.tickDelay);
         },
 
         stopTicker() {
-            if (this.interval) clearInterval(this.interval);
+            if (this.interval) window.clearInterval(this.interval);
         },
 
         async play() {
