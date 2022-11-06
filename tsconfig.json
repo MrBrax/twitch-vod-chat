@@ -15,7 +15,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
       ]
     },
     "lib": [
@@ -27,8 +27,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/**/*.vue",
-    "lib/**/*.ts",
+    "src/**/*.vue"
   ],
   "exclude": [
     "node_modules"
