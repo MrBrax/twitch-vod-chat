@@ -252,7 +252,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "@vue/runtime-core";
+import { defineComponent, ref } from "vue";
 import { nextTick } from "vue";
 import ChatMessage from "./components/ChatMessage.vue";
 import VideoControls from "./components/VideoControls.vue";

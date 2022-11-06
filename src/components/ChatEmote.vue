@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { useStore } from "@/store";
-import { defineComponent } from "@vue/runtime-core";
+import { defineComponent } from "vue";
 import { ChatEmote } from "../defs";
 
 export default defineComponent({

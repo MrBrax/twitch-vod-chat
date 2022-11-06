@@ -85,7 +85,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, ref } from "@vue/runtime-core";
+import { defineComponent, nextTick, ref } from "vue";
 import ChatMessage from "@/components/ChatMessage.vue";
 import VideoControls from "@/components/VideoControls.vue";
 import { useStore } from "@/store";

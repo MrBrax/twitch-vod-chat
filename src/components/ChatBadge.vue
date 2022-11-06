@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "@vue/runtime-core";
+import { defineComponent } from "vue";
 import { TwitchUserBadgeProxy } from "../defs";
 
 export default defineComponent({
