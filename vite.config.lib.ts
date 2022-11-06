@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
+import typescript from '@rollup/plugin-typescript'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -24,6 +25,13 @@ export default defineConfig({
           vue: 'Vue',
         },
       },
+      plugins: [
+        typescript({
+          declaration: true,
+          declarationDir: 'dist-lib',
+          // allowSyntheticDefaultImports: true,
+        }),
+      ],
     },
     outDir: 'dist-lib',
   },
