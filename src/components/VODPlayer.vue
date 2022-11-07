@@ -373,12 +373,12 @@ export default defineComponent({
             }, Math.floor(Math.random() * 5000));
         },
 
-        loadVideo(source: VideoSource, input: HTMLInputElement): boolean {
-            console.debug("video input", input, input.value, input.files);
+        loadVideo(source: VideoSource, input: string | File | undefined): boolean {
+            console.debug("video input", source, input);
 
             this.demo = false;
 
-            if (!input.value && !input.files) {
+            if (!input) {
                 alert("No video selected");
                 return false;
             }
@@ -387,8 +387,8 @@ export default defineComponent({
 
             this.status_video = "Loading...";
 
-            if (input.files) {
-                const file = input.files[0];
+            if (source === "file" && input instanceof File) {
+                const file = input;
 
                 if (!file) {
                     alert("No video selected");
@@ -413,7 +413,7 @@ export default defineComponent({
                 this.status_video = "Local video loaded";
 
                 return true;
-            } else if (source == "file_http") {
+            } else if (source == "file_http" && typeof input === "string") {
 
                 /*
                 this.embedPlayer = new EmbedVideoPlayer(input.value);
@@ -422,12 +422,12 @@ export default defineComponent({
                 this.video_id = input.value;
                 */
 
-                this.video_id = input.value;
-                this.videoLoadSource = input.value;
+                this.video_id = input;
+                this.videoLoadSource = input;
 
                 return true;
-            } else if (source == "twitch") {
-                const twitch_id = input.value.match(/\/videos\/([0-9]+)/);
+            } else if (source == "twitch" && typeof input === "string") {
+                const twitch_id = input.match(/\/videos\/([0-9]+)/);
                 if (!twitch_id) {
                     alert("invalid twitch vod link");
                     return false;
@@ -442,9 +442,9 @@ export default defineComponent({
                 this.status_video = "Twitch video loaded";
 
                 return true;
-            } else if (source == "youtube") {
-                const regex_1 = input.value.match(/v=([A-Za-z0-9-_]+)/);
-                const regex_2 = input.value.match(/\.be\/([A-Za-z0-9-_]+)/);
+            } else if (source == "youtube" && typeof input === "string") {
+                const regex_1 = input.match(/v=([A-Za-z0-9-_]+)/);
+                const regex_2 = input.match(/\.be\/([A-Za-z0-9-_]+)/);
                 let youtube_id;
                 if (regex_1) youtube_id = regex_1[1];
                 if (regex_2) youtube_id = regex_2[1];
@@ -475,28 +475,28 @@ export default defineComponent({
 
             }
 
-            console.error("unhandled video input", source, input.files, input.value);
+            console.error("unhandled video input", source, input);
 
             this.status_video = "Unhandled video source";
 
             return false;
         },
 
-        async loadChat(source: ChatSource, input: HTMLInputElement): Promise<boolean> {
-            console.debug("chat input", input, input.value, input.files);
+        async loadChat(source: ChatSource, input: string | File | undefined): Promise<boolean> {
+            console.debug("chat input", source, input);
 
             this.demo = false;
 
-            if (!input.value && !input.files) {
+            if (!input) {
                 alert("No chat selected");
                 return false;
             }
 
             this.chat_source = source;
 
-            if (input.files) {
+            if (source === "file" && input instanceof File) {
                 console.debug("load chat file locally");
-                const file = input.files[0];
+                const file = input;
                 let fileURL;
 
                 try {
@@ -514,24 +514,24 @@ export default defineComponent({
                     return true;
                 }
                 return false;
-            } else if (source == "file_http") {
+            } else if (source == "file_http" && typeof input === "string") {
                 console.debug("load chat file from http");
-                const success = await this.loadChatFileFromURL(input.value);
+                const success = await this.loadChatFileFromURL(input);
                 if (success) {
-                    this.chat_id = input.value;
-                    this.chatLoadSource = input.value;
+                    this.chat_id = input;
+                    this.chatLoadSource = input;
                     return true;
                 }
                 return false;
-            } else if (source == "twitch") {
-                const twitch_id = input.value.match(/\/videos\/([0-9]+)/);
+            } else if (source == "twitch" && typeof input === "string") {
+                const twitch_id = input.match(/\/videos\/([0-9]+)/);
                 if (!twitch_id) {
                     alert("invalid twitch vod link");
                     return false;
                 }
                 this.loadTwitchChat(twitch_id[1]);
                 this.chat_id = twitch_id[1];
-                this.chatLoadSource = input.value;
+                this.chatLoadSource = input;
                 return true;
             }
 
