@@ -26,6 +26,14 @@ export default class BTTVGlobalEmoteProvider extends BaseEmoteProvider {
         if (!json2 || json2.length == 0) {
             console.error("failed to load bttvglobal", json2);
             this.status = "Failed to load";
+            this.disabled = true;
+            return false;
+        }
+
+        if (response.status > 299) {
+            console.error("failed to load bttvglobal", json2);
+            this.status = `Error: ${response.status}`;
+            this.disabled = true;
             return false;
         }
 
@@ -38,7 +46,7 @@ export default class BTTVGlobalEmoteProvider extends BaseEmoteProvider {
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
-        if (!this.emotes) return false;
+        if (!this.emotes || this.disabled) return false;
         for (const fEmo of this.emotes) {
             if (fEmo.code == word) {
                 // this.debug(`Insert emote "${word}" from BTTV Global into comment #${commentObj.gid}`);

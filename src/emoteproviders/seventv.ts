@@ -55,18 +55,21 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
         if ("error" in json2) {
             console.error("failed to load seventv", json2);
             this.status = `Error: ${json2.error}`;
+            this.disabled = true;
             return false;
         }
 
         if (response.status > 299) {
             console.error("failed to load seventv", json2);
             this.status = `Error: ${response.status}`;
+            this.disabled = true;
             return false;
         }
 
         if (json2.length <= 0) {
             console.error("failed to load seventv, no data", json2);
             this.status = "No emotes";
+            this.disabled = true;
             return false;
         }
 
@@ -79,7 +82,7 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
-        if (!this.emotes || !Array.isArray(this.emotes)) return false;
+        if (!this.emotes || !Array.isArray(this.emotes) || this.disabled) return false;
         for (const fEmo of this.emotes) {
             if (fEmo.name == word) {
                 if (!fEmo.urls || fEmo.urls.length == 0) {
