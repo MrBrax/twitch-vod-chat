@@ -35,7 +35,11 @@ interface Emoticon {
 }
 
 interface SevenTVError {
-    message: string;
+    // message: string;
+    status_code?: number;
+    status?: string;
+    error: string;
+    error_code?: number;
 }
 
 export default class SevenTVEmoteProvider extends BaseEmoteProvider {
@@ -48,9 +52,15 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
         const json2: Emoticon[] | SevenTVError = await response.json();
 
         // server error return message
-        if ("message" in json2) {
+        if ("error" in json2) {
             console.error("failed to load seventv", json2);
-            this.status = `Error: ${json2.message}`;
+            this.status = `Error: ${json2.error}`;
+            return false;
+        }
+
+        if (response.status > 299) {
+            console.error("failed to load seventv", json2);
+            this.status = `Error: ${response.status}`;
             return false;
         }
 
@@ -69,7 +79,7 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
-        if (!this.emotes) return false;
+        if (!this.emotes || !Array.isArray(this.emotes)) return false;
         for (const fEmo of this.emotes) {
             if (fEmo.name == word) {
                 if (!fEmo.urls || fEmo.urls.length == 0) {
