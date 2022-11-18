@@ -42,6 +42,14 @@ export default class BTTVChannelEmoteProvider extends BaseEmoteProvider {
         if (!json2 || json2.channelEmotes.length == 0) {
             console.error("failed to load bttvchannel", json2);
             this.status = "Failed to load";
+            this.disabled = true;
+            return false;
+        }
+
+        if (response.status > 299) {
+            console.error("failed to load bttvchannel", json2);
+            this.status = `Error: ${response.status}`;
+            this.disabled = true;
             return false;
         }
 
@@ -54,7 +62,7 @@ export default class BTTVChannelEmoteProvider extends BaseEmoteProvider {
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
-        if (!this.emotes) return false;
+        if (!this.emotes || this.disabled) return false;
         if (this.emotes.sharedEmotes) {
             for (const fEmo of this.emotes.sharedEmotes) {
                 if (fEmo.code == word) {
