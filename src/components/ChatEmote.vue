@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { useStore } from "@/store";
+import { store } from "@/store";
 import { defineComponent } from "vue";
 import { ChatEmote } from "../defs";
 
@@ -13,7 +13,6 @@ export default defineComponent({
         emote: Object as () => ChatEmote,
     },
     setup() {
-        const store = useStore();
         return { store };
     },
     computed: {

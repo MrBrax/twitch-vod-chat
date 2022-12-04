@@ -21,14 +21,13 @@
 import ChatEmote from "./ChatEmote.vue";
 import ChatBadge from "./ChatBadge.vue";
 import { TwitchCommentProxy } from "../defs";
-import { useStore } from "@/store";
+import { store } from "@/store";
 import ChatMessage from "./ChatMessage.vue";
 import { defineComponent } from "vue";
 
 export default defineComponent({
     name: "ChatBox",
     setup() {
-        const store = useStore();
         return { store };
     },
     props: {
@@ -49,6 +48,7 @@ export default defineComponent({
             const comments = this.$refs.comments as HTMLDivElement;
             if (comments) {
                 comments.scrollTop = comments.scrollHeight;
+                // console.debug("Scrolled to bottom", comments.scrollTop);
             } else {
                 console.error("No comments element found");
             }
@@ -75,3 +75,8 @@ export default defineComponent({
     },
 });
 </script>
+
+<style lang="scss" scoped>
+@import "../style/animations";
+@import "../style/comments";
+</style>

@@ -2,8 +2,8 @@
     <div
         id="viewer"
         ref="viewer"
+        class="viewer-container"
         :class="{
-            'viewer-container': true,
             ultrawide: store.settings.ultrawide,
             ['chat-side-' + store.settings.chatAlign]: true,
         }"
@@ -88,7 +88,7 @@
 import { defineComponent, nextTick, ref } from "vue";
 import ChatMessage from "@/components/ChatMessage.vue";
 import VideoControls from "@/components/VideoControls.vue";
-import { useStore } from "@/store";
+import { store } from "@/store";
 import { ChatSource, TwitchComment, TwitchCommentDump, TwitchCommentProxy, TwitchUserBadge, TwitchUserBadgeProxy, VideoSource } from "@/defs";
 import BaseEmoteProvider from "@/emoteproviders/base";
 import BTTVChannelEmoteProvider from "@/emoteproviders/bttv_channel";
@@ -108,7 +108,6 @@ export default defineComponent({
     name: "VODPlayer",
     emits: ["ready"],
     setup() {
-        const store = useStore();
         const embedPlayer = ref<InstanceType<typeof VideoPlayerHTML5>>();
         const chatbox = ref<InstanceType<typeof ChatBox>>();
         return { store, embedPlayer, chatbox };
@@ -307,7 +306,7 @@ export default defineComponent({
             } as TwitchCommentProxy);
 
             this.commentQueue.push({
-                gid: "test1",
+                gid: "test2",
                 time: "00:00:00",
                 username: "braxen",
                 usernameColour: "#fff000",
@@ -318,7 +317,7 @@ export default defineComponent({
              * Test comment
              */
             this.commentQueue.push({
-                gid: "test2",
+                gid: "test3",
                 time: "00:00:00",
                 username: "helper",
                 usernameColour: "#ffff00",
@@ -343,7 +342,7 @@ export default defineComponent({
 
             this.shownComments = 0;
 
-            this.playerDemo();
+            // this.playerDemo();
 
         },
 
@@ -351,12 +350,12 @@ export default defineComponent({
             if (!this.demo) return;
 
             const lorem = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla ea dolor maxime voluptatem eaque ratione quasi, officia quam eos cum fuga expedita quo rem itaque delectus tenetur dolorem earum tempore!";
-            
+
             const randomPhrase = lorem.split(" ").slice(0, Math.floor(Math.random() * lorem.split(" ").length)).join(" ");
             const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 
             this.commentQueue.push({
-                gid: "test1",
+                gid: "test" + Math.floor(Math.random() * 100000),
                 time: "00:00:00",
                 username: "braxen",
                 usernameColour: randomColor,
@@ -1358,9 +1357,13 @@ export default defineComponent({
             //     commentsDiv.scrollTop = commentsDiv.scrollHeight;
             // }
             if (this.chatbox) {
-                setTimeout(() => {
-                    if (this.chatbox) this.chatbox.scrollToBottom();
-                }, 10);
+                nextTick(() => {
+                    if (this.chatbox){ 
+                        this.chatbox.scrollToBottom();
+                    } else {
+                        console.warn('chatbox is null');
+                    }
+                });
             }
 
             // console.debug("Tick finished", Date.now() - tickStart, "Previous tick", Date.now() - this.previousTick);
@@ -1501,3 +1504,92 @@ export default defineComponent({
     },
 });
 </script>
+
+<style lang="scss" scoped>
+
+.viewer-container {
+	position: relative;
+	display: flex;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	&.ultrawide {
+		aspect-ratio: 21 / 9;
+		#comments {
+			width: 31% !important;
+		}
+	}
+	&.chat-side-left {
+		flex-direction: row-reverse;
+	}
+}
+
+#player {
+
+	width: 100%;
+	// height: $height;
+
+	aspect-ratio: 16 / 9;
+
+	position: relative;
+
+	overflow: hidden;
+
+	height: fit-content; // ?
+
+	margin: auto;
+
+	// pointer-events: none; // smart?
+
+}
+
+#player:fullscreen {
+	width: 100%;
+	height: 100%;
+}
+
+#video {
+	width: 100%;
+	height: 100%;
+	/* background: #3D4470; */
+	background: #f0f;
+}
+
+#video_container {
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	// height: 100%;
+	video {
+		width: 100%;
+		height: 100%;
+	}
+	iframe {
+		pointer-events: none; // maybe
+	}
+}
+
+#osd {
+	display: none;
+	position: absolute;
+	left: 640px;
+	top: 360px;
+	background: #f00;
+	color: #fff;
+	padding: 10px;
+	font-family: Consolas, monospace;
+}
+
+#osd.running {
+	background: #00f;
+}
+
+
+.debug {
+	display: none;
+	font-size: 80%;
+	color: #fff;
+	background-color: #980c0c;
+	padding: 1em;
+}
+
+</style>

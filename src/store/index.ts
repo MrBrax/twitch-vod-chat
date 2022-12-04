@@ -1,11 +1,14 @@
 import { VODPlayerSettings } from "@/defs";
-import { defineStore } from "pinia";
+import { reactive, Ref, ref, watch } from "vue";
 
 interface StoreType {
     minimal: boolean;
     automated: boolean;
     unlockedWidth: boolean;
     settings: VODPlayerSettings;
+    saveSettings: () => void;
+    loadSettings: () => void;
+    resetSettings: () => void;
 }
 
 const defaultSettings: VODPlayerSettings = {
@@ -34,6 +37,7 @@ const defaultSettings: VODPlayerSettings = {
     chatPositionY: 0,
 };
 
+/*
 export const useStore = defineStore("twitchVodChat", {
     state: function (): StoreType {
         return {
@@ -62,5 +66,76 @@ export const useStore = defineStore("twitchVodChat", {
         resetSettings() {
             this.settings = { ...defaultSettings };
         },
+    },
+});
+*/
+
+/*
+export function useTVC() {
+
+    const minimal = ref<boolean>(false);
+    const automated = ref<boolean>(false);
+    const unlockedWidth = ref<boolean>(false);
+    const settings = ref<VODPlayerSettings>({ ...defaultSettings });
+
+    function saveSettings(): void {
+        localStorage.setItem("settings", JSON.stringify(settings.value));
+        console.debug("Saved settings");
+        alert("Saved settings");
+    }
+
+    function loadSettings(): void {
+        const v = localStorage.getItem("settings");
+        if (v) {
+            settings.value = JSON.parse(v);
+            console.debug("Loaded settings");
+        } else {
+            console.debug("No settings to load");
+        }
+        console.debug("Load settings", settings.value);
+    }
+
+    function resetSettings(): void {
+        settings.value = { ...defaultSettings };
+    }
+
+    watch(() => settings, (v) => {
+        console.debug("Settings changed", v);
+    });
+
+    return {
+        minimal,
+        automated,
+        unlockedWidth,
+        settings,
+        saveSettings,
+        loadSettings,
+        resetSettings,
+    };
+}
+*/
+
+export const store = reactive<StoreType>({
+    minimal: false,
+    automated: false,
+    unlockedWidth: false,
+    settings: { ...defaultSettings },
+    saveSettings() {
+        localStorage.setItem("settings", JSON.stringify(this.settings));
+        console.debug("Saved settings");
+        alert("Saved settings");
+    },
+    loadSettings() {
+        const v = localStorage.getItem("settings");
+        if (v) {
+            this.settings = JSON.parse(v);
+            console.debug("Loaded settings");
+        } else {
+            console.debug("No settings to load");
+        }
+        console.debug("Load settings", this.settings);
+    },
+    resetSettings() {
+        this.settings = { ...defaultSettings };
     },
 });

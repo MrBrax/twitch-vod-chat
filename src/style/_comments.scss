@@ -64,55 +64,6 @@
 		background: rgba(0, 0, 0, .8);
 	}
 
-	.comment {
-		// min-height: 20px;
-		// flex-shrink: 0;
-
-		// broken with vue, no animations supported
-		// animation: slide 0.3s ease-out;
-		// overflow: hidden;
-
-		word-wrap: break-word;
-
-		.time {
-			color: #aaa;
-			margin-right: 3px;
-		}
-
-		.badge {
-			display: inline-block;
-			margin: 0 3px;
-		}
-
-		.name {
-			font-weight: 700;
-			color: #ccc;
-			padding-right: 0.3em;
-		}
-
-		// dirty hack
-		.body {
-			span {
-				padding-right: 0.1em;
-			}
-		}
-
-		.emote {
-
-			max-height: 32px;
-
-			&.is-small {
-				max-height: 18px;
-			}
-
-		}
-
-		img {
-			vertical-align: middle;
-		}
-
-	}
-
 	&.has-stroke .comment {
 		text-shadow:
 			-1px -1px 0 #111,
@@ -156,6 +107,5 @@
 			pointer-events: auto;
 		}
 	}
-
 
 }

@@ -39,7 +39,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-deprecation", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:1.3.2"],\
             ["eslint-plugin-prettier", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:4.2.1"],\
             ["eslint-plugin-vue", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:9.6.0"],\
-            ["pinia", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:2.0.23"],\
             ["prettier", "npm:2.7.1"],\
             ["sass", "npm:1.55.0"],\
             ["typescript", "patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=701156"],\
@@ -827,15 +826,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@vue/compiler-ssr", "npm:3.2.41"],\
             ["@vue/compiler-dom", "npm:3.2.41"],\
             ["@vue/shared", "npm:3.2.41"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
-      ["@vue/devtools-api", [\
-        ["npm:6.4.5", {\
-          "packageLocation": "./.yarn/cache/@vue-devtools-api-npm-6.4.5-bcd56e5fec-40c5adc878.zip/node_modules/@vue/devtools-api/",\
-          "packageDependencies": [\
-            ["@vue/devtools-api", "npm:6.4.5"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -3104,38 +3094,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["pinia", [\
-        ["npm:2.0.23", {\
-          "packageLocation": "./.yarn/cache/pinia-npm-2.0.23-17bda5a8d2-004c76d80b.zip/node_modules/pinia/",\
-          "packageDependencies": [\
-            ["pinia", "npm:2.0.23"]\
-          ],\
-          "linkType": "SOFT"\
-        }],\
-        ["virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:2.0.23", {\
-          "packageLocation": "./.yarn/__virtual__/pinia-virtual-9ea1614b4c/0/cache/pinia-npm-2.0.23-17bda5a8d2-004c76d80b.zip/node_modules/pinia/",\
-          "packageDependencies": [\
-            ["pinia", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:2.0.23"],\
-            ["@types/typescript", null],\
-            ["@types/vue", null],\
-            ["@types/vue__composition-api", null],\
-            ["@vue/composition-api", null],\
-            ["@vue/devtools-api", "npm:6.4.5"],\
-            ["typescript", "patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=701156"],\
-            ["vue", "npm:3.2.41"],\
-            ["vue-demi", "virtual:9ea1614b4c9312399197aff80da4b6792498a76a0b7c285b239f665140c8c881f435ae1e0d5c38e78bbd65daecbb6f1c5cf815ff5a8b9aa19d66ba7d483009de#npm:0.12.5"]\
-          ],\
-          "packagePeers": [\
-            "@types/typescript",\
-            "@types/vue",\
-            "@types/vue__composition-api",\
-            "@vue/composition-api",\
-            "typescript",\
-            "vue"\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
       ["postcss", [\
         ["npm:8.4.13", {\
           "packageLocation": "./.yarn/cache/postcss-npm-8.4.13-bf011159f8-514fb35528.zip/node_modules/postcss/",\
@@ -3729,7 +3687,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-deprecation", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:1.3.2"],\
             ["eslint-plugin-prettier", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:4.2.1"],\
             ["eslint-plugin-vue", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:9.6.0"],\
-            ["pinia", "virtual:17d20f81f7cece98f5af96136b8c0090123ed99c4647cb1649606a21bf50096b6e451f70e24a1d2a966c65f12a09d567ad98b2b0a39b21e67de62e76d18ed826#npm:2.0.23"],\
             ["prettier", "npm:2.7.1"],\
             ["sass", "npm:1.55.0"],\
             ["typescript", "patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=701156"],\
@@ -3915,32 +3872,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@vue/runtime-dom", "npm:3.2.41"],\
             ["@vue/server-renderer", "virtual:cb73e74f4c1b0ba978d3dfaeb45c154a44c450eeff441ebc96c4637b74b80dff4418264a1180cde79b28cd7cc975e9dc40e6b868c7a505d89d0f50cff6b63090#npm:3.2.41"],\
             ["@vue/shared", "npm:3.2.41"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
-      ["vue-demi", [\
-        ["npm:0.12.5", {\
-          "packageLocation": "./.yarn/unplugged/vue-demi-virtual-ea87b03254/node_modules/vue-demi/",\
-          "packageDependencies": [\
-            ["vue-demi", "npm:0.12.5"]\
-          ],\
-          "linkType": "SOFT"\
-        }],\
-        ["virtual:9ea1614b4c9312399197aff80da4b6792498a76a0b7c285b239f665140c8c881f435ae1e0d5c38e78bbd65daecbb6f1c5cf815ff5a8b9aa19d66ba7d483009de#npm:0.12.5", {\
-          "packageLocation": "./.yarn/unplugged/vue-demi-virtual-ea87b03254/node_modules/vue-demi/",\
-          "packageDependencies": [\
-            ["vue-demi", "virtual:9ea1614b4c9312399197aff80da4b6792498a76a0b7c285b239f665140c8c881f435ae1e0d5c38e78bbd65daecbb6f1c5cf815ff5a8b9aa19d66ba7d483009de#npm:0.12.5"],\
-            ["@types/vue", null],\
-            ["@types/vue__composition-api", null],\
-            ["@vue/composition-api", null],\
-            ["vue", "npm:3.2.41"]\
-          ],\
-          "packagePeers": [\
-            "@types/vue",\
-            "@types/vue__composition-api",\
-            "@vue/composition-api",\
-            "vue"\
           ],\
           "linkType": "HARD"\
         }]\
