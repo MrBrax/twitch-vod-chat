@@ -4,8 +4,8 @@
         ref="viewer"
         :class="{
             'viewer-container': true,
-            ultrawide: store.settings.ultrawide,
-            ['chat-side-' + store.settings.chatAlign]: true,
+            ultrawide: store.settings.value.ultrawide,
+            ['chat-side-' + store.settings.value.chatAlign]: true,
         }"
     >
         <div ref="player" id="player">
@@ -44,10 +44,10 @@
                 </div>
             </div>
 
-            <ChatBox v-if="store.settings.chatOverlay" ref="chatbox" :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
+            <ChatBox v-if="store.settings.value.chatOverlay" ref="chatbox" :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
             <!--<div id="osd">SYNC NOT STARTED</div>-->
         </div>
-        <ChatBox v-if="!store.settings.chatOverlay" ref="chatbox" :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
+        <ChatBox v-if="!store.settings.value.chatOverlay" ref="chatbox" :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
     </div>
 
     <div v-if="videoChapters && vodLength" id="timeline-markers">
@@ -88,7 +88,7 @@
 import { defineComponent, nextTick, ref } from "vue";
 import ChatMessage from "@/components/ChatMessage.vue";
 import VideoControls from "@/components/VideoControls.vue";
-import { useStore } from "@/store";
+import { useTVC } from "@/store";
 import { ChatSource, TwitchComment, TwitchCommentDump, TwitchCommentProxy, TwitchUserBadge, TwitchUserBadgeProxy, VideoSource } from "@/defs";
 import BaseEmoteProvider from "@/emoteproviders/base";
 import BTTVChannelEmoteProvider from "@/emoteproviders/bttv_channel";
@@ -108,7 +108,7 @@ export default defineComponent({
     name: "VODPlayer",
     emits: ["ready"],
     setup() {
-        const store = useStore();
+        const store = useTVC();
         const embedPlayer = ref<InstanceType<typeof VideoPlayerHTML5>>();
         const chatbox = ref<InstanceType<typeof ChatBox>>();
         return { store, embedPlayer, chatbox };
@@ -686,7 +686,7 @@ export default defineComponent({
             this.fetchBadges();
             this.fetchEmotes();
 
-            if (this.store.settings.twitchClientId) {
+            if (this.store.settings.value.twitchClientId) {
                 /*
                 this.fetchMarkerInfo().then( (json) => {
                     console.log("marker info", json);
@@ -822,8 +822,8 @@ export default defineComponent({
         async fetchVideoInfo(): Promise<any> {
             return fetch(`https://api.twitch.tv/helix/videos?id=${this.videoLoadSource}`, {
                 headers: {
-                    "Client-ID": this.store.settings.twitchClientId,
-                    Authorization: "Bearer " + this.store.settings.twitchToken,
+                    "Client-ID": this.store.settings.value.twitchClientId,
+                    Authorization: "Bearer " + this.store.settings.value.twitchToken,
                 },
             }).then((resp) => {
                 return resp.json();
@@ -947,7 +947,7 @@ export default defineComponent({
 
             return fetch(url, {
                 headers: {
-                    "Client-ID": this.store.settings.twitchClientId,
+                    "Client-ID": this.store.settings.value.twitchClientId,
                     Accept: "application/vnd.twitchtv.v5+json",
                 },
             }).then((resp) => {
@@ -1188,7 +1188,7 @@ export default defineComponent({
                 /**
                  * Skip VOD (archive) comments
                  */
-                if (this.store.settings.showVODComments && comment.source && comment.source == "comment") {
+                if (this.store.settings.value.showVODComments && comment.source && comment.source == "comment") {
                     console.debug(`skip comment, vod comment: ${i}`);
                     continue; // skip vod comments?
                 }
@@ -1275,7 +1275,7 @@ export default defineComponent({
                 commentObj.messageFragments = [];
                 for (const f of comment.message.fragments) {
                     // official twitch emote
-                    if (f.emoticon && this.store.settings.emotesEnabled) {
+                    if (f.emoticon && this.store.settings.value.emotesEnabled) {
                         // console.debug(`Insert emote "${f.text}" from Twitch into comment #${commentObj.gid}`);
                         commentObj.messageFragments.push({
                             type: "emote",
@@ -1451,23 +1451,23 @@ export default defineComponent({
     computed: {
         commentsStyle(): Record<string, string> {
             return {
-                top: `${this.store.settings.chatTop}%`,
-                bottom: `${this.store.settings.chatBottom}%`,
-                width: `${this.store.settings.chatWidth}%`,
-                fontSize: `${this.store.settings.fontSize}px`,
-                fontFamily: this.store.settings.fontName,
+                top: `${this.store.settings.value.chatTop}%`,
+                bottom: `${this.store.settings.value.chatBottom}%`,
+                width: `${this.store.settings.value.chatWidth}%`,
+                fontSize: `${this.store.settings.value.fontSize}px`,
+                fontFamily: this.store.settings.value.fontName,
             };
         },
         commentsClass(): Record<string, boolean> {
             return {
-                "align-left": this.store.settings.chatAlign == "left",
-                "align-right": this.store.settings.chatAlign == "right",
-                "text-left": this.store.settings.chatTextAlign == "left",
-                "text-right": this.store.settings.chatTextAlign == "right",
-                [this.store.settings.chatStyle]: true,
-                "has-stroke": this.store.settings.chatStroke,
-                "is-overlay": this.store.settings.chatOverlay,
-                "selectable": this.store.settings.chatSelectable,
+                "align-left": this.store.settings.value.chatAlign == "left",
+                "align-right": this.store.settings.value.chatAlign == "right",
+                "text-left": this.store.settings.value.chatTextAlign == "left",
+                "text-right": this.store.settings.value.chatTextAlign == "right",
+                [this.store.settings.value.chatStyle]: true,
+                "has-stroke": this.store.settings.value.chatStroke,
+                "is-overlay": this.store.settings.value.chatOverlay,
+                "selectable": this.store.settings.value.chatSelectable,
             };
         },
         videoLoaded(): boolean {

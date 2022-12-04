@@ -1,6 +1,6 @@
 <template>
     <transition name="fade">
-        <div :class="{ 'video-controls': true, minimal: store.minimal }" v-if="!store.minimal || minimalShow">
+        <div :class="{ 'video-controls': true, minimal: store.minimal.value }" v-if="!store.minimal.value || minimalShow">
             <div id="timeline" ref="timeline" @click="seek" v-if="videoPosition">
                 <div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: videoPosition * 100 + '%' }">
                     <div class="timeline-seekbar-time">{{ formattedVideoTime }}</div>
@@ -19,10 +19,10 @@
                     <button class="pb-button" @click="$emit('fullscreen')">Fullscreen</button>
                     <button class="pb-button" @click="$emit('resetChat')">Reset chat</button>
                 </div>
-                <div class="video-controls-buttons-group" v-if="store.minimal">
-                    <label><input type="checkbox" name="comments-overlay" v-model="store.settings.chatOverlay" /> Overlay</label>
-                    <label><input type="checkbox" name="ultrawide" v-model="store.settings.ultrawide" /> Ultrawide</label>
-                    <label><input type="checkbox" name="minimal" v-model="store.minimal" /> Minimal</label>
+                <div class="video-controls-buttons-group" v-if="store.minimal.value">
+                    <label><input type="checkbox" name="comments-overlay" v-model="store.settings.value.chatOverlay" /> Overlay</label>
+                    <label><input type="checkbox" name="ultrawide" v-model="store.settings.value.ultrawide" /> Ultrawide</label>
+                    <label><input type="checkbox" name="minimal" v-model="store.minimal.value" /> Minimal</label>
                 </div>
                 <!--<div class="video-controls-text">{{ vp.playback_text }}</div>-->
             </div>
@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { useStore } from "@/store";
+import { useTVC } from "@/store";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -48,7 +48,7 @@ export default defineComponent({
         canStartPlayback: Boolean,
     },
     setup() {
-        const store = useStore();
+        const store = useTVC();
         return { store };
     },
     mounted() {

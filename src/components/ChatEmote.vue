@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { useStore } from "@/store";
+import { useTVC } from "@/store";
 import { defineComponent } from "vue";
 import { ChatEmote } from "../defs";
 
@@ -13,7 +13,7 @@ export default defineComponent({
         emote: Object as () => ChatEmote,
     },
     setup() {
-        const store = useStore();
+        const store = useTVC();
         return { store };
     },
     computed: {
@@ -22,7 +22,7 @@ export default defineComponent({
             let c = {
                 emote: true,
                 ["network-" + this.emote.network]: true,
-                "is-small": this.store.settings.smallEmotes,
+                "is-small": this.store.settings.value.smallEmotes,
             };
             if (this.emote.class !== undefined) c[this.emote.class] = true;
             return c;

@@ -1,6 +1,6 @@
 <template>
     <TransitionGroup
-        :name="store.settings.chatTransition ? 'comment' : ''"
+        :name="store.settings.value.chatTransition ? 'comment' : ''"
         tag="div"
         id="comments"
         ref="comments"
@@ -21,14 +21,14 @@
 import ChatEmote from "./ChatEmote.vue";
 import ChatBadge from "./ChatBadge.vue";
 import { TwitchCommentProxy } from "../defs";
-import { useStore } from "@/store";
+import { useTVC } from "@/store";
 import ChatMessage from "./ChatMessage.vue";
 import { defineComponent } from "vue";
 
 export default defineComponent({
     name: "ChatBox",
     setup() {
-        const store = useStore();
+        const store = useTVC();
         return { store };
     },
     props: {

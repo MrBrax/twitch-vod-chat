@@ -19,6 +19,8 @@ export default defineConfig({
     },
   },
   build: {
+    sourcemap: true,
+    emptyOutDir: true,
     lib: {
       entry: path.resolve(__dirname, 'src/lib.ts'),
       name: 'twitch-vod-chat',

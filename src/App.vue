@@ -1,8 +1,10 @@
 <template>
-    <div :class="{
-        'app-main': true,
-        'unlocked': store.unlockedWidth,
-    }">
+    <div
+        class="app-main"
+        :class="{
+            'unlocked': store.unlockedWidth.value,
+        }
+    ">
         <VODPlayer
             ref="vodplayer"
             @ready="playerReady"
@@ -24,7 +26,7 @@ import VideoControls from "./components/VideoControls.vue";
 import { ChatSource, VideoSource } from "./defs";
 import VODPlayer from "./components/VODPlayer.vue";
 import PlayerControls from "./components/PlayerControls.vue";
-import { useStore } from "./store";
+import { useTVC } from "./store";
 import "./style/player.scss";
 
 console.log("app.vue init");
@@ -39,7 +41,7 @@ export default defineComponent({
         // Dashboard
     },
     setup() {
-        const store = useStore();
+        const store = useTVC();
         const vodplayer = ref<InstanceType<typeof VODPlayer>>();
         return { store, vodplayer };
     },
@@ -80,24 +82,24 @@ export default defineComponent({
 
             // twitch client id
             if (params.tci) {
-                this.store.settings.twitchClientId = params.tci;
+                this.store.settings.value.twitchClientId = params.tci;
             }
 
             // twitch secret
             if (params.ts) {
-                this.store.settings.twitchSecret = params.ts;
+                this.store.settings.value.twitchSecret = params.ts;
             }
 
             // token
             if (params.tk) {
-                this.store.settings.twitchToken = params.tk;
+                this.store.settings.value.twitchToken = params.tk;
             }
 
             if (params.offset) {
                 vodplayer.chatOffset = parseInt(params.offset);
             }
 
-            this.store.minimal = params.minimal !== undefined && parseInt(params.minimal) > 0;
+            this.store.minimal.value = params.minimal !== undefined && parseInt(params.minimal) > 0;
 
             if (params.chapters) {
                 vodplayer.videoChapters = [];
@@ -118,7 +120,7 @@ export default defineComponent({
             if (params.source) {
                 const video_source = params.source as VideoSource;
                 console.debug("automate playback");
-                this.store.automated = true;
+                this.store.automated.value = true;
                 this.video_source = video_source;
 
                 // load video
@@ -231,12 +233,12 @@ export default defineComponent({
         },
         "store.settings.ultrawide"(newVal) {
             if (newVal) {
-                this.store.settings.chatOverlay = false;
+                this.store.settings.value.chatOverlay = false;
             }
         },
         "store.settings.chatOverlay"(newVal) {
             if (newVal) {
-                this.store.settings.ultrawide = false;
+                this.store.settings.value.ultrawide = false;
             }
         },
 	},

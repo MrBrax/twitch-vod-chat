@@ -1,7 +1,7 @@
 <template>
-    <div id="controls" v-if="vodplayer && !store.minimal">
+    <div id="controls" v-if="(vodplayer && !store.minimal.value)">
         <div class="option-row">
-            <div v-if="!store.automated" v-bind:class="{ 'option-group': true, ok: vodplayer.videoLoaded }" class="option-group">
+            <div v-if="!store.automated.value" v-bind:class="{ 'option-group': true, ok: vodplayer.videoLoaded }" class="option-group">
                 <div class="option-title">Video</div>
                 <div class="option-content">
                     <select class="fullsize" v-model="video_source">
@@ -40,7 +40,7 @@
                 </div>
             </div>
 
-            <div v-if="!store.automated" v-bind:class="{ 'option-group': true, ok: vodplayer.chatLoaded }" class="option-group">
+            <div v-if="!store.automated.value" v-bind:class="{ 'option-group': true, ok: vodplayer.chatLoaded }" class="option-group">
                 <div class="option-title">Chat</div>
                 <div class="option-content">
                     <select class="fullsize" v-model="chat_source">
@@ -74,15 +74,15 @@
                 <div class="option-title">Twitch API</div>
                 <div class="option-content">
                     <label>
-                        <input type="password" placeholder="Client ID" v-model="store.settings.twitchClientId" />
+                        <input type="password" placeholder="Client ID" v-model="store.settings.value.twitchClientId" />
                         Client ID
                     </label>
                     <label>
-                        <input type="password" placeholder="Secret" v-model="store.settings.twitchSecret" />
+                        <input type="password" placeholder="Secret" v-model="store.settings.value.twitchSecret" />
                         Secret
                     </label>
                     <br />
-                    <span class="is-error">{{ store.settings.twitchToken ? "Has token" : "No token" }}</span>
+                    <span class="is-error">{{ store.settings.value.twitchToken ? "Has token" : "No token" }}</span>
                     <br />
                     <button class="button" @click="saveSettings">Save</button>
                     <button class="button" @click="fetchTwitchToken">Fetch Twitch token</button>
@@ -125,39 +125,39 @@
                 <div class="option-title">Chat location</div>
                 <div class="option-content">
                     <div>
-                        <label><input type="checkbox" name="comments-overlay" v-model="store.settings.chatOverlay" /> Overlay</label>
-                        <label><input type="checkbox" name="ultrawide" v-model="store.settings.ultrawide" /> Ultrawide</label>
+                        <label><input type="checkbox" name="comments-overlay" v-model="store.settings.value.chatOverlay" /> Overlay</label>
+                        <label><input type="checkbox" name="ultrawide" v-model="store.settings.value.ultrawide" /> Ultrawide</label>
                     </div>
 
                     <div class="control">
                         <span>Chat align:</span>
-                        <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" value="left" /> Left</label>
-                        <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" value="right" /> Right</label>
+                        <label><input type="radio" name="comments-align" v-model="store.settings.value.chatAlign" value="left" /> Left</label>
+                        <label><input type="radio" name="comments-align" v-model="store.settings.value.chatAlign" value="right" /> Right</label>
                     </div>
 
                     <div class="control">
                         <span>Text align:</span>
-                        <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" value="left" /> Left</label>
-                        <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" value="right" /> Right</label>
+                        <label><input type="radio" name="comments-textalign" v-model="store.settings.value.chatTextAlign" value="left" /> Left</label>
+                        <label><input type="radio" name="comments-textalign" v-model="store.settings.value.chatTextAlign" value="right" /> Right</label>
                     </div>
 
                     <hr />
                     <div class="control">
                         <label class="label label-range">
-                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatTop" />
-                            <span>Top ({{ store.settings.chatTop }}%)</span>
+                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.value.chatTop" />
+                            <span>Top ({{ store.settings.value.chatTop }}%)</span>
                         </label>
                     </div>
                     <div class="control">
                         <label class="label label-range">
-                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatBottom" style="direction: ltr" />
-                            <span>Bottom ({{ store.settings.chatBottom }}%)</span>
+                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.value.chatBottom" style="direction: ltr" />
+                            <span>Bottom ({{ store.settings.value.chatBottom }}%)</span>
                         </label>
                     </div>
                     <div class="control">
                         <label class="label label-range">
-                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatWidth" />
-                            <span>Width ({{ store.settings.chatWidth }}%)</span>
+                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.value.chatWidth" />
+                            <span>Width ({{ store.settings.value.chatWidth }}%)</span>
                         </label>
                     </div>
                 </div>
@@ -166,13 +166,13 @@
             <div class="option-group">
                 <div class="option-title">Chat style</div>
                 <div class="option-content">
-                    <select v-model="store.settings.chatStyle">
+                    <select v-model="store.settings.value.chatStyle">
                         <option value="has-gradient">Gradient</option>
                         <option value="has-fill40">Fill 40%</option>
                         <option value="has-fill80">Fill 80%</option>
                         <option value="">None</option>
                     </select>
-                    <select v-model="store.settings.fontName">
+                    <select v-model="store.settings.value.fontName">
                         <option v-for="(v, k) in fonts" :key="k" :value="k" :style="{ fontFamily: k }">
                             {{ v }}
                         </option>
@@ -180,38 +180,38 @@
                     <table>
                         <tr>
                             <td>
-                                <label><input type="checkbox" v-model="store.settings.chatStroke" /> Stroke + shadow</label>
+                                <label><input type="checkbox" v-model="store.settings.value.chatStroke" /> Stroke + shadow</label>
                             </td>
                             <td>
-                                <label><input type="checkbox" v-model="store.settings.emotesEnabled" /> Emotes</label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label><input type="checkbox" v-model="store.settings.timestampsEnabled" /> Timestamps</label>
-                            </td>
-                            <td>
-                                <label><input type="checkbox" v-model="store.settings.badgesEnabled" /> Badges</label>
+                                <label><input type="checkbox" v-model="store.settings.value.emotesEnabled" /> Emotes</label>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <label><input type="checkbox" v-model="store.settings.smallEmotes" /> Small emotes</label>
+                                <label><input type="checkbox" v-model="store.settings.value.timestampsEnabled" /> Timestamps</label>
                             </td>
                             <td>
-                                <label><input type="checkbox" v-model="store.settings.showVODComments" /> VOD comments</label>
+                                <label><input type="checkbox" v-model="store.settings.value.badgesEnabled" /> Badges</label>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <label><input type="checkbox" v-model="store.settings.chatTransition" /> Transitions</label>
+                                <label><input type="checkbox" v-model="store.settings.value.smallEmotes" /> Small emotes</label>
                             </td>
                             <td>
-                                <label><input type="checkbox" v-model="store.settings.chatSelectable" /> Selectable</label>
+                                <label><input type="checkbox" v-model="store.settings.value.showVODComments" /> VOD comments</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label><input type="checkbox" v-model="store.settings.value.chatTransition" /> Transitions</label>
+                            </td>
+                            <td>
+                                <label><input type="checkbox" v-model="store.settings.value.chatSelectable" /> Selectable</label>
                             </td>
                         </tr>
                     </table>
-                    <label><input type="range" min="10" max="42" v-model="store.settings.fontSize" /> Font size ({{ store.settings.fontSize }}px)</label>
+                    <label><input type="range" min="10" max="42" v-model="store.settings.value.fontSize" /> Font size ({{ store.settings.value.fontSize }}px)</label>
                 </div>
             </div>
         </div>
@@ -222,16 +222,16 @@
                 <button class="button" @click="saveSettings">Save settings</button>
                 <button class="button" @click="resetSettings">Reset settings</button>
                 <button class="button" @click="generateLink">Generate link</button>
-                <button class="button" @click="store.minimal = true">
-                    <span class="icon">{{ store.minimal ? '✓' : '✗' }}</span>
+                <button class="button" @click="store.minimal.value = true">
+                    <span class="icon">{{ store.minimal.value ? '✓' : '✗' }}</span>
                     <span>Minimal mode</span>
                 </button>
-                <button class="button" @click="store.unlockedWidth = !store.unlockedWidth">
-                    <span class="icon">{{ store.unlockedWidth ? '✓' : '✗' }}</span>
+                <button class="button" @click="(store.unlockedWidth.value = !store.unlockedWidth.value)">
+                    <span class="icon">{{ store.unlockedWidth.value ? '✓' : '✗' }}</span>
                     <span>Unlocked width</span>
                 </button>
-                <button class="button" @click="store.automated = !store.automated" v-if="store.automated">
-                    <span class="icon">{{ store.automated ? '✓' : '✗' }}</span>
+                <button class="button" @click="store.automated.value = !store.automated" v-if="store.automated">
+                    <span class="icon">{{ store.automated.value ? '✓' : '✗' }}</span>
                     <span>Automated</span>
                 </button>
                 <span> Nothing is uploaded, everything runs in your browser. </span>
@@ -243,14 +243,14 @@
 <script lang="ts">
 import VODPlayer from './VODPlayer.vue';
 import { defineComponent, ref } from 'vue';
-import { useStore } from '@/store';
+import { useTVC } from '@/store';
 import { ChatSource, VideoSource } from '@/defs';
 import { Fonts } from "../value_defs";
 
 export default defineComponent({
     name: "PlayerControls",
     setup() {
-        const store = useStore();
+        const store = useTVC();
         return { store, fonts: Fonts };
     },
     data(): {
@@ -318,13 +318,13 @@ export default defineComponent({
             alert(`${location.protocol}//${location.host}${location.pathname}${this.vodplayer.generateHash()}`);
         },
         async fetchTwitchToken(): Promise<string | boolean> {
-            if (!this.store.settings.twitchClientId || !this.store.settings.twitchSecret) {
+            if (!this.store.settings.value.twitchClientId || !this.store.settings.value.twitchSecret) {
                 alert("Missing either Twitch client id or secret");
                 return false;
             }
 
             return fetch(
-                `https://id.twitch.tv/oauth2/token?client_id=${this.store.settings.twitchClientId}&client_secret=${this.store.settings.twitchSecret}&grant_type=client_credentials`,
+                `https://id.twitch.tv/oauth2/token?client_id=${this.store.settings.value.twitchClientId}&client_secret=${this.store.settings.value.twitchSecret}&grant_type=client_credentials`,
                 {
                     method: "POST",
                     mode: "cors",
@@ -342,7 +342,7 @@ export default defineComponent({
                     }
 
                     if (json.access_token) {
-                        this.store.settings.twitchToken = json.access_token;
+                        this.store.settings.value.twitchToken = json.access_token;
                         this.saveSettings();
                         return json.access_token;
                     }
