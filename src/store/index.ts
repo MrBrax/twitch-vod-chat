@@ -1,11 +1,14 @@
 import { VODPlayerSettings } from "@/defs";
-import { Ref, ref } from "vue";
+import { reactive, Ref, ref, watch } from "vue";
 
 interface StoreType {
     minimal: boolean;
     automated: boolean;
     unlockedWidth: boolean;
     settings: VODPlayerSettings;
+    saveSettings: () => void;
+    loadSettings: () => void;
+    resetSettings: () => void;
 }
 
 const defaultSettings: VODPlayerSettings = {
@@ -67,6 +70,7 @@ export const useStore = defineStore("twitchVodChat", {
 });
 */
 
+/*
 export function useTVC() {
 
     const minimal = ref<boolean>(false);
@@ -95,6 +99,10 @@ export function useTVC() {
         settings.value = { ...defaultSettings };
     }
 
+    watch(() => settings, (v) => {
+        console.debug("Settings changed", v);
+    });
+
     return {
         minimal,
         automated,
@@ -105,3 +113,29 @@ export function useTVC() {
         resetSettings,
     };
 }
+*/
+
+export const store = reactive<StoreType>({
+    minimal: false,
+    automated: false,
+    unlockedWidth: false,
+    settings: { ...defaultSettings },
+    saveSettings() {
+        localStorage.setItem("settings", JSON.stringify(this.settings));
+        console.debug("Saved settings");
+        alert("Saved settings");
+    },
+    loadSettings() {
+        const v = localStorage.getItem("settings");
+        if (v) {
+            this.settings = JSON.parse(v);
+            console.debug("Loaded settings");
+        } else {
+            console.debug("No settings to load");
+        }
+        console.debug("Load settings", this.settings);
+    },
+    resetSettings() {
+        this.settings = { ...defaultSettings };
+    },
+});
