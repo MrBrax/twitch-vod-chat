@@ -107,7 +107,7 @@ export default defineComponent({
                 console.error("VideoPlayerHTML5: video is not ready");
                 return;
             }
-            // console.debug("VideoPlayerHTML5: seek");
+            console.debug(`VideoPlayerHTML5: seek to ${time}`);
             this.video.currentTime = time;
         },
     }

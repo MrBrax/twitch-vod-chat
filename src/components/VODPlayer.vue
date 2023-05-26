@@ -16,7 +16,7 @@
                     ref="embedPlayer"
                     @pause="isPaused = true; isPlaying = false"
                     @play="isPaused = false; isPlaying = true"
-                    @ready="$emit('ready')"
+                    @ready="onReady"
                     @seeked="seeked"
                 />
                 <VideoPlayerTwitch
@@ -25,7 +25,7 @@
                     ref="embedPlayer"
                     @pause="isPaused = true; isPlaying = false"
                     @play="isPaused = false; isPlaying = true"
-                    @ready="$emit('ready')"
+                    @ready="onReady"
                     @seeked="seeked"
                 />
                 <VideoPlayerYouTube
@@ -34,7 +34,7 @@
                     ref="embedPlayer"
                     @pause="isPaused = true; isPlaying = false"
                     @play="isPaused = false; isPlaying = true"
-                    @ready="$emit('ready')"
+                    @ready="onReady"
                     @seeked="seeked"
                 />
             </div>
@@ -103,6 +103,8 @@ import ChatBox from "./ChatBox.vue";
 let chatLog: TwitchCommentDump | undefined; // decouple from vue for performance
 
 // type AnyEmbedPlayer = EmbedPlayer | EmbedTwitchPlayer | EmbedYouTubePlayer | EmbedVideoPlayer;
+
+const playbackPositionKeyName = "tvcPlaybackPosition";
 
 export default defineComponent({
     name: "VODPlayer",
@@ -410,7 +412,7 @@ export default defineComponent({
                 this.video_id = "";
                 */
 
-                this.video_id = "";
+                this.video_id = file.name;
                 this.videoLoadSource = fileURL;
 
                 this.status_video = "Local video loaded";
@@ -1043,8 +1045,6 @@ export default defineComponent({
 
             this.isReady = true;
 
-            await this.loadPlaybackPosition();
-
             return true;
         },
 
@@ -1072,8 +1072,11 @@ export default defineComponent({
         },
 
         async seek(seconds: number): Promise<void> {
-            if (!this.embedPlayer) return;
-            console.debug("Custom timeline seek executed");
+            if (!this.embedPlayer) {
+                console.error("No embed player");
+                return;
+            }
+            console.debug("Custom timeline seek executed", seconds);
             await this.embedPlayer.seek(seconds);
         },
 
@@ -1081,6 +1084,11 @@ export default defineComponent({
             if (!this.embedPlayer) return;
             console.debug("Seeked event executed");
             await this.resetChat();
+        },
+
+        async onReady(event: any): Promise<void> {
+            this.$emit('ready');
+            this.loadPlaybackPosition();
         },
 
         async togglePause(): Promise<void> {
@@ -1157,6 +1165,7 @@ export default defineComponent({
 
             if (videoTime > this.lastSavedPlaybackPosition + 15) {
                 await this.savePlaybackPosition();
+                this.lastSavedPlaybackPosition = videoTime;
             }
 
             /**
@@ -1463,12 +1472,18 @@ export default defineComponent({
         async savePlaybackPosition(): Promise<void> {
 
             const currentTime = await this.embedPlayer?.getCurrentTime();
-            if (!currentTime) return;
+            if (!currentTime) {
+                console.warn("Could not get current time");
+                return;
+            }
 
             const video = this.video_id;
-            if (!video) return;
+            if (!video) {
+                console.warn("Could not get video id");
+                return;
+            }
 
-            const raw_data = localStorage.getItem("playbackPosition");
+            const raw_data = localStorage.getItem(playbackPositionKeyName);
 
             let data: Record<string, number> = {};
 
@@ -1480,20 +1495,23 @@ export default defineComponent({
                 }
             }
 
-            data[video] = currentTime;
+            data[video] = Math.floor(currentTime);
 
-            localStorage.setItem("playbackPosition", JSON.stringify(data));
+            localStorage.setItem(playbackPositionKeyName, JSON.stringify(data));
 
             console.debug("Saved playback position", currentTime, "for", video);
 
-            },
+        },
 
-            async loadPlaybackPosition(): Promise<void> {
+        async loadPlaybackPosition(): Promise<void> {
 
             const video = this.video_id;
-            if (!video) return;
+            if (!video) {
+                console.warn("Could not get video id");
+                return;
+            }
 
-            const raw_data = localStorage.getItem("playbackPosition");
+            const raw_data = localStorage.getItem(playbackPositionKeyName);
 
             let data: Record<string, number> = {};
 
@@ -1507,11 +1525,14 @@ export default defineComponent({
 
             const currentTime = data[video];
 
-            if (!currentTime) return;
+            if (!currentTime) {
+                console.debug("No playback position found for", video);
+                return;
+            }
 
-            console.debug("Loaded playback position", currentTime, "for", video);
+            console.log("Loaded playback position", currentTime, "for", video);
 
-            await this.embedPlayer?.seek(currentTime);
+            await this.seek(currentTime);
 
         },
 
