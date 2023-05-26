@@ -1476,6 +1476,61 @@ export default defineComponent({
         canStartPlayback(): boolean {
             return this.videoLoaded && this.chatLoaded;
         },
+
+        async savePlaybackPosition(): Promise<void> {
+
+            const currentTime = await this.embedPlayer?.getCurrentTime();
+            if (!currentTime) return;
+
+            const video = this.video_id;
+            if (!video) return;
+
+            const raw_data = localStorage.getItem("playbackPosition");
+
+            let data: Record<string, number> = {};
+
+            if (raw_data) {
+                try {
+                    data = JSON.parse(raw_data);
+                } catch (e) {
+                    console.error("Error parsing playbackPosition", e);
+                }
+            }
+
+            data[video] = currentTime;
+
+            localStorage.setItem("playbackPosition", JSON.stringify(data));
+
+            console.debug("Saved playback position", currentTime, "for", video);
+            
+        },
+
+        async loadPlaybackPosition(): Promise<void> {
+
+            const video = this.video_id;
+            if (!video) return;
+
+            const raw_data = localStorage.getItem("playbackPosition");
+
+            let data: Record<string, number> = {};
+
+            if (raw_data) {
+                try {
+                    data = JSON.parse(raw_data);
+                } catch (e) {
+                    console.error("Error parsing playbackPosition", e);
+                }
+            }
+
+            const currentTime = data[video];
+
+            if (!currentTime) return;
+
+            console.debug("Loaded playback position", currentTime, "for", video);
+
+            await this.embedPlayer?.seek(currentTime);
+
+        },
         // shownComments(): number {
         //     return Object.keys(this.viewedComments).length;
         // },
