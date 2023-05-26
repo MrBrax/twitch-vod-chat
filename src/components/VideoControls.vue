@@ -1,6 +1,6 @@
 <template>
     <transition name="fade">
-        <div :class="{ 'video-controls': true, minimal: store.minimal }" v-if="!store.minimal || minimalShow">
+        <div class="video-controls" :class="{ minimal: store.minimal }" v-if="!store.minimal || minimalShow">
             <div id="timeline" ref="timeline" @click="seek" v-if="videoPosition">
                 <div id="timeline-seekbar" ref="seekbar" v-bind:style="{ width: videoPosition * 100 + '%' }">
                     <div class="timeline-seekbar-time">{{ formattedVideoTime }}</div>
@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { useStore } from "@/store";
+import { store } from "@/store";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -48,7 +48,6 @@ export default defineComponent({
         canStartPlayback: Boolean,
     },
     setup() {
-        const store = useStore();
         return { store };
     },
     mounted() {
@@ -81,3 +80,121 @@ export default defineComponent({
     },
 });
 </script>
+
+<style lang="scss" scoped>
+
+#timeline {
+	position: relative;
+	overflow: hidden;
+	height: 24px;
+	font-size: 14px;
+	font-weight: 700;
+	// width: $width;
+	width: 100%;
+	background: #222;
+	border-bottom: 1px solid #333;
+	color: #fff;
+	cursor: pointer;
+}
+
+#timeline-text {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	color: #fff;
+	padding: 4px;
+}
+
+#timeline-seekbar {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 50%;
+	background: linear-gradient(#ad2020, #622);
+	height: 24px;
+	transition: width .5s ease;
+}
+
+.timeline-seekbar-time {
+	text-align: right;
+	color: #fff;
+	font-size: 90%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding-right: 4px;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+}
+
+#timeline-markers {
+	position: relative;
+	// width: $width;
+	width: 100%;
+	// height: 16px;
+	pointer-events: none;
+}
+
+.timeline-marker {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	height: 16px;
+	padding-left: 2px;
+	border-left: 1px solid #555;
+	font-family: 'Roboto Condensed';
+	font-weight: 400;
+	color: #ccc;
+}
+
+
+.video-controls {
+	background-color: #151515;
+	color: #aaa;
+	&.minimal {
+		position: absolute;
+		bottom: 0px;
+		left: 0px;
+		right: 0px;
+	}
+	label {
+		padding: 0 0.5em;
+	}
+}
+.video-controls-buttons {
+	display: flex;
+	align-items: center;
+	padding: 4px;
+}
+.video-controls-text {
+	padding-left: 5px;
+	font-size: 1.3em;
+}
+
+
+.pb-button {
+	font-family: inherit;
+	font-size: 1.2em;
+	padding: 3px 10px;
+	background-color: #333;
+	color: #fff;
+	border: 1px solid #222;
+	cursor: pointer;
+	&:hover {
+		background-color: #555;
+	}
+	&.is-submit {
+		background-color: #219c21;
+	}
+	&:disabled {
+		background-color: #6f6f6f;
+		color: #acacac;
+		border-color: #444;
+		cursor: not-allowed;
+		&:hover {
+			background-color: #6f6f6f;
+		}
+	}
+}
+
+</style>

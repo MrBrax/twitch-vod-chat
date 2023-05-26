@@ -96,6 +96,14 @@ export default class FFZEmoteProvider extends BaseEmoteProvider {
         if (!json2.sets) {
             console.error("failed to load ffz", json2);
             this.status = "Failed to load";
+            this.disabled = true;
+            return false;
+        }
+
+        if (response.status > 299) {
+            console.error("failed to load ffz", json2);
+            this.status = `Error: ${response.status}`;
+            this.disabled = true;
             return false;
         }
 
@@ -109,7 +117,7 @@ export default class FFZEmoteProvider extends BaseEmoteProvider {
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
-        if (!this.emotes) return false;
+        if (!this.emotes || this.disabled) return false;
         for (const fSet in this.emotes.sets) {
             for (const fEmo of this.emotes.sets[fSet].emoticons) {
                 if (fEmo.name == word) {

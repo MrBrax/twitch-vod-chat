@@ -1,4 +1,6 @@
 import App from "@/App.vue";
+import Main from "@/components/Main.vue";
 import VODPlayer from "@/components/VODPlayer.vue";
 
-export { App, VODPlayer };
+// three levels of components
+export { App, Main, VODPlayer };

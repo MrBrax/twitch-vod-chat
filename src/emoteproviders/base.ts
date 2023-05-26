@@ -4,6 +4,7 @@ export default class BaseEmoteProvider {
     channelId: string | undefined;
     emotes: unknown;
     status = "Waiting...";
+    disabled = false;
 
     async fetchEmotes(channelId: string | number): Promise<boolean> {
         console.debug(channelId);

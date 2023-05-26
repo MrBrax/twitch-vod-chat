@@ -1,5 +1,5 @@
 <template>
-    <div id="controls" v-if="vodplayer && !store.minimal">
+    <div id="controls" v-if="(vodplayer && !store.minimal)">
         <div class="option-row">
             <div v-if="!store.automated" v-bind:class="{ 'option-group': true, ok: vodplayer.videoLoaded }" class="option-group">
                 <div class="option-title">Video</div>
@@ -226,7 +226,7 @@
                     <span class="icon">{{ store.minimal ? '✓' : '✗' }}</span>
                     <span>Minimal mode</span>
                 </button>
-                <button class="button" @click="store.unlockedWidth = !store.unlockedWidth">
+                <button class="button" @click="(store.unlockedWidth = !store.unlockedWidth)">
                     <span class="icon">{{ store.unlockedWidth ? '✓' : '✗' }}</span>
                     <span>Unlocked width</span>
                 </button>
@@ -243,14 +243,14 @@
 <script lang="ts">
 import VODPlayer from './VODPlayer.vue';
 import { defineComponent, ref } from 'vue';
-import { useStore } from '@/store';
+import { store } from '@/store';
 import { ChatSource, VideoSource } from '@/defs';
 import { Fonts } from "../value_defs";
 
 export default defineComponent({
     name: "PlayerControls",
     setup() {
-        const store = useStore();
+        // const store = useTVC();
         return { store, fonts: Fonts };
     },
     data(): {
@@ -360,3 +360,88 @@ export default defineComponent({
     },
 });
 </script>
+
+
+<style lang="scss" scoped>
+
+#controls {
+	// width: $width;
+	width: 100%;
+}
+
+.option-row {
+	display: flex;
+}
+
+.option-row .option-group {
+	flex-grow: 1;
+	flex-basis: 33%;
+}
+
+.option-group {
+
+	margin: 1px;
+
+	border: 1px solid #666;
+	background: #222;
+	color: #ccc;
+
+	box-shadow: inset 0 -1px 10px rgba(0, 0, 0, .2);
+
+	&.ok {
+		background: #3B5134;
+		border-color: #5D963A;
+		.option-title {
+			background-image: linear-gradient(#445f3b, #34472e);
+			border-color: #43642f;
+		}
+	}
+
+	h2 {
+		font-size: 16px;
+		margin: 0;
+		padding: 0 0 1px 0;
+	}
+
+	.option-title {
+		color: #ddd;
+		padding: 2px 4px;
+		// background: #333;
+		background-image: linear-gradient(#444, #333);
+		font-weight: 700;
+		font-size: 90%;
+		letter-spacing: 0.05em;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+		border-bottom: 1px solid #555;
+	}
+
+	.option-content {
+		padding: 5px;
+	}
+
+}
+
+.control {
+	&.fullwidth {
+		input {
+			width: 100%;
+		}
+	}
+}
+
+.help-text {
+	color: #aaa;
+	font-weight: 300;
+	font-size: 90%;
+	margin: 0 0 3px 0;
+	padding: 0;
+}
+
+.is-error {
+	color: #bd2525;
+}
+
+
+@import "../style/input";
+
+</style>
