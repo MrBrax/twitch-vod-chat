@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 import dts from 'vite-plugin-dts'
+import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,12 +11,18 @@ export default defineConfig({
         vue(),
         dts({
             entryRoot: path.resolve(__dirname),
+            // insertTypesEntry: true,
+            copyDtsFiles: true,
+            outputDir: 'dist-lib',
+            staticImport: true,
+            skipDiagnostics: false,
             insertTypesEntry: true,
+            tsConfigFilePath: path.resolve(__dirname, 'tsconfig.app.json'),
         })
     ],
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, 'src'),
+            '@': fileURLToPath(new URL('./src', import.meta.url))
         },
     },
     build: {
@@ -26,7 +33,7 @@ export default defineConfig({
             entry: path.resolve(__dirname, 'src/lib.ts'),
             name: 'twitch-vod-chat',
             fileName: 'twitch-vod-chat',
-            formats: ['es', 'cjs'],
+            // formats: ['es', 'cjs'],
         },
         rollupOptions: {
             external: ['vue'],
