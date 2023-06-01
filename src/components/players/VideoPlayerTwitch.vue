@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { TwitchPlayer } from "@/defs";
+import type { TwitchPlayer } from "@/defs";
 
 export default defineComponent({
     name: "VideoPlayerTwitch",

@@ -1,5 +1,5 @@
-import { VODPlayerSettings } from "@/defs";
-import { reactive, Ref, ref, watch } from "vue";
+import type { VODPlayerSettings } from "@/defs";
+import { reactive, type Ref, ref, watch } from "vue";
 
 interface StoreType {
     minimal: boolean;

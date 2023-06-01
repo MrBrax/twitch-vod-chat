@@ -1,4 +1,4 @@
-import { TwitchCommentProxy } from "../defs";
+import type { TwitchCommentProxy } from "../defs";
 import BaseEmoteProvider from "./base";
 
 interface ChannelEmote {

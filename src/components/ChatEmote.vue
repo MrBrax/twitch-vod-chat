@@ -5,7 +5,7 @@
 <script lang="ts">
 import { store } from "@/store";
 import { defineComponent } from "vue";
-import { ChatEmote } from "../defs";
+import type { ChatEmote } from "../defs";
 
 export default defineComponent({
     name: "ChatEmote",

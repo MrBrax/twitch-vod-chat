@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { TwitchUserBadgeProxy } from "../defs";
+import type { TwitchUserBadgeProxy } from "../defs";
 
 export default defineComponent({
     name: "ChatBadge",

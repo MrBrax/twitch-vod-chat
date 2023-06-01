@@ -89,7 +89,7 @@ import { defineComponent, nextTick, ref } from "vue";
 import ChatMessage from "@/components/ChatMessage.vue";
 import VideoControls from "@/components/VideoControls.vue";
 import { store } from "@/store";
-import { ChatSource, TwitchComment, TwitchCommentDump, TwitchCommentProxy, TwitchUserBadge, TwitchUserBadgeProxy, VideoSource } from "@/defs";
+import type { ChatSource, TwitchComment, TwitchCommentDump, TwitchCommentProxy, TwitchUserBadge, TwitchUserBadgeProxy, VideoSource } from "@/defs";
 import BaseEmoteProvider from "@/emoteproviders/base";
 import BTTVChannelEmoteProvider from "@/emoteproviders/bttv_channel";
 import BTTVGlobalEmoteProvider from "@/emoteproviders/bttv_global";

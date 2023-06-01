@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { YouTubePlayer } from "youtube-player/dist/types";
+import type { YouTubePlayer } from "youtube-player/dist/types";
 
 export default defineComponent({
     name: "VideoPlayerYouTube",

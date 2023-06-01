@@ -1,4 +1,4 @@
-import { TwitchCommentProxy } from "../defs";
+import type { TwitchCommentProxy } from "../defs";
 
 export default class BaseEmoteProvider {
     channelId: string | undefined;
