@@ -8,17 +8,17 @@ import { fileURLToPath, URL } from 'node:url'
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
-        vue(),
         dts({
             entryRoot: path.resolve(__dirname),
             // insertTypesEntry: true,
             copyDtsFiles: true,
             outputDir: 'dist-lib',
-            staticImport: true,
+            // staticImport: true,
             skipDiagnostics: false,
             insertTypesEntry: true,
-            tsConfigFilePath: path.resolve(__dirname, 'tsconfig.app.json'),
-        })
+            tsConfigFilePath: fileURLToPath(new URL('./tsconfig.lib.json', import.meta.url)),
+        }),
+        vue()
     ],
     resolve: {
         alias: {
@@ -30,10 +30,11 @@ export default defineConfig({
         emptyOutDir: true,
         minify: false,
         lib: {
-            entry: path.resolve(__dirname, 'src/lib.ts'),
+            // entry: path.resolve(__dirname, 'src/lib.ts'),
+            entry: fileURLToPath(new URL('./src/lib.ts', import.meta.url)),
             name: 'twitch-vod-chat',
             fileName: 'twitch-vod-chat',
-            // formats: ['es', 'cjs'],
+            formats: ['es', 'cjs'],
         },
         rollupOptions: {
             external: ['vue'],
