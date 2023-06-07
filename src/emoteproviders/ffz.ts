@@ -1,4 +1,4 @@
-import type { TwitchCommentProxy } from "../defs";
+import { TwitchCommentProxy } from "../defs";
 import BaseEmoteProvider from "./base";
 
 interface VipBadge {

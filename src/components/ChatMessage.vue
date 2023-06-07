@@ -18,7 +18,7 @@
 <script lang="ts">
 import ChatEmote from "./ChatEmote.vue";
 import ChatBadge from "./ChatBadge.vue";
-import type { TwitchCommentProxy } from "../defs";
+import { TwitchCommentProxy } from "../defs";
 import { store } from "@/store";
 import { defineComponent } from "vue";
 

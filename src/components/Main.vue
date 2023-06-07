@@ -23,7 +23,7 @@ import { defineComponent, ref } from "vue";
 import { nextTick } from "vue";
 import ChatMessage from "./ChatMessage.vue";
 import VideoControls from "./VideoControls.vue";
-import type { ChatSource, VideoSource } from "../defs";
+import { ChatSource, VideoSource } from "../defs";
 import VODPlayer from "./VODPlayer.vue";
 import PlayerControls from "./PlayerControls.vue";
 import { store } from "../store";

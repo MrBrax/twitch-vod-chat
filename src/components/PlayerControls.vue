@@ -244,7 +244,7 @@
 import VODPlayer from './VODPlayer.vue';
 import { defineComponent, ref } from 'vue';
 import { store } from '@/store';
-import type { ChatSource, VideoSource } from '@/defs';
+import { ChatSource, VideoSource } from '@/defs';
 import { Fonts } from "../value_defs";
 
 export default defineComponent({
