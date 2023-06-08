@@ -464,10 +464,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/youtube-player@npm:^5.5.5":
-  version: 5.5.6
-  resolution: "@types/youtube-player@npm:5.5.6"
-  checksum: d17b48f4cb56a3fc36fc02edf7fd111f954db67a1e97c2a9c53ddfac972eb6082cab9d05a878c1e8110e4e06cae52696485ec77c32db580f0deb293bad860345
+"@types/youtube-player@npm:^5.5.7":
+  version: 5.5.7
+  resolution: "@types/youtube-player@npm:5.5.7"
+  checksum: 5e18dc1b48a62e416a920b5dd3076c443c15537f2c96d9a834c715864c4cde2e7f8a2b5de7d8a6addfb2b26e5dbc4dd5d61319e7e9c8a9fbb90275dd06e61ef7
   languageName: node
   linkType: hard
 
@@ -3140,7 +3140,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "twitch-vod-chat@workspace:."
   dependencies:
-    "@types/youtube-player": ^5.5.5
+    "@types/youtube-player": ^5.5.7
     "@typescript-eslint/eslint-plugin": ^5.41.0
     "@typescript-eslint/parser": ^5.41.0
     "@vitejs/plugin-vue": ^4.2.3

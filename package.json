@@ -27,7 +27,7 @@
     "vue": "^3.3.4"
   },
   "devDependencies": {
-    "@types/youtube-player": "^5.5.5",
+    "@types/youtube-player": "^5.5.7",
     "@typescript-eslint/eslint-plugin": "^5.41.0",
     "@typescript-eslint/parser": "^5.41.0",
     "@vitejs/plugin-vue": "^4.2.3",

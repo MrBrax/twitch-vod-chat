@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { YouTubePlayer } from "youtube-player/dist/types";
+import { defineComponent } from "vue";
+import type { YouTubePlayer } from "youtube-player/dist/types";
 
 export default defineComponent({
     name: "VideoPlayerYouTube",
@@ -143,8 +143,8 @@ export default defineComponent({
             this.youtubePlayer = undefined;
 
             this.youtubePlayer = new window.YT.Player(player_element, {
-                width: "1280",
-                height: "720",
+                width: "100%",
+                height: "100%",
                 videoId: this.id,
                 events: {
                     // supplied event names are broken, why?

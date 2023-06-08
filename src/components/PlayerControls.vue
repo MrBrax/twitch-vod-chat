@@ -1,6 +1,8 @@
 <template>
     <div id="controls" v-if="(vodplayer && !store.minimal)">
         <div class="option-row">
+            
+            <!-- Video -->
             <div v-if="!store.automated" v-bind:class="{ 'option-group': true, ok: vodplayer.videoLoaded }" class="option-group">
                 <div class="option-title">Video</div>
                 <div class="option-content">
@@ -18,17 +20,17 @@
                     </div>
                     <div v-if="video_source == 'file_http'">
                         <div class="control fullwidth">
-                            <label><input type="text" name="video-input" v-model="input_video" placeholder="Video URL" /></label>
+                            <label><input type="url" name="video-input" v-model="input_video" placeholder="Video URL" /></label>
                         </div>
                     </div>
                     <div v-if="video_source == 'youtube'">
                         <div class="control fullwidth">
-                            <label><input type="text" name="video-input" v-model="input_video" placeholder="YouTube URL" /></label>
+                            <label><input type="url" name="video-input" v-model="input_video" placeholder="YouTube URL" /></label>
                         </div>
                     </div>
                     <div v-if="video_source == 'twitch'">
                         <div class="control fullwidth">
-                            <label><input type="text" name="video-input" v-model="input_video" placeholder="Twitch VOD URL" /></label>
+                            <label><input type="url" name="video-input" v-model="input_video" placeholder="Twitch VOD URL" /></label>
                         </div>
                         <p class="help-text">
                             Please proceed through the mature warning before clicking start, if it appears.<br />
@@ -40,6 +42,7 @@
                 </div>
             </div>
 
+            <!-- Chat -->
             <div v-if="!store.automated" v-bind:class="{ 'option-group': true, ok: vodplayer.chatLoaded }" class="option-group">
                 <div class="option-title">Chat</div>
                 <div class="option-content">
@@ -66,6 +69,19 @@
                     </div>
                     <hr />
                     <button class="button is-submit" @click="submitChat">Submit</button>
+                    &nbsp;
+                    <input
+                        name="chatOffset"
+                        v-model="vodplayer.chatOffset"
+                        type="number"
+                        :disabled="!vodplayer.chatLoaded"
+                    />
+                    &nbsp;
+                    <i
+                        title="Offset from the video, if recording started too late. It will be set automatically based on how long the chat dump is and the video length, remember to set it to 0 if you want it that way."
+                        class="icon"
+                    >?</i>
+
                     <p class="help-text">Chat logs may take a while to parse, don't worry.</p>
                 </div>
             </div>
@@ -110,53 +126,43 @@
         </div>
 
         <div class="option-row">
-            <div class="option-group">
-                <div class="option-title">Chat offset in seconds</div>
-                <div class="option-content">
-                    <p class="help-text">
-                        Offset from the video, if recording started too late. It will be set automatically based on how long the chat dump is and the video
-                        length, remember to set it to 0 if you want it that way.
-                    </p>
-                    <input name="chatOffset" v-model="vodplayer.chatOffset" />
-                </div>
-            </div>
 
             <div class="option-group">
                 <div class="option-title">Chat location</div>
                 <div class="option-content">
-                    <div>
-                        <label><input type="checkbox" name="comments-overlay" v-model="store.settings.chatOverlay" /> Overlay</label>
-                        <label><input type="checkbox" name="ultrawide" v-model="store.settings.ultrawide" /> Ultrawide</label>
+                    <div class="control horizontal">
+                        <label class="label"><input type="checkbox" name="comments-overlay" v-model="store.settings.chatOverlay" /> Overlay</label>
+                        <label class="label"><input type="checkbox" name="ultrawide" v-model="store.settings.ultrawide" /> Ultrawide</label>
                     </div>
 
-                    <div class="control">
+                    <div class="control horizontal">
                         <span>Chat align:</span>
-                        <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" value="left" /> Left</label>
-                        <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" value="right" /> Right</label>
+                        <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" value="left" :disabled="store.settings.ultrawide" /> Left</label>
+                        <label><input type="radio" name="comments-align" v-model="store.settings.chatAlign" value="right" :disabled="store.settings.ultrawide" /> Right</label>
                     </div>
 
-                    <div class="control">
+                    <div class="control horizontal">
                         <span>Text align:</span>
-                        <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" value="left" /> Left</label>
-                        <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" value="right" /> Right</label>
+                        <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" value="left" :disabled="store.settings.ultrawide" /> Left</label>
+                        <label><input type="radio" name="comments-textalign" v-model="store.settings.chatTextAlign" value="right" :disabled="store.settings.ultrawide" /> Right</label>
                     </div>
 
                     <hr />
                     <div class="control">
                         <label class="label label-range">
-                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatTop" />
+                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatTop" :disabled="store.settings.ultrawide" />
                             <span>Top ({{ store.settings.chatTop }}%)</span>
                         </label>
                     </div>
                     <div class="control">
                         <label class="label label-range">
-                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatBottom" style="direction: ltr" />
+                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatBottom" style="direction: ltr" :disabled="store.settings.ultrawide" />
                             <span>Bottom ({{ store.settings.chatBottom }}%)</span>
                         </label>
                     </div>
                     <div class="control">
                         <label class="label label-range">
-                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatWidth" />
+                            <input class="input-range" type="range" min="0" max="100" v-model="store.settings.chatWidth" :disabled="store.settings.ultrawide" />
                             <span>Width ({{ store.settings.chatWidth }}%)</span>
                         </label>
                     </div>
@@ -427,6 +433,12 @@ export default defineComponent({
 			width: 100%;
 		}
 	}
+    &.horizontal {
+        label {
+            display: inline-block;
+            margin-right: 10px;
+        }
+    }
 }
 
 .help-text {
@@ -440,6 +452,21 @@ export default defineComponent({
 .is-error {
 	color: #bd2525;
 }
+
+i.icon {
+    text-decoration: none;
+    font-style: normal;
+	width: 16px;
+	height: 16px;
+    display: inline-block;
+	vertical-align: middle;
+	background-color: #6264c4;
+    text-align: center;
+    line-height: 16px;
+    border-radius: 100%;
+    cursor: help;
+}
+
 
 
 @import "../style/input";

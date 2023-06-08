@@ -189,14 +189,16 @@ export default defineComponent({
                 }
             }
         },
-        submitVideo(source: string, input: string | File | undefined) {
+        submitVideo(source: VideoSource, input: string | File | undefined) {
             if (!this.vodplayer) return;
-            console.log(this.$refs);
+            console.log("submit video", source, input);
+            this.video_source = source;
             this.vodplayer.loadVideo(this.video_source, input);
         },
-        submitChat(source: string, input: string | File | undefined) {
+        submitChat(source: ChatSource, input: string | File | undefined) {
             if (!this.vodplayer) return;
-            console.log(this.$refs);
+            console.log("submit chat", source, input);
+            this.chat_source = source;
             this.vodplayer.loadChat(this.chat_source, input);
         },
         /*
