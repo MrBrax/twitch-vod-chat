@@ -528,16 +528,6 @@ export default defineComponent({
                     return true;
                 }
                 return false;
-            } else if (source == "twitch" && typeof input === "string") {
-                const twitch_id = input.match(/\/videos\/([0-9]+)/);
-                if (!twitch_id) {
-                    alert("invalid twitch vod link");
-                    return false;
-                }
-                this.loadTwitchChat(twitch_id[1]);
-                this.chat_id = twitch_id[1];
-                this.chatLoadSource = input;
-                return true;
             }
 
             console.error("unhandled chat input");
@@ -717,60 +707,6 @@ export default defineComponent({
         },
 
         /**
-         * Load twitch vod info and start dumping chat
-         * @param videoId Twitch VOD id
-         */
-        async loadTwitchChat(videoId: string) {
-            console.debug("load twitch chat", this);
-
-            this.videoLoadSource = videoId;
-
-            return this.fetchVideoInfo().then((json) => {
-                if (json.error) {
-                    alert("VOD loading error: " + json.message);
-                    return false;
-                }
-
-                if (!json.data) {
-                    alert("VOD loading error, probably deleted");
-                    throw "VOD loading error, probably deleted";
-                    return false;
-                }
-
-                const data = json.data[0];
-
-                console.log("loadOnline", data);
-
-                const dur = this.parseDuration(data.duration);
-                if (!dur) {
-                    console.error("invalid duration on video info");
-                    return false;
-                }
-
-                this.vodLength = dur;
-                this.channelName = data.user_name;
-                this.channelId = data.user_id;
-
-                console.log("LoadOnline length", this.vodLength);
-                console.log("LoadOnline channel name", this.channelName);
-                console.log("LoadOnline channel id", this.channelId);
-
-                this.fetchBadges();
-                this.fetchEmotes();
-
-                this.fetchChat();
-
-                this.chatLoaded = true;
-
-                // this.fetchMarkerInfo();
-
-                // this.setupEmbedPlayer();
-
-                return true;
-            });
-        },
-
-        /**
          * Fetch global and channel badges from twitch
          */
         async fetchBadges(): Promise<boolean> {
@@ -863,109 +799,6 @@ export default defineComponent({
             const date = new Date();
             date.setSeconds(seconds); // specify value for SECONDS here
             return date.toISOString().substring(11, 8);
-        },
-
-        /**
-         * Continually fetch chat
-         */
-        async fetchChat() {
-            if (!chatLog) return;
-            chatLog.comments = [];
-
-            const fragment = await this.fetchChatFragment(0);
-
-            if (!fragment.comments) {
-                console.error("could not fetch comments");
-                return false;
-            }
-
-            let cursor = fragment._next;
-
-            console.log("first fragment", fragment);
-            chatLog.comments = chatLog.comments.concat(fragment.comments);
-
-            this.fetchChatRunning = true;
-
-            // for( let i = 0; i < 5; i++ ){
-            while (cursor && this.fetchChatRunning) {
-                const f = await this.fetchChatFragment(null, cursor);
-
-                cursor = f._next;
-
-                if (!f.comments) {
-                    console.error("no comments with cursor");
-                    continue;
-                }
-
-                chatLog.comments = chatLog.comments.concat(f.comments);
-
-                console.log("Add messages to chat log", chatLog.comments.length, f.comments.length);
-
-                console.log("Message info", f.comments[0].content_offset_seconds, f.comments[0].commenter.display_name);
-
-                // TODO: don't spam server, throttle with this somehow
-                if (f.comments[f.comments.length - 1]) {
-                    this.lastCommentTime = f.comments[f.comments.length - 1].content_offset_seconds;
-                } else {
-                    console.error("no comment available");
-                }
-
-                this.commentAmount = chatLog.comments.length;
-
-                this.lastCommentOffset = Math.round(chatLog.comments[this.commentAmount - 1].content_offset_seconds);
-
-                this.status_comments = `OK (dump, ${this.channelName}, ${this.commentAmount}c, ${this.lastCommentOffset}o, ${this.vodLength}s)!`;
-
-                if (this.vodLength && this.vodLength > this.lastCommentOffset + 90) {
-                    this.status_comments += " (end of comments don't sync up)";
-                }
-
-                // debug stop
-                /*
-                if( chatLog.comments.length > 500 ){
-                    console.info("stop downloading comments due to spam test")
-                    break;
-                }
-                */
-
-                // console.log('loop fragment', f);
-            }
-
-            this.allCommentsFetched = true;
-
-            this.status_comments = `OK (dump, ${this.channelName}, ${this.commentAmount}c (complete), ${this.vodLength}s)!`;
-
-            console.log("Chat fetching stopped");
-        },
-
-        async fetchChatFragment(start: number | null, cursor: string | null = null) {
-            // unsupported by twitch
-            let url = `https://api.twitch.tv/kraken/videos/${this.videoLoadSource}/comments`;
-
-            // if(start) url += '?content_offset_seconds=' + start;
-
-            if (cursor) url += `?cursor=${cursor}`;
-
-            if (this.videoCurrentTime ?? 0 > 0) {
-                url += (cursor ? "&" : "?") + `content_offset_seconds=${this.videoCurrentTime}`;
-            }
-
-            return fetch(url, {
-                headers: {
-                    "Client-ID": this.store.settings.twitchClientId,
-                    Accept: "application/vnd.twitchtv.v5+json",
-                },
-            }).then((resp) => {
-                return resp.json();
-            });
-            /*.then( (json) => {
-                
-                console.log("chat", json);
-
-                let cursor = json._next;
-
-            });
-            */
         },
 
         /**

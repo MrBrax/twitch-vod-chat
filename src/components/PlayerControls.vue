@@ -49,7 +49,6 @@
                     <select class="fullsize" v-model="chat_source">
                         <option value="file">Local chat file</option>
                         <option value="file_http">Hosted chat file</option>
-                        <option value="twitch">Twitch API VOD dump</option>
                     </select>
                     <hr />
                     <div v-if="chat_source == 'file'">
@@ -60,11 +59,6 @@
                     <div v-if="chat_source == 'file_http'">
                         <div class="control fullwidth">
                             <label><input type="url" name="chat-input" v-model="input_chat" placeholder="Chat URL" /></label>
-                        </div>
-                    </div>
-                    <div v-if="chat_source == 'twitch'">
-                        <div class="control fullwidth">
-                            <label><input type="url" name="chat-input" v-model="input_chat" placeholder="Twitch VOD URL" /></label>
                         </div>
                     </div>
                     <hr />
