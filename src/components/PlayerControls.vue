@@ -371,6 +371,10 @@ export default defineComponent({
 
 .option-row {
 	display: flex;
+
+    @media (max-width: 1280px) {
+        flex-direction: column;
+    }
 }
 
 .option-row .option-group {

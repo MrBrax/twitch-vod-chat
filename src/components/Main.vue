@@ -262,6 +262,10 @@ export default defineComponent({
 		width: auto;
 	}
 
+    @media (max-width: 1280px) {
+        width: 100%;
+    }
+
     font: 12px 'Roboto', 'Open Sans', 'Arial';
 	
 	// height: 100%;
