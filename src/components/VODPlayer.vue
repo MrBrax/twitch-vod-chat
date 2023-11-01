@@ -1103,7 +1103,7 @@ export default defineComponent({
                             imageSrc = this.badges.channel[badgeId].versions[badgeVersion].image_url_1x;
 
                         if (!imageSrc) {
-                            console.error("no badge", badgeId, badgeVersion);
+                            console.error("no image source for badge", b, this.badges);
                             continue;
                         }
 

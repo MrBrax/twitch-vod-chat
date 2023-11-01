@@ -1,3 +1,4 @@
+import { fixupUrl } from "@/helpers";
 import { TwitchCommentProxy } from "../defs";
 import BaseEmoteProvider from "./base";
 
@@ -127,7 +128,7 @@ export default class FFZEmoteProvider extends BaseEmoteProvider {
                         data: {
                             network: "ffz",
                             name: word,
-                            url: "https:" + fEmo.urls[1], // TODO: check that this https url is standardised
+                            url: fixupUrl(fEmo.urls[1]), // TODO: check that this https url is standardised
                         },
                     });
 
