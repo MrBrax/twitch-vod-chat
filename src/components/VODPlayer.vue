@@ -715,29 +715,7 @@ export default defineComponent({
                 return false;
             }
 
-            // global badges
-            await fetch("https://badges.twitch.tv/v1/badges/global/display")
-                .then(function (response) {
-                    return response.json();
-                })
-                .then((json2) => {
-                    if (json2.badge_sets) {
-                        this.badges.global = json2.badge_sets;
-                        console.debug("twitch badges global", this.badges.global);
-                    }
-                });
-
-            // channel badges
-            await fetch(`https://badges.twitch.tv/v1/badges/channels/${this.channelId}/display`)
-                .then(function (response) {
-                    return response.json();
-                })
-                .then((json2) => {
-                    if (json2.badge_sets) {
-                        this.badges.channel = json2.badge_sets;
-                        console.debug("twitch badges channel", this.badges.channel);
-                    }
-                });
+            console.error("fetchBadges no longer possible, twitch api removed");
 
             return true;
         },

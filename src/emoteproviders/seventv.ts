@@ -1,6 +1,112 @@
+import { fixupUrl } from "@/helpers";
 import { TwitchCommentProxy } from "../defs";
 import BaseEmoteProvider from "./base";
 
+interface SevenTVUserResponse {
+    id: string;
+    platform: string;
+    username: string;
+    display_name: string;
+    linked_at: number;
+    emote_capacity: number;
+    emote_set_id: unknown;
+    emote_set: EmoteSet;
+    user: User;
+}
+
+interface EmoteSet {
+    id: string;
+    name: string;
+    flags: number;
+    tags: string[];
+    immutable: boolean;
+    privileged: boolean;
+    emotes: Emoticon[];
+    emote_count: number;
+    capacity: number;
+    owner: Owner;
+}
+
+interface Owner {
+    id: string;
+    username: string;
+    display_name: string;
+    avatar_url: string;
+    style: {
+        color: number;
+    };
+    roles: string[];
+}
+
+interface User {
+    id: string;
+    username: string;
+    display_name: string;
+    avatar_url: string;
+    biography: string;
+    style: {
+        color: number;
+    };
+    emote_sets: EmoteSet[];
+    editors: Editor[];
+    roles: string[];
+    connections: Connection[];
+}
+
+interface Connection {
+    id: string;
+    platform: string;
+    username: string;
+    display_name: string;
+    linked_at: number;
+    emote_capacity: number;
+    emote_set_id: unknown;
+    emote_set: EmoteSet;
+}
+
+interface Editor {
+    id: string;
+    permissions: number;
+    visible: boolean;
+    added_at: number;
+}
+
+interface Emoticon {
+    id: string;
+    name: string;
+    flags: number;
+    timestamp: number;
+    actor_id: unknown;
+    data: EmoticonData;
+}
+
+interface EmoticonData {
+    id: string;
+    name: string;
+    flags: number;
+    tags: string[];
+    lifecycle: number;
+    state: string[];
+    listed: boolean;
+    animated: boolean;
+    owner: Owner;
+    host: {
+        url: string;
+        files: EmoticonFile[];
+    }
+}
+
+interface EmoticonFile {
+    name: string;
+    static_name: string;
+    width: number;
+    height: number;
+    frame_count: number;
+    size: number;
+    format: string;
+}
+
+/*
 interface Role {
     id: string;
     name: string;
@@ -33,6 +139,7 @@ interface Emoticon {
     height: number[];
     urls: string[][];
 }
+*/
 
 interface SevenTVError {
     // message: string;
@@ -42,48 +149,92 @@ interface SevenTVError {
     error_code?: number;
 }
 
+
 export default class SevenTVEmoteProvider extends BaseEmoteProvider {
     declare emotes: Emoticon[];
 
     async fetchEmotes(channelId: string | number): Promise<boolean> {
         console.log("Fetching seventv");
 
-        const response = await fetch(`https://api.7tv.app/v2/users/${channelId}/emotes`);
-        const json2: Emoticon[] | SevenTVError = await response.json();
+        const response = await fetch(`https://7tv.io/v3/users/twitch/${channelId}`);
+        const response_json: SevenTVUserResponse | SevenTVError = await response.json();
 
         // server error return message
-        if ("error" in json2) {
-            console.error("failed to load seventv", json2);
-            this.status = `Error: ${json2.error}`;
+        if ("error" in response_json) {
+            console.error("failed to load seventv", response_json);
+            this.status = `Error: ${response_json.error}`;
             this.disabled = true;
             return false;
         }
 
         if (response.status > 299) {
-            console.error("failed to load seventv", json2);
+            console.error("failed to load seventv", response_json);
             this.status = `Error: ${response.status}`;
             this.disabled = true;
             return false;
         }
 
-        if (json2.length <= 0) {
-            console.error("failed to load seventv, no data", json2);
+        /*
+        if (response_json.length <= 0) {
+            console.error("failed to load seventv, no data", response_json);
             this.status = "No emotes";
             this.disabled = true;
             return false;
         }
 
-        this.emotes = json2;
+        this.emotes = response_json;
 
         console.log("seventv", this.emotes);
         this.status = `OK! (${this.emotes.length} emotes)`;
+        */
+
+        if (!response_json.emote_set || response_json.emote_set.emotes.length <= 0) {
+            console.error("failed to load seventv, no data", response_json);
+            this.status = "No emotes";
+            this.disabled = true;
+            return false;
+        }
+
+        this.emotes = response_json.emote_set.emotes;
 
         return true;
+    }
+
+    getEmoteURL(emote: Emoticon, size: number): string {
+
+        const emoteFile = emote.data.host.files.find((f) => f.name.startsWith(`${size}x`));
+
+        if (!emoteFile) {
+            console.error("no emote file", emote);
+            return "";
+        }
+
+        return `${emote.data.host.url}/${emoteFile.name}`;
     }
 
     parseComment(word: string, commentObj: TwitchCommentProxy) {
         if (!this.emotes || !Array.isArray(this.emotes) || this.disabled) return false;
         for (const fEmo of this.emotes) {
+
+            const isMatch = fEmo.name == word; // no other checks right now
+
+            if (!isMatch) continue;
+
+            if (!fEmo.data.host.files || fEmo.data.host.files.length == 0) {
+                console.error("no files on seventv emote", fEmo);
+                continue;
+            }
+
+            commentObj.messageFragments.push({
+                type: "emote",
+                data: {
+                    network: "seventv",
+                    name: word,
+                    url: fixupUrl(this.getEmoteURL(fEmo, 2)),
+                },
+            });
+
+            /*
             if (fEmo.name == word) {
                 if (!fEmo.urls || fEmo.urls.length == 0) {
                     console.error("no urls on seventv emote", fEmo);
@@ -107,6 +258,7 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
 
                 return true;
             }
+            */
         }
         return false;
     }
