@@ -89,7 +89,7 @@ import { defineComponent, nextTick, ref } from "vue";
 import ChatMessage from "@/components/ChatMessage.vue";
 import VideoControls from "@/components/VideoControls.vue";
 import { store } from "@/store";
-import { ChatSource, TwitchComment, TwitchCommentDump, TwitchCommentProxy, TwitchUserBadge, TwitchUserBadgeProxy, VideoSource } from "@/defs";
+import { ChatSource, GqlGlobalBadgeResponse, GqlSubBadgeResponse, TwitchChatBadge, TwitchComment, TwitchCommentDump, TwitchCommentProxy, TwitchUserBadgeProxy, VideoSource } from "@/defs";
 import BaseEmoteProvider from "@/emoteproviders/base";
 import BTTVChannelEmoteProvider from "@/emoteproviders/bttv_channel";
 import BTTVGlobalEmoteProvider from "@/emoteproviders/bttv_global";
@@ -141,8 +141,8 @@ export default defineComponent({
         // embedPlayer: AnyEmbedPlayer | null; // TODO: remove
         emotes: Record<string, BaseEmoteProvider>;
         badges: {
-            global: Record<string, TwitchUserBadge>;
-            channel: Record<string, TwitchUserBadge>;
+            global: Record<string, TwitchChatBadge>;
+            channel: Record<string, TwitchChatBadge>;
         };
         tickDelay: number;
         commentLimit: number;
@@ -706,6 +706,26 @@ export default defineComponent({
             return true;
         },
 
+        async gqlRequest<T>(query: string, variables: Record<string, any>): Promise<T> {
+            const response = await fetch("https://gql.twitch.tv/gql", {
+                method: "POST",
+                headers: {
+                    "Client-ID": this.store.settings.twitchClientId,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify([
+                    {
+                        variables: variables,
+                        query: query,
+                    },
+                ]),
+            });
+
+            const json = await response.json();
+
+            return json[0].data;
+        },
+
         /**
          * Fetch global and channel badges from twitch
          */
@@ -715,7 +735,53 @@ export default defineComponent({
                 return false;
             }
 
-            console.error("fetchBadges no longer possible, twitch api removed");
+            // new StringContent("{\"query\":\"query{badges{imageURL(size:DOUBLE),description,title,setID,version}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+            const globalData = await this.gqlRequest<GqlGlobalBadgeResponse>(
+                `query {
+                    badges {
+                        imageURL(size: DOUBLE)
+                        description
+                        title
+                        setID
+                        version
+                    }
+                }`,
+                {}
+            );
+
+            if (globalData.data.badges) {
+                for (const badge of globalData.data.badges) {
+                    this.badges.global[badge.title] = badge;
+                }
+            } else {
+                console.error("No global badges", globalData);
+            }
+
+            // new StringContent("{\"query\":\"query{user(id: " + streamerId + "){broadcastBadges{imageURL(size:DOUBLE),description,title,setID,version}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+            const userData = await this.gqlRequest<GqlSubBadgeResponse>(
+                `query($id: ID!) {
+                    user(id: $id) {
+                        broadcastBadges {
+                            imageURL(size: DOUBLE)
+                            description
+                            title
+                            setID
+                            version
+                        }
+                    }
+                }`,
+                {
+                    id: this.channelId,
+                }
+            );
+
+            if (userData.data.user.broadcastBadges) {
+                for (const badge of userData.data.user.broadcastBadges) {
+                    this.badges.channel[badge.title] = badge;
+                }
+            } else {
+                console.error("No channel badges", userData);
+            }
 
             return true;
         },
@@ -1073,12 +1139,12 @@ export default defineComponent({
                         let imageSrc: string | null = null;
 
                         // global badge
-                        if (this.badges.global[badgeId] && this.badges.global[badgeId].versions[badgeVersion])
-                            imageSrc = this.badges.global[badgeId].versions[badgeVersion].image_url_1x;
+                        if (this.badges.global[badgeId] && this.badges.global[badgeId].imageURL)
+                            imageSrc = this.badges.global[badgeId].imageURL;
 
                         // channel badge
-                        if (this.badges.channel[badgeId] && this.badges.channel[badgeId].versions[badgeVersion])
-                            imageSrc = this.badges.channel[badgeId].versions[badgeVersion].image_url_1x;
+                        if (this.badges.channel[badgeId] && this.badges.channel[badgeId].imageURL)
+                            imageSrc = this.badges.channel[badgeId].imageURL;
 
                         if (!imageSrc) {
                             console.error("no image source for badge", b, this.badges);
