@@ -34,7 +34,7 @@ declare global {
     }
 }
 
-interface TwitchPlayer {
+export interface TwitchPlayer {
     pause(): void;
     play(): void;
     seek(timestamp: number): void;
