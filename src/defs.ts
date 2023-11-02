@@ -30,11 +30,11 @@ declare global {
                 new (element: HTMLDivElement, opt: YouTubePlayerOptions): YouTubePlayer;
             };
         };
-        onYouTubeIframeAPIReady();
+        onYouTubeIframeAPIReady(): void;
     }
 }
 
-interface TwitchPlayer {
+export interface TwitchPlayer {
     pause(): void;
     play(): void;
     seek(timestamp: number): void;
@@ -57,12 +57,13 @@ export interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget;
 }
 
-interface TwitchUserBadgeProxy {
+export interface TwitchUserBadgeProxy {
     url: string;
     id: string;
 }
 
-interface TwitchUserBadge {
+/*
+export interface TwitchUserBadge {
     versions: TwitchUserBadgeEntry[];
     url: string;
     id: string;
@@ -78,6 +79,7 @@ interface TwitchUserBadgeEntry {
     click_url: string;
     // last_updated: string;
 }
+*/
 
 /*
 interface TwitchUserBadge {
@@ -105,7 +107,7 @@ export interface TwitchCommentProxy extends TwitchComment {
     displayed: boolean;
 }
 
-interface TwitchCommentDump {
+export interface TwitchCommentDump {
     comments: TwitchComment[];
     video: {
         created_at: string;
@@ -146,7 +148,7 @@ interface TwitchCommentDump {
     };
 }
 
-interface TwitchComment {
+export interface TwitchComment {
     // internal
 
     /**
@@ -234,3 +236,26 @@ export interface VODPlayerSettings {
 
 export type VideoSource = "file" | "file_http" | "twitch" | "youtube";
 export type ChatSource = "file" | "file_http" | "twitch";
+
+
+export interface GqlGlobalBadgeResponse {
+    data: {
+        badges: TwitchChatBadge[];
+    }
+}
+
+export interface GqlSubBadgeResponse {
+    data: {
+        user: {
+            broadcastBadges: TwitchChatBadge[];
+        }
+    }
+}
+
+export interface TwitchChatBadge {
+    imageURL: string;
+    setID: string;
+    title: string;
+    description: string;
+    version: string;
+}

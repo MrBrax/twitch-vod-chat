@@ -27,6 +27,7 @@ import { ChatSource, VideoSource } from "../defs";
 import VODPlayer from "./VODPlayer.vue";
 import PlayerControls from "./PlayerControls.vue";
 import { store } from "../store";
+import "@fontsource/inter";
 
 console.log("app.vue init");
 

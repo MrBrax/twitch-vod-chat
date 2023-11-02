@@ -1,6 +1,6 @@
 {
   "name": "twitch-vod-chat",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "private": true,
   "description": "http://vod.dongers.net/player.html",
   "author": "",
@@ -22,6 +22,7 @@
     }
   },
   "dependencies": {
+    "@fontsource/inter": "^5.0.15",
     "core-js": "^3.26.0",
     "eslint-plugin-deprecation": "^1.4.1",
     "vue": "^3.3.4"
