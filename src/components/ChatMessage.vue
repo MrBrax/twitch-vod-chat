@@ -59,6 +59,7 @@ export default defineComponent({
     .badge {
         display: inline-block;
         margin: 0 3px;
+        max-height: 18px;
     }
 
     .name {
