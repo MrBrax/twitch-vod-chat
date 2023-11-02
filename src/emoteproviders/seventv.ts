@@ -196,6 +196,8 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
         }
 
         this.emotes = response_json.emote_set.emotes;
+        console.log("seventv", this.emotes);
+        this.status = `OK! (${this.emotes.length} emotes)`;
 
         return true;
     }

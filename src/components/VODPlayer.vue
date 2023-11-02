@@ -106,6 +106,8 @@ let chatLog: TwitchCommentDump | undefined; // decouple from vue for performance
 
 const playbackPositionKeyName = "tvcPlaybackPosition";
 
+const clientId = "kd1unb4b3q4t58fwlpcbzcbnm76a8fp";
+
 export default defineComponent({
     name: "VODPlayer",
     emits: ["ready"],
@@ -707,23 +709,43 @@ export default defineComponent({
         },
 
         async gqlRequest<T>(query: string, variables: Record<string, any>): Promise<T> {
-            const response = await fetch("https://gql.twitch.tv/gql", {
-                method: "POST",
-                headers: {
-                    "Client-ID": this.store.settings.twitchClientId,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify([
-                    {
-                        variables: variables,
-                        query: query,
+
+            let response;
+
+            try {
+                response = await fetch("https://gql.twitch.tv/gql", {
+                    method: "POST",
+                    headers: {
+                        "Client-ID": clientId,
+                        "Content-Type": "application/json",
                     },
-                ]),
-            });
+                    body: JSON.stringify([
+                        {
+                            variables: variables,
+                            query: query,
+                        },
+                    ]),
+                });
+            } catch (error) {
+                console.error("gqlRequest fetch error", error);
+                throw error;
+            }
 
-            const json = await response.json();
+            let json;
 
-            return json[0].data;
+            try {
+                json = await response.json();
+            } catch (error) {
+                console.error("gqlRequest json error", error);
+                throw error;
+            }
+
+            if ( json.error ) {
+                console.error("gqlRequest error", json);
+                throw new Error(json.message);
+            }
+
+            return json[0];
         },
 
         /**
@@ -749,10 +771,13 @@ export default defineComponent({
                 {}
             );
 
+            console.log("Global badges preprocess", globalData);
+
             if (globalData.data.badges) {
                 for (const badge of globalData.data.badges) {
-                    this.badges.global[badge.title] = badge;
+                    this.badges.global[badge.setID] = badge;
                 }
+                console.log("Global badges", this.badges.global);
             } else {
                 console.error("No global badges", globalData);
             }
@@ -775,10 +800,13 @@ export default defineComponent({
                 }
             );
 
+            console.log("Channel badges preprocess", userData);
+
             if (userData.data.user.broadcastBadges) {
                 for (const badge of userData.data.user.broadcastBadges) {
-                    this.badges.channel[badge.title] = badge;
+                    this.badges.channel[badge.setID] = badge;
                 }
+                console.log("Channel badges", this.badges.channel);
             } else {
                 console.error("No channel badges", userData);
             }

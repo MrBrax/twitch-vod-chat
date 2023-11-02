@@ -108,6 +108,8 @@
                     <br />
                     <strong>Delay:</strong> <span>{{ vodplayer.chatOffset }}</span>
                     <br />
+                    <strong>Badges:</strong> <span>{{ Object.keys(vodplayer.badges.global).length }} global, {{ Object.keys(vodplayer.badges.channel).length }} channel</span>
+                    <br />
                     <strong>FFZ:</strong> <span>{{ vodplayer.emotes.ffz.status }}</span>
                     <br />
                     <strong>BTTV Channel:</strong> <span>{{ vodplayer.emotes.bttv_channel.status }}</span>
@@ -274,7 +276,7 @@ export default defineComponent({
     },
     props: {
         vodplayer: {
-            type: Object,
+            type: Object as () => InstanceType<typeof VODPlayer>,
             required: true,
         },
     },
