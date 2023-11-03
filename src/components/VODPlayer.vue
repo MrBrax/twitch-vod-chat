@@ -1,42 +1,19 @@
 <template>
-    <div
-        id="viewer"
-        ref="viewer"
-        class="viewer-container"
-        :class="{
-            ultrawide: store.settings.ultrawide,
-            ['chat-side-' + store.settings.chatAlign]: true,
-        }"
-    >
+    <div id="viewer" ref="viewer" class="viewer-container" :class="{
+        ultrawide: store.settings.ultrawide,
+        ['chat-side-' + store.settings.chatAlign]: true,
+    }">
         <div ref="player" id="player">
             <div id="video_container" v-if="videoLoaded">
-                <VideoPlayerHTML5
-                    v-if="video_source === 'file' || video_source === 'file_http'"
-                    :url="videoLoadSource"
-                    ref="embedPlayer"
-                    @pause="isPaused = true; isPlaying = false"
-                    @play="isPaused = false; isPlaying = true"
-                    @ready="onReady"
-                    @seeked="seeked"
-                />
-                <VideoPlayerTwitch
-                    v-if="video_source === 'twitch'"
-                    :id="videoLoadSource"
-                    ref="embedPlayer"
-                    @pause="isPaused = true; isPlaying = false"
-                    @play="isPaused = false; isPlaying = true"
-                    @ready="onReady"
-                    @seeked="seeked"
-                />
-                <VideoPlayerYouTube
-                    v-if="video_source === 'youtube'"
-                    :id="videoLoadSource"
-                    ref="embedPlayer"
-                    @pause="isPaused = true; isPlaying = false"
-                    @play="isPaused = false; isPlaying = true"
-                    @ready="onReady"
-                    @seeked="seeked"
-                />
+                <VideoPlayerHTML5 v-if="video_source === 'file' || video_source === 'file_http'" :url="videoLoadSource"
+                    ref="embedPlayer" @pause="isPaused = true; isPlaying = false" @play="isPaused = false; isPlaying = true"
+                    @ready="onReady" @seeked="seeked" />
+                <VideoPlayerTwitch v-if="video_source === 'twitch'" :id="videoLoadSource" ref="embedPlayer"
+                    @pause="isPaused = true; isPlaying = false" @play="isPaused = false; isPlaying = true" @ready="onReady"
+                    @seeked="seeked" />
+                <VideoPlayerYouTube v-if="video_source === 'youtube'" :id="videoLoadSource" ref="embedPlayer"
+                    @pause="isPaused = true; isPlaying = false" @play="isPaused = false; isPlaying = true" @ready="onReady"
+                    @seeked="seeked" />
             </div>
             <div v-else class="meme-bg">
                 <div class="meme">
@@ -44,18 +21,17 @@
                 </div>
             </div>
 
-            <ChatBox v-if="store.settings.chatOverlay" ref="chatbox" :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
+            <ChatBox v-if="store.settings.chatOverlay" ref="chatbox" :commentsClass="commentsClass"
+                :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
             <!--<div id="osd">SYNC NOT STARTED</div>-->
         </div>
-        <ChatBox v-if="!store.settings.chatOverlay" ref="chatbox" :commentsClass="commentsClass" :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
+        <ChatBox v-if="!store.settings.chatOverlay" ref="chatbox" :commentsClass="commentsClass"
+            :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
     </div>
 
     <div v-if="videoChapters && vodLength" id="timeline-markers">
-        <div
-            class="timeline-marker"
-            v-for="(marker, id) in videoChapters"
-            v-bind:key="id"
-            v-bind:style="{ left: ( ( marker.time / (vodLength ?? 0) ) * 100 ) + '%' }">
+        <div class="timeline-marker" v-for="(marker, id) in videoChapters" v-bind:key="id"
+            v-bind:style="{ left: ((marker.time / (vodLength ?? 0)) * 100) + '%' }">
             {{ marker.label }}
         </div>
     </div>
@@ -66,22 +42,10 @@
         Shown comments: {{ shownComments }}<br />
     </div>
 
-    <video-controls
-        :is-ready="isReady"
-        :is-playing="isPlaying"
-        :is-paused="isPaused"
-        @start-playback="startPlayback"
-        @toggle-pause="togglePause"
-        @fullscreen="fullscreen"
-        @reset-chat="resetChat"
-        :video-duration="videoDuration"
-        :video-position="videoPosition"
-        :video-current-time="videoCurrentTime"
-        :minimal-show="minimal_show"
-        @seek="seek"
-        :can-start-playback="canStartPlayback"
-    />
-
+    <video-controls :is-ready="isReady" :is-playing="isPlaying" :is-paused="isPaused" @start-playback="startPlayback"
+        @toggle-pause="togglePause" @fullscreen="fullscreen" @reset-chat="resetChat" :video-duration="videoDuration"
+        :video-position="videoPosition" :video-current-time="videoCurrentTime" :minimal-show="minimal_show" @seek="seek"
+        :can-start-playback="canStartPlayback" />
 </template>
 
 <script lang="ts">
@@ -89,7 +53,7 @@ import { defineComponent, nextTick, ref } from "vue";
 import ChatMessage from "@/components/ChatMessage.vue";
 import VideoControls from "@/components/VideoControls.vue";
 import { store } from "@/store";
-import { ChatSource, GqlGlobalBadgeResponse, GqlSubBadgeResponse, TwitchChatBadge, TwitchComment, TwitchCommentDump, TwitchCommentProxy, TwitchUserBadgeProxy, VideoSource } from "@/defs";
+import { ChatSource, GqlGlobalBadgeResponse, GqlSubBadgeResponse, TwitchChatBadge, TwitchComment, TwitchCommentDump, TwitchCommentDumpTD, TwitchCommentProxy, TwitchUserBadgeProxy, VideoSource } from "@/defs";
 import BaseEmoteProvider from "@/emoteproviders/base";
 import BTTVChannelEmoteProvider from "@/emoteproviders/bttv_channel";
 import BTTVGlobalEmoteProvider from "@/emoteproviders/bttv_global";
@@ -100,7 +64,15 @@ import VideoPlayerTwitch from "./players/VideoPlayerTwitch.vue";
 import VideoPlayerYouTube from "./players/VideoPlayerYouTube.vue";
 import ChatBox from "./ChatBox.vue";
 
-let chatLog: TwitchCommentDump | undefined; // decouple from vue for performance
+let chatLog: TwitchCommentDump | TwitchCommentDumpTD | undefined; // decouple from vue for performance
+
+function isTwitchCommentDumpTDv2(input: any): input is TwitchCommentDumpTD {
+    return "FileInfo" in input && "comments" in input;
+}
+
+function isTwitchCommentDumpTDv1(input: any): input is TwitchCommentDumpTD {
+    return "video" in input && "end" in input.video;
+}
 
 // type AnyEmbedPlayer = EmbedPlayer | EmbedTwitchPlayer | EmbedYouTubePlayer | EmbedVideoPlayer;
 
@@ -537,6 +509,20 @@ export default defineComponent({
             return false;
         },
 
+        parseTwitchDuration(input: string): number | undefined {
+            if (!input) return undefined;
+
+            const matchHours = input.match(/([0-9]+)h/);
+            const matchMinutes = input.match(/([0-9]+)m/);
+            const matchSeconds = input.match(/([0-9]+)s/);
+
+            const durHours = matchHours ? parseInt(matchHours[1]) : 0;
+            const durMinutes = matchMinutes ? parseInt(matchMinutes[1]) : 0;
+            const durSeconds = matchSeconds ? parseInt(matchSeconds[1]) : 0;
+
+            return durHours * 60 * 60 + durMinutes * 60 + durSeconds;
+        },
+
         /**
          * Load chat file from URL, either locally or remote
          * @todo return success
@@ -558,7 +544,7 @@ export default defineComponent({
                 return false;
             }
 
-            let json: TwitchCommentDump;
+            let json: TwitchCommentDump | TwitchCommentDumpTD;
             console.debug(`Parse chat json...`);
             try {
                 json = await response.json();
@@ -583,7 +569,7 @@ export default defineComponent({
             }
 
             let tmp_id = 1;
-            json.comments.forEach((comment: TwitchComment) => {
+            json.comments.forEach((comment) => {
                 if (!comment._id) {
                     comment._id = `tmp-id-${tmp_id}`;
                     tmp_id++;
@@ -600,15 +586,13 @@ export default defineComponent({
             this.commentAmount = Object.values(chatLog.comments).length; // speed?
             console.debug(`Comment amount: ${this.commentAmount}`);
 
+            /*
             // get duration, this changed in the new api. if you know of a better parsing solution, please fix this
             const rawDuration = chatLog.video.duration;
 
             if (!rawDuration) {
-                /*
-                alert("Chat log unsupported, it might be too old.");
-                console.error("Chat log unsupported, it might be too old.");
-                return false;
-                */
+
+                if ( chatLog.)
 
                 if (chatLog.video.length) {
                     this.vodLength = parseInt(chatLog.video.length);
@@ -639,6 +623,36 @@ export default defineComponent({
 
                 this.vodLength = durHours * 60 * 60 + durMinutes * 60 + durSeconds;
             }
+            */
+
+            if ( "duration" in chatLog.video ) {
+                this.chatlog_version = "twitch_v2";
+                const rawDuration = chatLog.video.duration;
+                this.vodLength = this.parseTwitchDuration(rawDuration);
+
+                this.channelName = chatLog.video.user_name || chatLog.streamer.name;
+                this.channelId = chatLog.video.user_id || chatLog.streamer.id.toString();
+                this.vod_id = chatLog.video.id;
+                this.videoTitle = chatLog.video.title;
+
+            } else if ( "FileInfo" in chatLog && "end" in chatLog.video ) {
+                this.chatlog_version = "td_v2";
+                this.vodLength = chatLog.video.end;
+                this.channelName = chatLog.streamer.name;
+                this.channelId = chatLog.streamer.id.toString();
+                this.vod_id = chatLog.comments[0].content_id;
+                this.videoTitle = chatLog.video.title;
+            } else if ( "end" in chatLog.video ) {
+                this.chatlog_version = "td_v1";
+                this.vodLength = chatLog.video.end;
+                this.channelName = chatLog.streamer.name;
+                this.channelId = chatLog.streamer.id.toString();
+            } else {
+                alert("Chat log unsupported, it might be too old.");
+                console.error("Chat log unsupported, it might be too old.");
+                this.status_comments = `Error!`;
+                return false;
+            }
 
             // this.vodLength = this.chatLog.video.length;
             console.debug(`VOD length: ${this.vodLength}`);
@@ -650,17 +664,13 @@ export default defineComponent({
                 console.error("No embed player to set archive length from");
             }
 
-            if (this.archiveLength && this.archiveLength > 0 && this.vodLength) {
-                /*
-                let offsetInput = (<HTMLInputElement>document.getElementById('optionOffset'));
-                if (offsetInput) {
-                    offsetInput.value = (this.vodLength - this.archiveLength).toString();
-                }
-                */
-                this.chatOffset = this.vodLength - this.archiveLength;
-            }
+            // automatically set offset if chat is longer than video
+            // if (this.archiveLength && this.archiveLength > 0 && this.vodLength) {
+            //     this.chatOffset = this.vodLength - this.archiveLength;
+            // }
 
-            if (this.chatlog_version == "td_v1") {
+            /*
+            if (this.chatlog_version == "td_v1" || this.chatlog_version == "td_v2") && "end" in chatLog.video) {
                 // weird format
                 this.channelName = chatLog.streamer.name;
                 this.channelId = chatLog.streamer.id;
@@ -679,6 +689,7 @@ export default defineComponent({
                 this.channelId = chatLog.video.channel._id;
                 this.vod_id = chatLog.video._id;
             }
+            */
 
             this.fetchBadges();
             this.fetchEmotes();
@@ -740,7 +751,7 @@ export default defineComponent({
                 throw error;
             }
 
-            if ( json.error ) {
+            if (json.error) {
                 console.error("gqlRequest error", json);
                 throw new Error(json.message);
             }
@@ -1018,6 +1029,195 @@ export default defineComponent({
             }
         },
 
+        getChatLog(): TwitchCommentDump | TwitchCommentDumpTD | undefined {
+            return chatLog; // mockable
+        },
+
+        handleComment(commentIndex: number, offsetTime: number): boolean {
+
+            const localChatLog = this.getChatLog();
+
+            if (localChatLog == null || localChatLog.comments.length == 0 || commentIndex >= localChatLog.comments.length) {
+                console.error("handleComment: invalid comment index or chat log", commentIndex, localChatLog);
+                return false;
+            }
+
+            const comment = localChatLog.comments[commentIndex];
+
+            /**
+             * Skip malformed comments, abort completely if too many found.
+             * Usually a case of formats changing.
+             */
+            if (comment.content_offset_seconds === undefined || comment.content_offset_seconds < 0) {
+                console.error("Malformed comment", comment);
+                this.malformed_comments++;
+                return false;
+            }
+
+            /**
+             * Skip already displayed comments
+             */
+            if (this.viewedComments[comment._id]) {
+                // console.debug(`skip comment ${commentIndex}, already displayed`);
+                return false;
+            }
+
+            if (comment.content_offset_seconds > offsetTime + 30) {
+                // console.debug(`skip comment ${commentIndex}, too far away: ${comment.content_offset_seconds} (offset: ${offsetTime+30})`);
+                // break; // stop looping
+                // throw new Error(`Comment too far away: ${comment.content_offset_seconds} (offset: ${offsetTime + 30})`);
+                return false;
+            }
+
+            /**
+             * Skip VOD (archive) comments
+             */
+            if (this.store.settings.showVODComments && "source" in comment && comment.source == "comment") {
+                // console.debug(`skip comment ${commentIndex}, vod comment`);
+                // continue; // skip vod comments?
+                return false;
+            }
+
+            /**
+             * Don't show comment yet, its time has not passed current playback time yet
+             * @todo: implement chat offset again (?)
+             */
+            if (offsetTime < comment.content_offset_seconds) {
+                // console.debug(`skip comment ${commentIndex}, not displaying yet`);
+                // continue;
+                return false;
+            }
+
+            /**
+             * If comment is older than 60 seconds, mark it as displayed in a last ditch effort.
+             */
+            const commentAge = offsetTime - comment.content_offset_seconds;
+            if (commentAge > 60 && !this.viewedComments[comment._id]) {
+                // console.debug(`skip comment ${commentIndex}, too old`);
+                // comment.displayed = true;
+                this.viewedComments[comment._id] = true;
+                return false;
+            }
+
+            if (localChatLog.comments[commentIndex + 1] && localChatLog.comments[commentIndex + 1].content_offset_seconds > comment.content_offset_seconds + 600) {
+                this.pause();
+                console.error("Next comment is over 10 minutes in the future, something is probably wrong with the file.");
+                alert("Next comment is over 10 minutes in the future, something is probably wrong with the file.");
+                return false;
+            }
+
+            console.debug(`Handle comment #${commentIndex}: ${comment.message.body} @ ${comment.content_offset_seconds} (${comment.message.fragments.length} fragments: ${comment.message.fragments.map(
+                (f) => f.text
+            ).join(" ")})`);
+
+            const commentObj = {} as TwitchCommentProxy;
+
+            if (!comment._id) {
+                console.warn(`No id on comment #${commentIndex} @ (${comment.content_offset_seconds})`, comment);
+                this.malformed_comments++;
+            }
+
+            commentObj.gid = comment._id ?? `tmp${commentIndex}`;
+
+            // timestamp
+            commentObj.time = this.timeFormat(comment.content_offset_seconds);
+
+            commentObj.badges = [];
+
+            /**
+             * Process and insert badges
+             */
+            if (comment.message.user_badges && this.badges.global && this.badges.channel) {
+                for (const b of comment.message.user_badges) {
+                    const badgeId = b._id;
+                    const badgeVersion = b.version;
+
+                    let imageSrc: string | null = null;
+
+                    // global badge
+                    if (this.badges.global[badgeId] && this.badges.global[badgeId].imageURL)
+                        imageSrc = this.badges.global[badgeId].imageURL;
+
+                    // channel badge
+                    if (this.badges.channel[badgeId] && this.badges.channel[badgeId].imageURL)
+                        imageSrc = this.badges.channel[badgeId].imageURL;
+
+                    if (!imageSrc) {
+                        console.error("no image source for badge", b, this.badges);
+                        continue;
+                    }
+
+                    const badgeObj: TwitchUserBadgeProxy = {
+                        id: b._id,
+                        url: imageSrc,
+                    };
+
+                    commentObj.badges.unshift(badgeObj); // TODO: insert in what order?
+                }
+            }
+
+            // name
+            commentObj.username = comment.commenter.display_name;
+            commentObj.usernameColour = comment.message.user_color;
+
+            /**
+             * Parse message fragments and add emotes
+             */
+            commentObj.messageFragments = [];
+            for (const f of comment.message.fragments) {
+                // official twitch emote
+                if (f.emoticon && this.store.settings.emotesEnabled) {
+                    console.debug(`\tInsert twitch emote "${f.text}" from Twitch into comment: ${comment.message.body}`);
+                    commentObj.messageFragments.push({
+                        type: "emote",
+                        data: {
+                            network: "twitch",
+                            name: f.text, // @todo: fix
+                            url: `https://static-cdn.jtvnw.net/emoticons/v1/${f.emoticon.emoticon_id}/1.0`,
+                        },
+                    });
+                } else {
+                    const fragWords = f.text.split(" ");
+
+                    for (const word of fragWords) {
+                        let found_emote = false;
+
+                        if (this.emotes) {
+                            for (const provider in this.emotes) {
+                                if (this.emotes[provider] && this.emotes[provider].parseComment && this.emotes[provider].parseComment(word, commentObj)) {
+                                    console.debug(`\tInsert custom emote "${word}" from ${provider} into comment: ${comment.message.body}`);
+                                    found_emote = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        /**
+                         * If no emote found in word, insert the word as text instead
+                         * @todo optimize this, currently makes a span for every word
+                         */
+                        if (!found_emote) {
+                            console.debug(`\tInsert text "${word}" into comment: ${comment.message.body}`);
+                            commentObj.messageFragments.push({
+                                type: "text",
+                                data: word,
+                            });
+                        }
+                    }
+                }
+            }
+
+            this.commentQueue.push(commentObj);
+
+            // comment.displayed = true;
+            this.viewedComments[comment._id] = true;
+
+            this.shownComments++;
+
+            return true;
+
+        },
+
         /**
          * Runs in an interval to add messages to chat
          */
@@ -1030,7 +1230,7 @@ export default defineComponent({
                 throw new Error("No embed player in tick");
             }
 
-            if (!chatLog){
+            if (!chatLog) {
                 throw new Error("No chat log in tick");
             }
 
@@ -1077,7 +1277,6 @@ export default defineComponent({
              * Loop through all comments to insert into queue
              */
             for (let i = this.shownComments; i < this.commentAmount; i++) {
-                const comment: TwitchComment = chatLog.comments[i];
 
                 if (this.malformed_comments > 100) {
                     this.pause();
@@ -1085,179 +1284,20 @@ export default defineComponent({
                     return false;
                 }
 
-                /**
-                 * Skip malformed comments, abort completely if too many found.
-                 * Usually a case of formats changing.
-                 */
-                if (comment.content_offset_seconds === undefined || comment.content_offset_seconds < 0) {
-                    console.error("Malformed comment", comment);
-                    this.malformed_comments++;
-                    continue;
-                }
+                const comment = chatLog.comments[i];
 
-                /**
-                 * Skip already displayed comments
-                 */
-                if (this.viewedComments[comment._id]) {
-                    // console.debug(`skip comment, already displayed: ${i}`);
-                    continue;
-                }
-
+                // quick check if comment is too far away
                 if (comment.content_offset_seconds > offsetTime + 30) {
-                    // console.debug(`skip comment, too far away: ${i}, ${comment.content_offset_seconds} (offset: ${offsetTime+30})`);
-                    break; // stop looping
+                    break;
                 }
 
-                /**
-                 * Skip VOD (archive) comments
-                 */
-                if (this.store.settings.showVODComments && comment.source && comment.source == "comment") {
-                    console.debug(`skip comment, vod comment: ${i}`);
-                    continue; // skip vod comments?
+                try {
+                    this.handleComment(i, offsetTime);
+                } catch (error) {
+                    console.error("Error handling comment", error);
+                    break;
                 }
 
-                /**
-                 * Don't show comment yet, its time has not passed current playback time yet
-                 * @todo: implement chat offset again (?)
-                 */
-                if (offsetTime < comment.content_offset_seconds) {
-                    // console.debug('skip comment, not displaying yet', i, timeRelative, ( comment.content_offset_seconds / this.timeScale ) );
-                    continue;
-                }
-
-                /**
-                 * If comment is older than 60 seconds, mark it as displayed in a last ditch effort.
-                 */
-                const commentAge = offsetTime - comment.content_offset_seconds;
-                if (commentAge > 60 && !comment.displayed) {
-                    // console.debug('skip comment, too old', i);
-                    // comment.displayed = true;
-                    this.viewedComments[comment._id] = true;
-                    continue;
-                }
-
-                if (chatLog.comments[i + 1] && chatLog.comments[i + 1].content_offset_seconds > comment.content_offset_seconds + 600) {
-                    this.pause();
-                    alert("Next comment is over 10 minutes in the future, something is probably wrong with the file.");
-                    return false;
-                }
-
-                const commentObj = {} as TwitchCommentProxy;
-
-                if (!comment._id) {
-                    console.warn(`No id on comment #${i} @ (${comment.content_offset_seconds})`, comment);
-                    this.malformed_comments++;
-                }
-
-                commentObj.gid = comment._id ?? `tmp${i}`;
-
-                // timestamp
-                commentObj.time = this.timeFormat(comment.content_offset_seconds);
-
-                commentObj.badges = [];
-
-                /**
-                 * Process and insert badges
-                 */
-                if (comment.message.user_badges && this.badges.global && this.badges.channel) {
-                    for (const b of comment.message.user_badges) {
-                        const badgeId = b._id;
-                        const badgeVersion = b.version;
-
-                        let imageSrc: string | null = null;
-
-                        // global badge
-                        if (this.badges.global[badgeId] && this.badges.global[badgeId].imageURL)
-                            imageSrc = this.badges.global[badgeId].imageURL;
-
-                        // channel badge
-                        if (this.badges.channel[badgeId] && this.badges.channel[badgeId].imageURL)
-                            imageSrc = this.badges.channel[badgeId].imageURL;
-
-                        if (!imageSrc) {
-                            console.error("no image source for badge", b, this.badges);
-                            continue;
-                        }
-
-                        const badgeObj: TwitchUserBadgeProxy = {
-                            id: b._id,
-                            url: imageSrc,
-                        };
-
-                        commentObj.badges.unshift(badgeObj); // TODO: insert in what order?
-                    }
-                }
-
-                // name
-                commentObj.username = comment.commenter.display_name;
-                commentObj.usernameColour = comment.message.user_color;
-
-                /**
-                 * Parse message fragments and add emotes
-                 */
-                commentObj.messageFragments = [];
-                for (const f of comment.message.fragments) {
-                    // official twitch emote
-                    if (f.emoticon && this.store.settings.emotesEnabled) {
-                        // console.debug(`Insert emote "${f.text}" from Twitch into comment #${commentObj.gid}`);
-                        commentObj.messageFragments.push({
-                            type: "emote",
-                            data: {
-                                network: "twitch",
-                                name: f.text, // @todo: fix
-                                url: `https://static-cdn.jtvnw.net/emoticons/v1/${f.emoticon.emoticon_id}/1.0`,
-                            },
-                        });
-                    } else {
-                        const fragWords = f.text.split(" ");
-
-                        // let paragraph = "";
-
-                        // const emotes = 0;
-
-                        for (const word of fragWords) {
-                            let found_emote = false;
-
-                            if (this.emotes) {
-                                for (const provider in this.emotes) {
-                                    if (this.emotes[provider] && this.emotes[provider].parseComment && this.emotes[provider].parseComment(word, commentObj)) {
-                                        found_emote = true;
-                                    }
-                                }
-                            }
-
-                            /*
-                            if(!found_emote){
-                                paragraph += word + " ";
-                            }else{
-                                commentObj.messageFragments.push({
-                                    type: 'text',
-                                    data: paragraph
-                                });
-                                paragraph = "";
-                            }
-                            */
-
-                            /**
-                             * If no emote found in word, insert the word as text instead
-                             * @todo optimize this, currently makes a span for every word
-                             */
-                            if (!found_emote) {
-                                commentObj.messageFragments.push({
-                                    type: "text",
-                                    data: word,
-                                });
-                            }
-                        }
-                    }
-                }
-
-                this.commentQueue.push(commentObj);
-
-                // comment.displayed = true;
-                this.viewedComments[comment._id] = true;
-
-                this.shownComments++;
             }
 
             /**
@@ -1282,7 +1322,7 @@ export default defineComponent({
             // }
             if (this.chatbox) {
                 nextTick(() => {
-                    if (this.chatbox){ 
+                    if (this.chatbox) {
                         this.chatbox.scrollToBottom();
                     } else {
                         console.warn('chatbox is null');
@@ -1303,7 +1343,7 @@ export default defineComponent({
 
         fullscreen() {
             const viewer = this.$refs.viewer as HTMLElement;
-            if (viewer){
+            if (viewer) {
                 viewer.requestFullscreen();
             }
         },
@@ -1497,90 +1537,93 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-
 .viewer-container {
-	position: relative;
-	display: flex;
-	width: 100%;
-	aspect-ratio: 16 / 9;
-	overflow: hidden;
-	&.ultrawide {
-		aspect-ratio: 21 / 9;
-		#comments {
-			width: 31% !important;
-		}
-	}
-	&.chat-side-left {
-		flex-direction: row-reverse;
-	}
+    position: relative;
+    display: flex;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+
+    &.ultrawide {
+        aspect-ratio: 21 / 9;
+
+        #comments {
+            width: 31% !important;
+        }
+    }
+
+    &.chat-side-left {
+        flex-direction: row-reverse;
+    }
 }
 
 #player {
 
-	width: 100%;
-	// height: $height;
+    width: 100%;
+    // height: $height;
 
-	aspect-ratio: 16 / 9;
+    aspect-ratio: 16 / 9;
 
-	position: relative;
+    position: relative;
 
-	overflow: hidden;
+    overflow: hidden;
 
-	height: fit-content; // ?
+    height: fit-content; // ?
 
-	margin: auto;
+    margin: auto;
 
-	// pointer-events: none; // smart?
+    // pointer-events: none; // smart?
 
 }
 
 #player:fullscreen {
-	width: 100%;
-	height: 100%;
+    width: 100%;
+    height: 100%;
 }
 
 #video {
-	width: 100%;
-	height: 100%;
-	/* background: #3D4470; */
-	background: #f0f;
+    width: 100%;
+    height: 100%;
+    /* background: #3D4470; */
+    background: #f0f;
 }
 
 #video_container {
-	width: 100%;
-	aspect-ratio: 16 / 9;
-	// height: 100%;
-	video {
-		width: 100%;
-		height: 100%;
-	}
-	iframe {
-		pointer-events: none; // maybe
-	}
+    width: 100%;
+    aspect-ratio: 16 / 9;
+
+    // height: 100%;
+    video {
+        width: 100%;
+        height: 100%;
+    }
+
+    iframe {
+        pointer-events: none; // maybe
+    }
 }
 
 #osd {
-	display: none;
-	position: absolute;
-	left: 640px;
-	top: 360px;
-	background: #f00;
-	color: #fff;
-	padding: 10px;
-	font-family: Consolas, monospace;
+    display: none;
+    position: absolute;
+    left: 640px;
+    top: 360px;
+    background: #f00;
+    color: #fff;
+    padding: 10px;
+    font-family: Consolas, monospace;
 }
 
 #osd.running {
-	background: #00f;
+    background: #00f;
 }
 
 
 .debug {
-	display: none;
-	font-size: 80%;
-	color: #fff;
-	background-color: #980c0c;
-	padding: 1em;
+    display: none;
+    font-size: 80%;
+    color: #fff;
+    background-color: #980c0c;
+    padding: 1em;
 }
-
 </style>

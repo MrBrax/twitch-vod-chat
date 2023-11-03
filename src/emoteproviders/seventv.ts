@@ -214,8 +214,9 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
         return `${emote.data.host.url}/${emoteFile.name}`;
     }
 
-    parseComment(word: string, commentObj: TwitchCommentProxy) {
+    parseComment(word: string, commentObj: TwitchCommentProxy): boolean {
         if (!this.emotes || !Array.isArray(this.emotes) || this.disabled) return false;
+        // let match = 0;
         for (const fEmo of this.emotes) {
 
             const isMatch = fEmo.name == word; // no other checks right now
@@ -235,6 +236,15 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
                     url: fixupUrl(this.getEmoteURL(fEmo, 2)),
                 },
             });
+
+            /*
+            match++;
+
+            if (match > 1) {
+                console.error("multiple matches for", word, "on seventv", this.emotes);
+                // break;
+            }
+            */
 
             /*
             if (fEmo.name == word) {
@@ -261,6 +271,7 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
                 return true;
             }
             */
+            return true;
         }
         return false;
     }
