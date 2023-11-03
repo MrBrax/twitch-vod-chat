@@ -107,7 +107,11 @@ export interface TwitchCommentProxy extends TwitchComment {
     displayed: boolean;
 }
 
-export interface TwitchCommentDump {
+export interface TwitchCommentDumpBase {
+
+}
+
+export interface TwitchCommentDump extends TwitchCommentDumpBase {
     comments: TwitchComment[];
     video: {
         created_at: string;
@@ -148,13 +152,41 @@ export interface TwitchCommentDump {
     };
 }
 
-export interface TwitchComment {
-    // internal
+export interface TwitchCommentDumpTD extends TwitchCommentDumpBase {
+    FileInfo?: {
+        Version: {
+            Major: number;
+            Minor: number;
+            Patch: number;
+        };
+        CreatedAt: string;
+        UpdatedAt: string;
+    };
 
-    /**
-     * @deprecated
-     */
-    displayed: boolean;
+    comments: TwitchCommentTD[];
+
+    video: {
+        title: string;
+        description: string;
+        id: string;
+        created_at: string;
+        start: number;
+        end: number;
+        length: string;
+        viewCount: number;
+        game: string;
+        chapters: unknown[];
+    };
+
+    streamer: {
+        name: string;
+        id: number;
+    };
+
+    embeddedData: unknown;
+}
+
+export interface TwitchComment {
 
     _id: string;
     channel_id: string;
@@ -179,19 +211,26 @@ export interface TwitchComment {
     };
     message: {
         body: string;
-        // emoticons: {}
+
+        emoticons: {
+            _id: string;
+            begin: number;
+            end: number;
+        }[];
 
         fragments: {
             text: string;
             emoticon: {
                 emoticon_id: string;
-                emoticon_set_id: string;
-            };
+                emoticon_set_id?: string;
+            } | null;
         }[];
+
         user_badges: {
             _id: string;
             version: number;
         }[];
+
         user_color: string;
     };
     created_at: string;
@@ -199,6 +238,56 @@ export interface TwitchComment {
     source: string;
     state: string;
     updated_at: string;
+}
+
+export interface TwitchCommentTD {
+
+    _id: string;
+    created_at: string;
+    channel_id: string;
+    content_type: string;
+    content_id: string;
+
+    /**
+     * The offset of the comment being displayed in seconds
+     */
+    content_offset_seconds: number;
+
+    commenter: {
+        display_name: string;
+        _id: string;
+        name: string;
+        bio: string | null;
+        created_at: string;
+        updated_at: string;
+        logo: string;
+    };
+    message: {
+        body: string;
+        bits_spent: number;
+
+        emoticons: {
+            _id: string;
+            begin: number;
+            end: number;
+        }[];
+
+        fragments: {
+            text: string;
+            emoticon: {
+                emoticon_id: string;
+                emoticon_set_id?: string;
+            } | null;
+        }[];
+
+        user_badges: {
+            _id: string;
+            version: number | string;
+        }[];
+
+        user_color: string;
+    };
+
 }
 
 export interface ChatEmote {
