@@ -171,6 +171,8 @@ export default defineComponent({
 
         lastSavedPlaybackPosition: number;
 
+        comedy: number;
+
     } {
         return {
             // videoLoaded: false,
@@ -240,6 +242,8 @@ export default defineComponent({
             viewedComments: {},
 
             lastSavedPlaybackPosition: 0,
+
+            comedy: 0,
         };
     },
     mounted() {
@@ -1202,6 +1206,14 @@ export default defineComponent({
                                 type: "text",
                                 data: word,
                             });
+
+                            // match text such as -2 and +2 for comedy points
+                            // this is just a silly easter egg kinda thing
+                            const comedyMatch = word.match(/^([+-])([0-9]+)$/);
+                            if (comedyMatch) {
+                                const comedyPoints = parseInt(comedyMatch[2]);
+                                this.comedy = this.comedy + (comedyMatch[1] == "+" ? comedyPoints : -comedyPoints);
+                            }
                         }
                     }
                 }

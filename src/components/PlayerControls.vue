@@ -117,6 +117,8 @@
                     <strong>BTTV Global:</strong> <span>{{ vodplayer.emotes.bttv_global.status }}</span>
                     <br />
                     <strong>SevenTV:</strong> <span>{{ vodplayer.emotes.seventv.status }}</span>
+                    <br />
+                    <strong>Comedy:</strong> <span>{{ vodplayer.comedy }}</span>
                 </div>
             </div>
         </div>
