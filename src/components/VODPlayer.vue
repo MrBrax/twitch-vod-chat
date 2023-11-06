@@ -29,13 +29,6 @@
             :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
     </div>
 
-    <div v-if="videoChapters && vodLength" id="timeline-markers">
-        <div class="timeline-marker" v-for="(marker, id) in videoChapters" v-bind:key="id"
-            v-bind:style="{ left: ((marker.time / (vodLength ?? 0)) * 100) + '%' }">
-            {{ marker.label }}
-        </div>
-    </div>
-
     <div class="debug">
         Comment queue: {{ commentQueue.length }}<br />
         Comment amount: {{ commentAmount }}<br />
@@ -45,7 +38,7 @@
     <video-controls :is-ready="isReady" :is-playing="isPlaying" :is-paused="isPaused" @start-playback="startPlayback"
         @toggle-pause="togglePause" @fullscreen="fullscreen" @reset-chat="resetChat" :video-duration="videoDuration"
         :video-position="videoPosition" :video-current-time="videoCurrentTime" :minimal-show="minimal_show" @seek="seek"
-        :can-start-playback="canStartPlayback" />
+        :can-start-playback="canStartPlayback" :video-chapters="videoChapters"></video-controls>
 </template>
 
 <script lang="ts">
@@ -53,7 +46,7 @@ import { defineComponent, nextTick, ref } from "vue";
 import ChatMessage from "@/components/ChatMessage.vue";
 import VideoControls from "@/components/VideoControls.vue";
 import { store } from "@/store";
-import { ChatSource, GqlGlobalBadgeResponse, GqlSubBadgeResponse, TwitchChatBadge, TwitchComment, TwitchCommentDump, TwitchCommentDumpTD, TwitchCommentProxy, TwitchUserBadgeProxy, VideoSource } from "@/defs";
+import { ChatSource, GqlGlobalBadgeResponse, GqlSubBadgeResponse, TwitchChatBadge, TwitchComment, TwitchCommentDump, TwitchCommentDumpTD, TwitchCommentProxy, TwitchUserBadgeProxy, VideoChapter, VideoSource } from "@/defs";
 import BaseEmoteProvider from "@/emoteproviders/base";
 import BTTVChannelEmoteProvider from "@/emoteproviders/bttv_channel";
 import BTTVGlobalEmoteProvider from "@/emoteproviders/bttv_global";
@@ -98,7 +91,7 @@ export default defineComponent({
         videoPosition: number;
         videoCurrentTime: number;
         videoDuration: number;
-        videoChapters: any[];
+        videoChapters: VideoChapter[];
         chatLoaded: boolean;
         chatOffset: number;
         vodLength?: number;

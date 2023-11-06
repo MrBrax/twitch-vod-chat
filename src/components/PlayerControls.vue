@@ -387,10 +387,10 @@ export default defineComponent({
             if (this.syncStep) {
                 if (this.syncStart) {
                     const diff = new Date().getTime() - this.syncStart.getTime();
-                    this.vodplayer.chatOffset = diff / 1000;
+                    this.vodplayer.chatOffset += diff / 1000;
                     this.syncStep = false;
                     alert(`Chat offset set to ${this.vodplayer.chatOffset}`);
-                }                
+                }
             } else {
                 this.syncStart = new Date();
                 this.syncStep = true;

@@ -14,6 +14,16 @@
 				<div class="timeline-hover-time">{{ hoverTime }}</div>
 			</div>
 
+			<div v-if="videoChapters && videoDuration" class="timeline-chapters">
+				<div class="timeline-chapter" v-for="(marker, id) in videoChapters" v-bind:key="id"
+					v-bind:style="{ left: ((marker.time / (videoDuration ?? 0)) * 100) + '%' }"
+					@click="$emit('seek', marker.time)"
+					>
+					<strong>{{ marker.label }}</strong><br>
+					<small>{{ formatTime(marker.time) }}</small>
+				</div>
+			</div>
+
 			<div class="video-controls-buttons">
 				<div class="video-controls-buttons-group" v-if="!isReady">
 					<button class="pb-button is-submit" @click="$emit('startPlayback')" v-if="!isPlaying"
@@ -41,6 +51,7 @@
 </template>
 
 <script lang="ts">
+import { VideoChapter } from "@/defs";
 import { store } from "@/store";
 import { defineComponent } from "vue";
 
@@ -56,6 +67,7 @@ export default defineComponent({
 		isReady: Boolean,
 		minimalShow: Boolean,
 		canStartPlayback: Boolean,
+		videoChapters: Array as () => VideoChapter[],
 	},
 	data() {
 		return {
@@ -159,24 +171,26 @@ export default defineComponent({
 	text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
 }
 
-#timeline-markers {
-	position: relative;
-	// width: $width;
-	width: 100%;
-	// height: 16px;
-	pointer-events: none;
+.timeline-chapters {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
 }
 
-.timeline-marker {
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	height: 16px;
-	padding-left: 2px;
-	border-left: 1px solid #555;
+.timeline-chapter {
+	max-width: 25%;
+	padding: 4px;
 	font-family: 'Roboto Condensed';
 	font-weight: 400;
 	color: #ccc;
+	// cut off text
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
+	&:hover {
+		color: #fff;
+	}
 }
 
 .timeline-hover {

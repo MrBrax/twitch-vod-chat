@@ -107,7 +107,7 @@ export default defineComponent({
                     const d = c.split(":");
                     const chapter = {
                         time: parseInt(d[0]),
-                        label: d[1],
+                        label: decodeURIComponent(decodeURIComponent(d[1])),
                     };
                     console.log("add chapter", chapter);
                     vodplayer.videoChapters.push(chapter);
