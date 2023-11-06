@@ -954,8 +954,8 @@ export default defineComponent({
             this.play();
 
             // FIXME: vue
-            const button_start = document.getElementById("buttonStart");
-            if (button_start && button_start instanceof HTMLInputElement) button_start.disabled = true;
+            // const button_start = document.getElementById("buttonStart");
+            // if (button_start && button_start instanceof HTMLInputElement) button_start.disabled = true;
 
             this.isPlaying = true;
 
@@ -1106,9 +1106,9 @@ export default defineComponent({
                 return false;
             }
 
-            console.debug(`Handle comment #${commentIndex}: ${comment.message.body} @ ${comment.content_offset_seconds} (${comment.message.fragments.length} fragments: ${comment.message.fragments.map(
-                (f) => f.text
-            ).join(" ")})`);
+            // console.debug(`Handle comment #${commentIndex}: ${comment.message.body} @ ${comment.content_offset_seconds} (${comment.message.fragments.length} fragments: ${comment.message.fragments.map(
+            //     (f) => f.text
+            // ).join(" ")})`);
 
             const commentObj = {} as TwitchCommentProxy;
 
@@ -1167,7 +1167,7 @@ export default defineComponent({
             for (const f of comment.message.fragments) {
                 // official twitch emote
                 if (f.emoticon && this.store.settings.emotesEnabled) {
-                    console.debug(`\tInsert twitch emote "${f.text}" from Twitch into comment: ${comment.message.body}`);
+                    // console.debug(`\tInsert twitch emote "${f.text}" from Twitch into comment: ${comment.message.body}`);
                     commentObj.messageFragments.push({
                         type: "emote",
                         data: {
@@ -1185,7 +1185,7 @@ export default defineComponent({
                         if (this.emotes) {
                             for (const provider in this.emotes) {
                                 if (this.emotes[provider] && this.emotes[provider].parseComment && this.emotes[provider].parseComment(word, commentObj)) {
-                                    console.debug(`\tInsert custom emote "${word}" from ${provider} into comment: ${comment.message.body}`);
+                                    // console.debug(`\tInsert custom emote "${word}" from ${provider} into comment: ${comment.message.body}`);
                                     found_emote = true;
                                     break;
                                 }
@@ -1197,7 +1197,7 @@ export default defineComponent({
                          * @todo optimize this, currently makes a span for every word
                          */
                         if (!found_emote) {
-                            console.debug(`\tInsert text "${word}" into comment: ${comment.message.body}`);
+                            // console.debug(`\tInsert text "${word}" into comment: ${comment.message.body}`);
                             commentObj.messageFragments.push({
                                 type: "text",
                                 data: word,

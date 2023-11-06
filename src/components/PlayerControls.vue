@@ -127,10 +127,6 @@
             <div class="option-group">
                 <div class="option-title">Chat offset in seconds</div>
                 <div class="option-content">
-                    <p class="help-text">
-                        Offset from the video, if recording started too late. It will be set automatically based on how long the chat dump is and the video
-                        length, remember to set it to 0 if you want it that way.
-                    </p>
                     <input name="chatOffset" v-model="vodplayer.chatOffset" />
                 </div>
             </div>
