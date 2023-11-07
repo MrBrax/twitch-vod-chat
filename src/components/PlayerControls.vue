@@ -117,8 +117,32 @@
                     <strong>BTTV Global:</strong> <span>{{ vodplayer.emotes.bttv_global.status }}</span>
                     <br />
                     <strong>SevenTV:</strong> <span>{{ vodplayer.emotes.seventv.status }}</span>
+                    <br />
+                    <strong>Comedy:</strong> <span>{{ vodplayer.comedy }}</span>
                 </div>
             </div>
+        </div>
+
+        <!-- Syncing -->
+        <div class="option-row">
+
+            <div class="option-group">
+                <div class="option-title">Chat offset in seconds</div>
+                <div class="option-content">
+                    <input name="chatOffset" v-model="vodplayer.chatOffset" />
+                </div>
+            </div>
+
+            <div class="option-group">
+                <div class="option-title">Syncing</div>
+                <div class="option-content">
+                    <button class="button" @click="doSyncStep">{{ syncStep == false ? "Start sync" : "End sync" }}</button>
+                    <p class="help-text">
+                        Click start sync when you know there's a moment chat will react to, and end sync when you see the reaction. The offset will be set automatically.
+                    </p>
+                </div>
+            </div>
+
         </div>
 
         <div class="option-row">
@@ -264,6 +288,8 @@ export default defineComponent({
         input_chat: string;
         input_chatfile?: File;
         video_height: number;
+        syncStep: boolean;
+        syncStart: Date | undefined;
         // eslint-disable-next-line indent
     } {
         return {
@@ -272,6 +298,8 @@ export default defineComponent({
             input_video: "",
             input_chat: "",
             video_height: 720,
+            syncStep: false,
+            syncStart: undefined,
         };
     },
     props: {
@@ -353,6 +381,20 @@ export default defineComponent({
                     console.error("tac error", reason);
                     return false;
                 });
+        },
+        async doSyncStep() {
+            if (!this.vodplayer) return;
+            if (this.syncStep) {
+                if (this.syncStart) {
+                    const diff = new Date().getTime() - this.syncStart.getTime();
+                    this.vodplayer.chatOffset += diff / 1000;
+                    this.syncStep = false;
+                    alert(`Chat offset set to ${this.vodplayer.chatOffset}`);
+                }
+            } else {
+                this.syncStart = new Date();
+                this.syncStep = true;
+            }
         },
     },
     computed: {

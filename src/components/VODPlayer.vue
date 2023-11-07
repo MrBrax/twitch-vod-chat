@@ -29,13 +29,6 @@
             :commentsStyle="commentsStyle" :commentQueue="commentQueue" />
     </div>
 
-    <div v-if="videoChapters && vodLength" id="timeline-markers">
-        <div class="timeline-marker" v-for="(marker, id) in videoChapters" v-bind:key="id"
-            v-bind:style="{ left: ((marker.time / (vodLength ?? 0)) * 100) + '%' }">
-            {{ marker.label }}
-        </div>
-    </div>
-
     <div class="debug">
         Comment queue: {{ commentQueue.length }}<br />
         Comment amount: {{ commentAmount }}<br />
@@ -45,7 +38,7 @@
     <video-controls :is-ready="isReady" :is-playing="isPlaying" :is-paused="isPaused" @start-playback="startPlayback"
         @toggle-pause="togglePause" @fullscreen="fullscreen" @reset-chat="resetChat" :video-duration="videoDuration"
         :video-position="videoPosition" :video-current-time="videoCurrentTime" :minimal-show="minimal_show" @seek="seek"
-        :can-start-playback="canStartPlayback" />
+        :can-start-playback="canStartPlayback" :video-chapters="videoChapters"></video-controls>
 </template>
 
 <script lang="ts">
@@ -53,7 +46,7 @@ import { defineComponent, nextTick, ref } from "vue";
 import ChatMessage from "@/components/ChatMessage.vue";
 import VideoControls from "@/components/VideoControls.vue";
 import { store } from "@/store";
-import { ChatSource, GqlGlobalBadgeResponse, GqlSubBadgeResponse, TwitchChatBadge, TwitchComment, TwitchCommentDump, TwitchCommentDumpTD, TwitchCommentProxy, TwitchUserBadgeProxy, VideoSource } from "@/defs";
+import { ChatSource, GqlGlobalBadgeResponse, GqlSubBadgeResponse, TwitchChatBadge, TwitchComment, TwitchCommentDump, TwitchCommentDumpTD, TwitchCommentProxy, TwitchUserBadgeProxy, VideoChapter, VideoSource } from "@/defs";
 import BaseEmoteProvider from "@/emoteproviders/base";
 import BTTVChannelEmoteProvider from "@/emoteproviders/bttv_channel";
 import BTTVGlobalEmoteProvider from "@/emoteproviders/bttv_global";
@@ -98,7 +91,7 @@ export default defineComponent({
         videoPosition: number;
         videoCurrentTime: number;
         videoDuration: number;
-        videoChapters: any[];
+        videoChapters: VideoChapter[];
         chatLoaded: boolean;
         chatOffset: number;
         vodLength?: number;
@@ -171,6 +164,8 @@ export default defineComponent({
 
         lastSavedPlaybackPosition: number;
 
+        comedy: number;
+
     } {
         return {
             // videoLoaded: false,
@@ -240,6 +235,8 @@ export default defineComponent({
             viewedComments: {},
 
             lastSavedPlaybackPosition: 0,
+
+            comedy: 0,
         };
     },
     mounted() {
@@ -954,8 +951,8 @@ export default defineComponent({
             this.play();
 
             // FIXME: vue
-            const button_start = document.getElementById("buttonStart");
-            if (button_start && button_start instanceof HTMLInputElement) button_start.disabled = true;
+            // const button_start = document.getElementById("buttonStart");
+            // if (button_start && button_start instanceof HTMLInputElement) button_start.disabled = true;
 
             this.isPlaying = true;
 
@@ -1106,9 +1103,9 @@ export default defineComponent({
                 return false;
             }
 
-            console.debug(`Handle comment #${commentIndex}: ${comment.message.body} @ ${comment.content_offset_seconds} (${comment.message.fragments.length} fragments: ${comment.message.fragments.map(
-                (f) => f.text
-            ).join(" ")})`);
+            // console.debug(`Handle comment #${commentIndex}: ${comment.message.body} @ ${comment.content_offset_seconds} (${comment.message.fragments.length} fragments: ${comment.message.fragments.map(
+            //     (f) => f.text
+            // ).join(" ")})`);
 
             const commentObj = {} as TwitchCommentProxy;
 
@@ -1167,7 +1164,7 @@ export default defineComponent({
             for (const f of comment.message.fragments) {
                 // official twitch emote
                 if (f.emoticon && this.store.settings.emotesEnabled) {
-                    console.debug(`\tInsert twitch emote "${f.text}" from Twitch into comment: ${comment.message.body}`);
+                    // console.debug(`\tInsert twitch emote "${f.text}" from Twitch into comment: ${comment.message.body}`);
                     commentObj.messageFragments.push({
                         type: "emote",
                         data: {
@@ -1185,7 +1182,7 @@ export default defineComponent({
                         if (this.emotes) {
                             for (const provider in this.emotes) {
                                 if (this.emotes[provider] && this.emotes[provider].parseComment && this.emotes[provider].parseComment(word, commentObj)) {
-                                    console.debug(`\tInsert custom emote "${word}" from ${provider} into comment: ${comment.message.body}`);
+                                    // console.debug(`\tInsert custom emote "${word}" from ${provider} into comment: ${comment.message.body}`);
                                     found_emote = true;
                                     break;
                                 }
@@ -1197,11 +1194,19 @@ export default defineComponent({
                          * @todo optimize this, currently makes a span for every word
                          */
                         if (!found_emote) {
-                            console.debug(`\tInsert text "${word}" into comment: ${comment.message.body}`);
+                            // console.debug(`\tInsert text "${word}" into comment: ${comment.message.body}`);
                             commentObj.messageFragments.push({
                                 type: "text",
                                 data: word,
                             });
+
+                            // match text such as -2 and +2 for comedy points
+                            // this is just a silly easter egg kinda thing
+                            const comedyMatch = word.match(/^([+-])([0-9]+)$/);
+                            if (comedyMatch) {
+                                const comedyPoints = parseInt(comedyMatch[2]);
+                                this.comedy = this.comedy + (comedyMatch[1] == "+" ? comedyPoints : -comedyPoints);
+                            }
                         }
                     }
                 }

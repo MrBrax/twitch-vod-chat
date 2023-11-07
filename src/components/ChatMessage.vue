@@ -71,7 +71,7 @@ export default defineComponent({
     // dirty hack
     .body {
         span {
-            padding-right: 0.1em;
+            padding-right: 0.15rem; // padding between fragments
         }
     }
 

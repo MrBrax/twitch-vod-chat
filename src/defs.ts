@@ -348,3 +348,8 @@ export interface TwitchChatBadge {
     description: string;
     version: string;
 }
+
+export interface VideoChapter {
+    time: number;
+    label: string;
+}
