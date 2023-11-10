@@ -622,7 +622,7 @@ export default defineComponent({
             }
             */
 
-            if ( "duration" in chatLog.video ) {
+            if ("duration" in chatLog.video) {
                 this.chatlog_version = "twitch_v2";
                 const rawDuration = chatLog.video.duration;
                 this.vodLength = this.parseTwitchDuration(rawDuration);
@@ -632,14 +632,14 @@ export default defineComponent({
                 this.vod_id = chatLog.video.id;
                 this.videoTitle = chatLog.video.title;
 
-            } else if ( "FileInfo" in chatLog && "end" in chatLog.video ) {
+            } else if ("FileInfo" in chatLog && "end" in chatLog.video) {
                 this.chatlog_version = "td_v2";
                 this.vodLength = chatLog.video.end;
                 this.channelName = chatLog.streamer.name;
                 this.channelId = chatLog.streamer.id.toString();
                 this.vod_id = chatLog.comments[0].content_id;
                 this.videoTitle = chatLog.video.title;
-            } else if ( "end" in chatLog.video ) {
+            } else if ("end" in chatLog.video) {
                 this.chatlog_version = "td_v1";
                 this.vodLength = chatLog.video.end;
                 this.channelName = chatLog.streamer.name;
@@ -1030,6 +1030,13 @@ export default defineComponent({
             return chatLog; // mockable
         },
 
+        /**
+         * Handles a comment at the specified index and offset time.
+         * Detects emotes and badges and inserts them into the comment.
+         * @param {number} commentIndex - The index of the comment to handle.
+         * @param {number} offsetTime - The offset time of the comment to handle.
+         * @returns {boolean} - True if the comment was successfully handled, false otherwise.
+         */
         handleComment(commentIndex: number, offsetTime: number): boolean {
 
             const localChatLog = this.getChatLog();
@@ -1279,7 +1286,8 @@ export default defineComponent({
             }
 
             /**
-             * Loop through all comments to insert into queue
+             * Loop through all comments to insert into queue.
+             * Start at the last shown comment to not loop through all comments every tick.
              */
             for (let i = this.shownComments; i < this.commentAmount; i++) {
 
