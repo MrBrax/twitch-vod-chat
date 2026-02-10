@@ -159,17 +159,17 @@ export default class SevenTVEmoteProvider extends BaseEmoteProvider {
         const response = await fetch(`https://7tv.io/v3/users/twitch/${channelId}`);
         const response_json: SevenTVUserResponse | SevenTVError = await response.json();
 
-        // server error return message
-        if ("error" in response_json) {
+        if (response.status > 299) {
             console.error("failed to load seventv", response_json);
-            this.status = `Error: ${response_json.error}`;
+            this.status = `Error: ${response.status}`;
             this.disabled = true;
             return false;
         }
 
-        if (response.status > 299) {
+        // server error return message
+        if ("error" in response_json) {
             console.error("failed to load seventv", response_json);
-            this.status = `Error: ${response.status}`;
+            this.status = `Error: ${response_json.error}`;
             this.disabled = true;
             return false;
         }

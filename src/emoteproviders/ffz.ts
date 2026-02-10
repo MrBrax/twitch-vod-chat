@@ -94,16 +94,16 @@ export default class FFZEmoteProvider extends BaseEmoteProvider {
         const response = await fetch(`https://api.frankerfacez.com/v1/room/id/${channelId}`);
         const json2: FFZEmoteData = await response.json();
 
-        if (!json2.sets) {
+        if (response.status > 299) {
             console.error("failed to load ffz", json2);
-            this.status = "Failed to load";
+            this.status = `Error: ${response.status}`;
             this.disabled = true;
             return false;
         }
 
-        if (response.status > 299) {
+        if (!json2.sets) {
             console.error("failed to load ffz", json2);
-            this.status = `Error: ${response.status}`;
+            this.status = "Failed to load";
             this.disabled = true;
             return false;
         }
