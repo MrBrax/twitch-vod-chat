@@ -1120,6 +1120,7 @@ export default defineComponent({
             commentObj.time = this.timeFormat(comment.content_offset_seconds);
 
             commentObj.badges = [];
+            var badgeIds = new Set();
 
             /**
              * Process and insert badges
@@ -1128,6 +1129,11 @@ export default defineComponent({
                 for (const b of comment.message.user_badges) {
                     const badgeId = b._id;
                     const badgeVersion = b.version;
+
+                    if (badgeIds.has(badgeId)) {
+                        continue;
+                    }
+                    badgeIds.add(badgeId);
 
                     let imageSrc: string | null = null;
 
