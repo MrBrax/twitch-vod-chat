@@ -23,16 +23,16 @@ export default class BTTVGlobalEmoteProvider extends BaseEmoteProvider {
         const response = await fetch(`https://api.betterttv.net/3/cached/emotes/global`);
         const json2: Emoticon[] = await response.json();
 
-        if (!json2 || json2.length == 0) {
+        if (response.status > 299) {
             console.error("failed to load bttvglobal", json2);
-            this.status = "Failed to load";
+            this.status = `Error: ${response.status}`;
             this.disabled = true;
             return false;
         }
 
-        if (response.status > 299) {
+        if (!json2 || json2.length == 0) {
             console.error("failed to load bttvglobal", json2);
-            this.status = `Error: ${response.status}`;
+            this.status = "Failed to load";
             this.disabled = true;
             return false;
         }
